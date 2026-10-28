@@ -104,6 +104,7 @@ struct SavedShelfView: View {
 /// tile leading, like the library landing's playlist row but full-page.
 struct SavedPlaylistsView: View {
     var title = "Playlists"
+    var hostsWindowControls: Bool = false
     @Environment(AuthController.self) private var auth
     @Environment(AppModel.self) private var appModel
     @State private var shelves: [FeedShelf] = []
@@ -188,10 +189,15 @@ struct SavedPlaylistsView: View {
         }
         #else
         .toolbar {
-            if auth.signedIn {
-                ToolbarItem(placement: .primaryAction) { spotifyImportButton }
+            if !appModel.nowPlayingPresented {
+                if auth.signedIn {
+                    ToolbarItem(placement: .primaryAction) { spotifyImportButton }
+                }
+                ToolbarItem(placement: .primaryAction) { importFileButton }
+                if hostsWindowControls {
+                    MacWindowControls()
+                }
             }
-            ToolbarItem(placement: .primaryAction) { importFileButton }
         }
         #endif
         .sheet(isPresented: $showSpotifyImport) {

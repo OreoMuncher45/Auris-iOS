@@ -12,7 +12,9 @@ import UniformTypeIdentifiers
 struct UnifiedArtistsView: View {
     var title = "Artists"
     var onPickFolder: (() -> Void)? = nil
+    var hostsWindowControls: Bool = false
     @Environment(AuthController.self) private var auth
+    @Environment(AppModel.self) private var appModel
     @State private var local = LocalLibrary.shared
     @State private var pickingFolder = false
     @State private var shelves: [FeedShelf] = []
@@ -109,17 +111,22 @@ struct UnifiedArtistsView: View {
         }
         #else
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    pickFolder()
-                } label: {
-                    Image(.bchPlus)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 15)
+            if !appModel.nowPlayingPresented {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        pickFolder()
+                    } label: {
+                        Image(.bchPlus)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 15)
+                    }
+                    .help("Scan a folder")
+                    .accessibilityLabel("Scan a Folder")
                 }
-                .help("Scan a folder")
-                .accessibilityLabel("Scan a Folder")
+                if hostsWindowControls {
+                    MacWindowControls()
+                }
             }
         }
         #endif

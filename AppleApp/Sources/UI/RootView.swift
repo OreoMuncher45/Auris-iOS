@@ -442,8 +442,10 @@ struct RootView: View {
                 ToolbarItem(placement: .navigation) {
                     MacHistoryButtons(navigator: navigator)
                 }
-                // Search declares these itself, after its field and switcher.
-                if macSide != .search || !navigator.path.isEmpty {
+                // Pages with their own trailing primaryAction items append
+                // MacWindowControls after them so Profile and Downloads stay
+                // at the right-most end of the titlebar.
+                if !macSide.hostsOwnToolbarControls || !navigator.path.isEmpty {
                     MacWindowControls()
                 }
             }
@@ -517,13 +519,13 @@ struct RootView: View {
         case .recent:
             LibraryView(lockedSection: .youtube)
         case .songs:
-            LibraryView(lockedSection: .songs)
+            LibraryView(lockedSection: .songs, hostsWindowControls: navigator.path.isEmpty)
         case .albums:
-            LibraryView(lockedSection: .albums)
+            LibraryView(lockedSection: .albums, hostsWindowControls: navigator.path.isEmpty)
         case .artists:
-            LibraryView(lockedSection: .artists)
+            LibraryView(lockedSection: .artists, hostsWindowControls: navigator.path.isEmpty)
         case .playlists:
-            LibraryView(lockedSection: .playlists)
+            LibraryView(lockedSection: .playlists, hostsWindowControls: navigator.path.isEmpty)
         case .subscriptions:
             LibraryView(lockedSection: .subscriptions)
         case .podcasts:
@@ -535,7 +537,10 @@ struct RootView: View {
         case .webdav:
             LibraryView(lockedSection: .webdav)
         case .search:
-            SearchView(hostsWindowControls: navigator.path.isEmpty)
+            SearchView(
+                showsMacToolbar: navigator.path.isEmpty && !appModel.nowPlayingPresented,
+                hostsWindowControls: navigator.path.isEmpty && !appModel.nowPlayingPresented
+            )
         case .playlist(let id, let title):
             DetailView(browseId: id, initialTitle: title)
         }
@@ -709,6 +714,15 @@ enum MacSide: Hashable {
         case .search: .search
         }
     }
+
+    var hostsOwnToolbarControls: Bool {
+        switch self {
+        case .search, .songs, .albums, .artists, .playlists:
+            true
+        default:
+            false
+        }
+    }
 }
 
 /// Configure the system-generated toolbar items without creating another
@@ -735,6 +749,11 @@ private final class MacWindowToolbarView: NSView {
         guard isPlayerPresented != presented else { return }
         isPlayerPresented = presented
         scheduleUpdate()
+        for delay in [0.05, 0.15, 0.3] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.configureToolbar()
+            }
+        }
     }
 
     override func viewDidMoveToWindow() {
@@ -773,11 +792,11 @@ private final class MacWindowToolbarView: NSView {
         isConfiguring = true
         defer { isConfiguring = false }
         if isPlayerPresented {
-            // Spacing is not a browse control. SwiftUI reuses its spacer
-            // identifiers for the player's own toolbar, and hiding them took
-            // the flexible space that puts volume and AirPlay at the far end.
-            for item in toolbar.items where normalItems[item.itemIdentifier] != nil
-                && !Self.isSpacing(item) {
+            // Spacing and window-level controls stay visible; browse controls
+            // and the sidebar toggle are hidden while the player owns the window.
+            for item in toolbar.items where (normalItems[item.itemIdentifier] != nil || Self.isSidebarToggle(item))
+                && !Self.isSpacing(item)
+                && !Self.isWindowControl(item) {
                 item.isHidden = true
             }
         } else {
@@ -811,6 +830,11 @@ private final class MacWindowToolbarView: NSView {
         item.itemIdentifier == .flexibleSpace || item.itemIdentifier == .space
             || item.itemIdentifier.rawValue.localizedCaseInsensitiveContains("spacer")
             || item.itemIdentifier.rawValue.localizedCaseInsensitiveContains("space")
+    }
+
+    private static func isWindowControl(_ item: NSToolbarItem) -> Bool {
+        item.itemIdentifier.rawValue == MacToolbarItemID.account
+            || item.itemIdentifier.rawValue == MacToolbarItemID.downloads
     }
 
     private static func isSidebarToggle(_ item: NSToolbarItem) -> Bool {

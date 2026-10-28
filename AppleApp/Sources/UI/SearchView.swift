@@ -326,15 +326,18 @@ struct SearchView: View {
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     #endif
+    private let showsMacToolbar: Bool
     private let hostsWindowControls: Bool
 
     init(
         initialQuery: String? = nil,
         initialScope: Scope = .all,
         initialSource: SearchSource = .youtube,
+        showsMacToolbar: Bool = true,
         hostsWindowControls: Bool = false
     ) {
         self.initialQuery = initialQuery
+        self.showsMacToolbar = showsMacToolbar
         self.hostsWindowControls = hostsWindowControls
         _query = State(initialValue: initialQuery ?? "")
         _scope = State(initialValue: initialScope)
@@ -527,38 +530,40 @@ struct SearchView: View {
     #if os(macOS)
     @ToolbarContentBuilder
     private var macToolbar: some ToolbarContent {
-        if !searchedTerm.isEmpty {
-            // Ahead of the field, so it does not split the search
-            // field from its catalogue switcher.
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    openWindow(
-                        id: MacBrowseWindow.sceneID,
-                        value: MacBrowseWindowRoute.search(
-                            query: searchedTerm, scope: scope, source: searchSource
+        if showsMacToolbar && !appModel.nowPlayingPresented {
+            if !searchedTerm.isEmpty {
+                // Ahead of the field, so it does not split the search
+                // field from its catalogue switcher.
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        openWindow(
+                            id: MacBrowseWindow.sceneID,
+                            value: MacBrowseWindowRoute.search(
+                                query: searchedTerm, scope: scope, source: searchSource
+                            )
                         )
-                    )
-                } label: {
-                    Label("Open in New Window", systemImage: "macwindow.badge.plus")
-                }
-                .help("Open these search results in a new window")
-            }
-        }
-        // Music's titlebar order: search pill first, then the YouTube/Addons
-        // tab switcher, and lastly the window's Profile and Downloads buttons.
-        ToolbarItem(id: MacToolbarItemID.searchField, placement: .primaryAction) {
-            MacToolbarSearchField(text: $query, focused: $searchFieldFocused) {
-                Task {
-                    await performSearch()
-                    searchFieldFocused = false
+                    } label: {
+                        Label("Open in New Window", systemImage: "macwindow.badge.plus")
+                    }
+                    .help("Open these search results in a new window")
                 }
             }
-        }
-        ToolbarItem(id: MacToolbarItemID.searchSource, placement: .primaryAction) {
-            ToolbarSearchSourceSwitcher(selection: $searchSource)
-        }
-        if hostsWindowControls {
-            MacWindowControls()
+            // Music's titlebar order: search pill first, then the YouTube/Addons
+            // tab switcher, and lastly the window's Profile and Downloads buttons.
+            ToolbarItem(id: MacToolbarItemID.searchField, placement: .primaryAction) {
+                MacToolbarSearchField(text: $query, focused: $searchFieldFocused) {
+                    Task {
+                        await performSearch()
+                        searchFieldFocused = false
+                    }
+                }
+            }
+            ToolbarItem(id: MacToolbarItemID.searchSource, placement: .primaryAction) {
+                ToolbarSearchSourceSwitcher(selection: $searchSource)
+            }
+            if hostsWindowControls {
+                MacWindowControls()
+            }
         }
     }
     #endif

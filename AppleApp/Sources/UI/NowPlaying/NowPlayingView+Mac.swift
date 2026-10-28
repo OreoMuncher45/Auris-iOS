@@ -44,6 +44,7 @@ extension NowPlayingView {
         }
         .toolbar { macPlayerToolbar }
         .toolbar(removing: .title)
+        .toolbar(removing: .sidebarToggle)
         .toolbarBackground(.hidden, for: .windowToolbar)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .navigationTitle("")
@@ -98,11 +99,8 @@ extension NowPlayingView {
                     .help("AirPlay")
             }
             .sharedBackgroundVisibility(.hidden)
-            // As far from the right edge as Back is from the left.
-            ToolbarItem(placement: .primaryAction) {
-                Color.clear.frame(width: trailingInset, height: 1)
-            }
-            .sharedBackgroundVisibility(.hidden)
+            ToolbarSpacer(.fixed, placement: .primaryAction)
+            MacWindowControls()
         } else {
             ToolbarItem(placement: .primaryAction) {
                 AirPlayRouteButton()
@@ -111,6 +109,7 @@ extension NowPlayingView {
                     .background(.ultraThinMaterial, in: Circle())
                     .help("AirPlay")
             }
+            MacWindowControls()
         }
     }
 

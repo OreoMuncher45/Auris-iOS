@@ -19,6 +19,7 @@ struct LibraryView: View {
     /// is shown directly. The section page owns its navigation title and
     /// toolbar — nothing outer may add its own, or the two sets merge.
     var lockedSection: Section? = nil
+    var hostsWindowControls: Bool = false
 
     enum Section: String, CaseIterable, Identifiable {
         case youtube, songs, albums, artists, playlists, subscriptions, podcasts, ondevice, downloads, history, webdav
@@ -138,10 +139,10 @@ struct LibraryView: View {
     private func lockedContent(_ locked: Section) -> some View {
         switch locked {
         case .youtube: YoutubeLibraryView()
-        case .songs: UnifiedSongsView(title: locked.label, onPickFolder: { pickFolder() })
-        case .albums: UnifiedAlbumsView(title: locked.label, onPickFolder: { pickFolder() })
-        case .artists: UnifiedArtistsView(title: locked.label, onPickFolder: { pickFolder() })
-        case .playlists: SavedPlaylistsView()
+        case .songs: UnifiedSongsView(title: locked.label, onPickFolder: { pickFolder() }, hostsWindowControls: hostsWindowControls)
+        case .albums: UnifiedAlbumsView(title: locked.label, onPickFolder: { pickFolder() }, hostsWindowControls: hostsWindowControls)
+        case .artists: UnifiedArtistsView(title: locked.label, onPickFolder: { pickFolder() }, hostsWindowControls: hostsWindowControls)
+        case .playlists: SavedPlaylistsView(hostsWindowControls: hostsWindowControls)
         case .subscriptions: SavedShelfView(shelfName: "Subscriptions", title: "Subscriptions", emptySubtitle: "Channels you subscribe to show up here.")
         case .podcasts: SavedShelfView(shelfName: "Podcasts", title: "Podcasts", emptySubtitle: "Podcasts you follow show up here.")
         case .ondevice: OnDeviceView()

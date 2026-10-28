@@ -278,6 +278,9 @@ struct BitChordApp: App {
             MiniPlayerView()
                 .environment(controller)
                 .environment(appModel)
+                .environment(auth)
+                .environment(toast)
+                .environment(party)
                 .preferredColorScheme(appModel.preferredScheme)
         }
         .windowStyle(.hiddenTitleBar)
@@ -289,6 +292,9 @@ struct BitChordApp: App {
             MiniPlayerView(compact: true)
                 .environment(controller)
                 .environment(appModel)
+                .environment(auth)
+                .environment(toast)
+                .environment(party)
         } label: {
             Image(systemName: "music.note")
                 .symbolEffect(.pulse, isActive: controller.isPlaying)
@@ -301,6 +307,8 @@ struct BitChordApp: App {
                 .environment(controller)
                 .environment(appModel)
                 .environment(auth)
+                .environment(toast)
+                .environment(party)
                 .preferredColorScheme(appModel.preferredScheme)
                 .environment(\.locale, appModel.appLanguage.isEmpty ? .autoupdatingCurrent : Locale(identifier: appModel.appLanguage))
         }
