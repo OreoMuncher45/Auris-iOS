@@ -12,7 +12,23 @@ import AppKit
 
 // Transport: play/pause, next and previous, repeat, shuffle and seeking.
 extension PlaybackController {
+    func audioInterruptionBegan() {
+        guard isPlaying || isBuffering else { return }
+        pausePlayback(releaseAudioSession: true)
+        wasInterrupted = true
+    }
+
+    func audioInterruptionEnded(shouldResume: Bool) {
+        let resumePending = wasInterrupted
+        wasInterrupted = false
+        guard resumePending, shouldResume, state == .paused else { return }
+        togglePlayPause()
+    }
+
     func togglePlayPause() {
+        // A manual Play supersedes interruption recovery. Otherwise the later
+        // interruption-ended event can toggle already resumed audio back off.
+        wasInterrupted = false
         noteLocalIntent()
         startEngineIfNeeded()
         if state == .buffering {
@@ -38,7 +54,9 @@ extension PlaybackController {
             // Only when it is still the track the position was saved for.
             let start = restoredStart.flatMap { $0.entryId == current?.id ? $0.position : nil }
             restoredStart = nil
-            loadCurrent(playingIndex, startAt: start, refreshAutoplay: false)
+            let fresh = recoveryNeedsFreshResolution
+            if fresh, let current { streamRecovery.select(current.id, resetAttempts: true) }
+            loadCurrent(playingIndex, startAt: start, refreshAutoplay: false, freshResolution: fresh)
             return
         }
         if isPlaying {
@@ -374,7 +392,10 @@ extension PlaybackController {
         applyListOrder()
     }
 
-    func seek(to seconds: Double) {
+    func seek(to requestedSeconds: Double) {
+        guard requestedSeconds.isFinite else { return }
+        var seconds = max(0, requestedSeconds)
+        if duration > 0, duration.isFinite { seconds = min(seconds, duration) }
         noteLocalIntent()
         // Queues and returns: the playhead is the engine's to move, and waiting
         // for it here would stall whatever thread asked — usually the main one.

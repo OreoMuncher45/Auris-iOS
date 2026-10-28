@@ -146,7 +146,12 @@ final class PlaybackController {
     var position: Double = 0
     var duration: Double = 0
     var lastError: String?
+    var recoveringEntryID: String?
+    var recoveryNeedsFreshResolution = false
+    var sourceDecisionNotes: [String: String] = [:]
+    @ObservationIgnored var streamRecovery = PlaybackRecoveryPolicy()
     @ObservationIgnored var pendingPlaybackLatency: PlaybackLatencySample?
+    @ObservationIgnored var nextPreparationTask: Task<Void, Never>?
     @ObservationIgnored var urlPrefetchTask: Task<Void, Never>?
     @ObservationIgnored var urlPrefetchFingerprint: String?
     /// A′3's session pacing: at most one transition in four may use an effect
@@ -229,7 +234,6 @@ final class PlaybackController {
     /// then sit paused at its start instead of discarding it.
     var holdAfterLoad = false
     /// How often each track has been reloaded after its download failed.
-    var failedDownloadResumes: [String: Int] = [:]
     /// Tracks that failed every way of asking for them, and until when the
     /// queue steps over them instead of stopping on them.
     var unplayableUntil: [String: Date] = [:]
@@ -549,6 +553,7 @@ final class PlaybackController {
     var wasInterrupted = false
 
     init() {
+        NativeStreamVerifier.install()
         _ = LoadingMonitor.shared
         _ = LaunchReadiness.shared
         let configuredSpeed = Double(PlatformSettings.shared.getFloat(key: "playback_speed", default: 1))
@@ -602,22 +607,14 @@ final class PlaybackController {
                 Task { @MainActor in
                     guard let self else { return }
                     NSLog("[BitChord] Audio interruption began")
-                    if self.isPlaying || self.isBuffering {
-                        self.pausePlayback(releaseAudioSession: true)
-                        self.wasInterrupted = true
-                    }
+                    self.audioInterruptionBegan()
                 }
             },
             ended: { [weak self] shouldResume in
                 Task { @MainActor in
                     guard let self else { return }
                     NSLog("[BitChord] Audio interruption ended, shouldResume=\(shouldResume)")
-                    if self.wasInterrupted {
-                        self.wasInterrupted = false
-                        if shouldResume {
-                            self.togglePlayPause()
-                        }
-                    }
+                    self.audioInterruptionEnded(shouldResume: shouldResume)
                 }
             }
         )
@@ -764,6 +761,7 @@ final class PlaybackController {
                 guard let self else { return }
                 for event in drainTechnicalEvents() { self.debugLog.record(event) }
                 self.pollWidgetCommands()
+                self.pollStreamRecovery()
                 guard self.state == .playing else { return }
                 self.position = self.playbackPosition
                 self.positionSampledAt = Date()

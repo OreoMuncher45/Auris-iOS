@@ -63,6 +63,7 @@ extension PlaybackController {
     struct ResolveOutcome: Sendable {
         let source: ResolvedSource
         let leftover: Task<QualityUpgrade.Candidate?, Never>?
+        var decisionNote: String? = nil
     }
 
     struct ResolvePrefs: Sendable {
@@ -88,6 +89,8 @@ extension PlaybackController {
 
     static func resolveSource(
         _ entry: QueueEntry, prefs: ResolvePrefs,
+        preparationBudget: TimeInterval? = nil,
+        freshResolution: Bool = false,
         latencyResolved: PlaybackLatencyRecorder? = nil
     ) async throws -> ResolveOutcome {
         await DownloadStore.shared.waitUntilReady()
@@ -116,11 +119,13 @@ extension PlaybackController {
             // id, so it resolves through the source resolver's own ordering —
             // its source first, then any enabled source that has the recording.
             let key = entry.source.hasPrefix("src:") ? entry.source : entry.id
+            let report = PlaybackLookupReport()
             if let stream = await SourceSearch.shared.stream(
                 key: key, title: entry.title, artist: entry.artist,
                 // Unknown is not zero: a 0 s runtime would be read as a real
                 // length and reject every match.
-                durationSec: entry.durationSeconds > 0 ? Int(entry.durationSeconds.rounded()) : nil
+                durationSec: entry.durationSeconds > 0 ? Int(entry.durationSeconds.rounded()) : nil,
+                diagnostic: report.record
             ) {
                 await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cold", "source substitute")
                 return ResolveOutcome(
@@ -129,7 +134,7 @@ extension PlaybackController {
                         lossless: stream.lossless, codec: stream.codec,
                         durationSec: stream.durationSec, origin: .substitute
                     ),
-                    leftover: nil
+                    leftover: nil, decisionNote: report.explanation
                 )
             }
             throw InnertubeStreamResolver.StreamError(message: "That source had no stream")
@@ -159,9 +164,11 @@ extension PlaybackController {
             )
         }
         let videoId = String(entry.source.dropFirst(3))
-        if !(prefs.wantLossless && prefs.canSubstitute),
+        if !freshResolution, !(prefs.wantLossless && prefs.canSubstitute),
            let growing = streamGate.lock.withLock({ streamGate.growing[videoId] }),
-           FileManager.default.fileExists(atPath: growing) {
+           FileManager.default.fileExists(atPath: growing),
+           !FileManager.default.fileExists(atPath: growing + ".failed"),
+           !FileManager.default.fileExists(atPath: growing + ".playback-cancelled") {
             await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cached", "stream cache")
             return ResolveOutcome(
                 source: ResolvedSource(
@@ -181,32 +188,51 @@ extension PlaybackController {
                                    "cold", source.clientName ?? "unknown")
             return ResolveOutcome(source: source, leftover: nil)
         }
-        if let cached = await StreamFileCache.shared.path(for: videoId, maxKbps: prefs.maxKbps, requireLossless: prefs.wantLossless) {
+        if !freshResolution, let cached = await StreamFileCache.shared.path(for: videoId, maxKbps: prefs.maxKbps, requireLossless: prefs.wantLossless),
+           let verified = NativeStreamVerifier.verifyCachedFile(cached),
+           !prefs.wantLossless || verified.format.losslessPcm || !prefs.canSubstitute {
             await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cached", "stream cache")
             let metadata = await StreamFileCache.shared.metadata(at: cached)
             let cachedDuration = metadata?.durationSeconds
             return ResolveOutcome(
                 source: ResolvedSource(
-                    source: cached, headers: [:], kbps: metadata?.kbps ?? 0, lossless: QualityUpgrade.Format.isLosslessCodec(metadata?.codec), codec: metadata?.codec, durationSec: cachedDuration, loudnessDb: metadata?.relativeLoudnessDb, clientName: "cache", origin: .cache, youtubeVideoId: metadata?.youtubeVideoId ?? videoId
+                    source: cached, headers: [:], kbps: verified.estimatedKbps.map(Int.init) ?? metadata?.kbps ?? 0, lossless: verified.format.losslessPcm, codec: verified.format.codec, durationSec: cachedDuration, loudnessDb: metadata?.relativeLoudnessDb, clientName: "cache", origin: .cache, youtubeVideoId: metadata?.youtubeVideoId ?? videoId
                 ),
                 leftover: nil
             )
         }
         return try await resolveWithModulePriority(
-            entry, videoId: videoId, prefs: prefs, latencyResolved: latencyResolved
+            entry, videoId: videoId, prefs: prefs, preparationBudget: preparationBudget, latencyResolved: latencyResolved
         )
     }
 
     /// Upstream `resolveWithModulePriority`: start YouTube and substitutes
     /// together. Lossless gives configured sources up to three seconds to answer
     /// before a ready YouTube fallback is selected. A lookup that loses is **not** cancelled — it is handed
-    /// to QualityUpgrade as `inFlight`.
+    /// to QualityUpgrade as `inFlight`. Preparing the next track may spend a
+    /// larger budget while the current track is still playing.
     private static func resolveWithModulePriority(
         _ entry: QueueEntry, videoId: String, prefs: ResolvePrefs,
+        preparationBudget: TimeInterval?,
         latencyResolved: PlaybackLatencyRecorder? = nil
     ) async throws -> ResolveOutcome {
+        let report = PlaybackLookupReport()
         let lookup = Task<QualityUpgrade.Candidate?, Never> {
-            await Self.resolveSubstitute(entry, prefs: prefs)?.asCandidate()
+            if preparationBudget != nil && prefs.canSubstitute && !entry.isVideo {
+                let stream = await SourceSubstitution.prefetch(
+                    title: entry.title, artist: entry.artist,
+                    durationSec: entry.durationSeconds > 0 ? Int(entry.durationSeconds.rounded()) : nil,
+                    album: entry.albumName,
+                    isExplicit: entry.isExplicit.map { KotlinBoolean(value: $0) },
+                    diagnostic: report.record
+                )
+                return stream.map { QualityUpgrade.Candidate(
+                    url: $0.url, headers: $0.headers,
+                    format: QualityUpgrade.Format(codec: $0.codec, kbps: $0.kbps, lossless: $0.lossless),
+                    durationSec: $0.durationSec
+                ) }
+            }
+            return await Self.resolveSubstitute(entry, prefs: prefs, diagnostic: report.record)?.asCandidate()
         }
         let fallback = Task<ResolvedSource, Error> {
             try await Self.resolveYouTube(videoId: videoId, prefs: prefs)
@@ -236,7 +262,8 @@ extension PlaybackController {
             let source = try await fallback.value
             await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                    "cold", source.clientName ?? "unknown")
-            return ResolveOutcome(source: source, leftover: nil)
+            return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
+                ? "A preferred source supplied verified lossless audio." : report.explanation)
         }
 
         let preferLossless = prefs.wantLossless && prefs.canSubstitute
@@ -244,7 +271,8 @@ extension PlaybackController {
         _ = Task { await race.finishLookup(await lookup.value) }
         _ = Task { await race.finishFallback(try? await fallback.value) }
 
-        switch await race.wait(timeoutNanoseconds: preferLossless ? 3_000_000_000 : 800_000_000) {
+        let waitSeconds = preferLossless ? (preparationBudget ?? 3) : 0.8
+        switch await race.wait(timeoutNanoseconds: UInt64(waitSeconds * 1_000_000_000)) {
         case .preferred(let stream):
             fallback.cancel()
             await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cold", "source substitute")
@@ -255,13 +283,16 @@ extension PlaybackController {
                 durationSec: stream.durationSec,
                 origin: .substitute
             )
-            return ResolveOutcome(source: source, leftover: nil)
+            return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
+                ? "A preferred source supplied verified lossless audio." : report.explanation)
         case .fallback(let source):
             // Preserve the slower substitute lookup for the in-playback quality
             // upgrade path instead of making it delay the first audible sample.
             await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                    "cold", source.clientName ?? "unknown")
-            return ResolveOutcome(source: source, leftover: lookup)
+            return ResolveOutcome(source: source, leftover: lookup, decisionNote: report.explanation ?? (prefs.canSubstitute
+                ? "Preferred sources did not provide a verified stream before the playback deadline."
+                : "YouTube is the selected source."))
         case .timedOut:
             // A substitute lookup gets a short head start, then the direct
             // YouTube URL carries first sound while the lookup stays available
@@ -270,13 +301,16 @@ extension PlaybackController {
                 let source = try await fallback.value
                 await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                        "cold", source.clientName ?? "unknown")
-                return ResolveOutcome(source: source, leftover: lookup)
+                return ResolveOutcome(source: source, leftover: lookup, decisionNote: report.explanation ?? (prefs.canSubstitute
+                ? "Preferred sources did not provide a verified stream before the playback deadline."
+                : "YouTube is the selected source."))
             } catch {
                 // The lookup is the first thing to fall back on now, so it is
                 // awaited rather than cancelled.
                 let source = try await recoverRefusedTrack(entry, videoId: videoId, prefs: prefs, lookup: lookup, error: error)
                 await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cold", source.clientName ?? "recovered")
-                return ResolveOutcome(source: source, leftover: nil)
+                return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
+                ? "A preferred source supplied verified lossless audio." : report.explanation)
             }
         case .cancelled:
             lookup.cancel()
@@ -293,7 +327,8 @@ extension PlaybackController {
             }
             await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                    "cold", source.clientName ?? "unknown")
-            return ResolveOutcome(source: source, leftover: nil)
+            return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
+                ? "A preferred source supplied verified lossless audio." : report.explanation)
         }
     }
 
@@ -500,15 +535,16 @@ extension PlaybackController {
     ///
     ///  - The track is matched by `TrackMatcher` before anything is opened, so a
     ///    cover cannot be substituted for the recording the listener picked.
-    ///  - Rank decides who is asked; the race decides who answers first. The two
-    ///    are not the same thing, and only the first one is a list.
+    ///  - Rank decides who is asked. Lossless compares completed answers within
+    ///    a bounded window instead of selecting only the first responder.
     ///  - `playingDurationSec` set routes this through the *upgrade* path, whose bar
     ///    is "beats what is actually playing" rather than "satisfies the request",
     ///    and which waits for every source so a slow one holding the FLAC still
     ///    gets to serve it mid-track rather than being dropped for a fast 320.
     static func resolveSubstitute(
         _ entry: QueueEntry, prefs: ResolvePrefs, waitForAll: Bool = false,
-        playingDurationSec: Int? = nil, playing: QualityUpgrade.Format? = nil
+        playingDurationSec: Int? = nil, playing: QualityUpgrade.Format? = nil,
+        diagnostic: @escaping @Sendable (String) -> Void = { _ in }
     ) async -> ResolvedSource? {
         // Nothing configured outranks YouTube, so the race cannot be won and asking
         // would be pure latency. Answerable from the source list alone, with no
@@ -518,11 +554,12 @@ extension PlaybackController {
         let stream = await SourceSubstitution.substitute(
             title: entry.title,
             artist: entry.artist,
-            durationSec: playingDurationSec,
+            durationSec: playingDurationSec ?? (entry.durationSeconds > 0 ? Int(entry.durationSeconds.rounded()) : nil),
             album: entry.albumName,
             isExplicit: entry.isExplicit.map { KotlinBoolean(value: $0) },
             isVideo: entry.isVideo,
-            playing: (playing ?? (waitForAll ? QualityUpgrade.Format(codec: nil, kbps: nil, lossless: false) : nil)).map { SourceSubstitution.Format(codec: $0.codec, kbps: $0.kbps, lossless: $0.lossless) }
+            playing: (playing ?? (waitForAll ? QualityUpgrade.Format(codec: nil, kbps: nil, lossless: false) : nil)).map { SourceSubstitution.Format(codec: $0.codec, kbps: $0.kbps, lossless: $0.lossless) },
+            diagnostic: diagnostic
         )
         guard let stream else { return nil }
         return ResolvedSource(
@@ -555,6 +592,39 @@ extension PlaybackController {
         let url: String
         let kbps: Int
         let lossless: Bool?
+    }
+
+    /// Buffer the chosen next-track rendition under its own cache identity.
+    /// A failed speculative download retains the remote stream for normal loading.
+    static func bufferPreparedSource(_ outcome: ResolveOutcome, mediaId: String) async throws -> ResolveOutcome {
+        let chosen = outcome.source
+        guard chosen.origin == .substitute,
+              chosen.source.hasPrefix("https://") || chosen.source.hasPrefix("http://"),
+              !PlaybackCodecCapabilities.shared.canRenderDolby(codec: chosen.codec, headers: chosen.headers) else {
+            return outcome
+        }
+        do {
+            let path = try await streamViaKtor(
+                videoId: "\(mediaId)#prepared-\(DiskCache.hashName(chosen.source))",
+                url: chosen.source, headers: chosen.headers,
+                codec: chosen.codec ?? "unknown", kbps: chosen.kbps,
+                durationSeconds: chosen.durationSec
+            )
+            try Task.checkCancellation()
+            let buffered = ResolvedSource(
+                source: path, headers: [:], kbps: chosen.kbps,
+                lossless: chosen.lossless, codec: chosen.codec,
+                durationSec: chosen.durationSec, origin: .substitute
+            )
+            return ResolveOutcome(source: buffered, leftover: outcome.leftover, decisionNote: outcome.decisionNote)
+        } catch is CancellationError {
+            outcome.leftover?.cancel()
+            throw CancellationError()
+        } catch {
+            try Task.checkCancellation()
+            PlaybackDebugLog.shared.record("next-track buffer unavailable; retaining selected stream", about: mediaId)
+            return outcome
+        }
     }
 
     /// Warm short-lived stream URLs for the upcoming queue window. This does

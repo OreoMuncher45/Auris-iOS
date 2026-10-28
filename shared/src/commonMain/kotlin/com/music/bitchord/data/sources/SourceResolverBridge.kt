@@ -9,6 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -58,7 +60,7 @@ object SourceResolverBridge {
      * below YouTube, so every queued track paid a pointless race for a source that
      * could not have won it.
      */
-    fun canSubstituteForYouTube(): Boolean = SourceResolver.canSubstituteForYouTube()
+    fun canSubstituteForYouTube(): Boolean = runCatching { SourceResolver.canSubstituteForYouTube() }.getOrDefault(false)
 
     /** A stream that genuinely satisfies the request, for a track already playing. */
     fun worthSwapping(candidateJson: String, playingJson: String?): Boolean {
@@ -82,10 +84,9 @@ object SourceResolverBridge {
         isExplicit: Boolean?,
         isVideo: Boolean,
         callback: StreamCallback,
-    ) = launch(callback) {
+    ) = lookup(callback) {
         val target = TrackMatcher.Target(title, artist, durationSec, album, isExplicit, isVideo)
-        SourceResolver.substituteForYouTube(target)?.let { callback.onResult(it.encode(), null) }
-            ?: callback.onResult(null, null)
+        SourceResolver.substituteForYouTube(target)
     }
 
     /**
@@ -102,16 +103,10 @@ object SourceResolverBridge {
         artist: String,
         durationSec: Int?,
         callback: StreamCallback,
-    ) = launch(callback) {
-        val parsed = SourceRegistry.parseTrackKey(key)
-        if (parsed == null) {
-            callback.onResult(null, "Not a source track")
-            return@launch
-        }
+    ) = lookup(callback) {
+        val parsed = SourceRegistry.parseTrackKey(key) ?: return@lookup null
         val target = TrackMatcher.Target(title, artist, durationSec)
         SourceResolver.resolve(parsed.first, parsed.second, target)
-            ?.let { callback.onResult(it.encode(), null) }
-            ?: callback.onResult(null, "No stream from that source")
     }
 
     /**
@@ -134,16 +129,14 @@ object SourceResolverBridge {
         playingJson: String?,
         servedBy: String?,
         callback: StreamCallback,
-    ) = launch(callback) {
+    ) = lookup(callback) {
         val target = TrackMatcher.Target(title, artist, durationSec, album, isExplicit, isVideo)
         val playing = playingJson?.let { readFormat(it) }
         SourceResolver.upgradeFor(target, playing, servedBy)
-            ?.let { callback.onResult(it.encode(), null) }
-            ?: callback.onResult(null, null)
     }
 
     /**
-     * The copy a source quick enough to ask about *before* the track is played.
+     * The best copy within the next-track preparation window, including slow addons.
      *
      * The caller is expected to **pin** a returned stream before caching any of it,
      * or playback re-runs the race and may land on a different source — writing a
@@ -157,10 +150,9 @@ object SourceResolverBridge {
         isExplicit: Boolean?,
         isVideo: Boolean,
         callback: StreamCallback,
-    ) = launch(callback) {
+    ) = lookup(callback) {
         val target = TrackMatcher.Target(title, artist, durationSec, album, isExplicit, isVideo)
-        SourceResolver.prefetchSubstitute(target)?.let { callback.onResult(it.encode(), null) }
-            ?: callback.onResult(null, null)
+        SourceResolver.prefetchSubstitute(target)
     }
 
     /** The copy worth keeping as a file over whatever YouTube's ladder would give. */
@@ -252,17 +244,22 @@ object SourceResolverBridge {
 
     /** Every configured source, as a document the sources screen can read. */
     fun configs(callback: ConfigsCallback) {
-        callback.onResult(json.encodeToString(ConfigListing.serializer(), readConfigs()))
+        val document = runCatching { json.encodeToString(ConfigListing.serializer(), readConfigs()) }.getOrNull()
+        callback.onResult(document)
     }
 
     /** Reachability for one configured source, or for a candidate not yet saved. */
     fun health(configId: String, callback: HealthCallback) {
         scope.launch {
-            val config = SourceRegistry.config(configId)
-            val health = if (config != null) {
-                SourceRegistry.probeCandidate(config)
-            } else {
-                com.music.bitchord.data.sources.SourceHealth.Rejected("Unknown source")
+            val health = try {
+                withTimeoutOrNull(15_000) {
+                    val config = SourceRegistry.config(configId)
+                    if (config != null) SourceRegistry.probeCandidate(config)
+                    else com.music.bitchord.data.sources.SourceHealth.Rejected("Unknown source")
+                } ?: com.music.bitchord.data.sources.SourceHealth.Unreachable("The source did not answer in time. Try again.")
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (_: Exception) {
+                com.music.bitchord.data.sources.SourceHealth.Unreachable("The source could not be checked. Try again.")
             }
             callback.onResult(configId, healthName(health), healthDetail(health))
         }
@@ -329,7 +326,10 @@ object SourceResolverBridge {
         enabled: Boolean,
         callback: ActionCallback,
     ) {
-        val existing = SourceRegistry.config(id)
+        val existing = try { SourceRegistry.config(id) } catch (_: Exception) {
+            callback.onResult(false, "Sources could not be read. Unlock your device or Keychain and try again.")
+            return
+        }
         saveWithRefresh(id, kind, label, baseUrl, enabled,
             existing?.refreshEnabled ?: false, existing?.refreshUrl.orEmpty(), existing?.refreshUrlUnavailable ?: false, callback)
     }
@@ -388,7 +388,7 @@ object SourceResolverBridge {
      * asks them — `AddonSource` only — so a tab that says "no addons yet" and a
      * search that finds none can never disagree.
      */
-    fun addonCount(): Int = SourceRegistry.active().count { it is AddonSource }
+    fun addonCount(): Int = runCatching { SourceRegistry.active().count { it is AddonSource } }.getOrDefault(0)
 
     fun setEnabled(configId: String, enabled: Boolean, callback: ActionCallback) {
         sourceAction(callback) { SourceRegistry.setEnabled(configId, enabled) }
@@ -422,7 +422,25 @@ object SourceResolverBridge {
      * are all the same source.
      */
     fun isDuplicate(url: String, exceptId: String?): Boolean =
-        SourceRegistry.duplicateOf(url, exceptId) != null
+        runCatching { SourceRegistry.duplicateOf(url, exceptId) != null }.getOrDefault(false)
+
+    /** Recovery retries must ask enabled addons again rather than reuse an expired URL. */
+    fun refreshPlaybackSources() {
+        runCatching {
+            SourceRegistry.activeForPlayback().filterIsInstance<AddonSource>().forEach { it.clearCompletedTrackCalls() }
+        }
+    }
+
+    private fun lookup(callback: StreamCallback, block: suspend () -> SourceStream?) {
+        scope.launch {
+            val report = SourceResolutionReport()
+            try {
+                val stream = withContext(report) { block() }
+                callback.onResult(stream?.encode(), report.summary())
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (_: Exception) { callback.onResult(null, "Preferred sources could not provide playable audio.") }
+        }
+    }
 
     /** The one place a quality decision is made, exposed so the host agrees with it. */
     private fun launch(callback: StreamCallback, block: suspend () -> Unit) {
@@ -472,6 +490,7 @@ object SourceResolverBridge {
                 kbps = stream.format.kbps,
                 sampleRateHz = stream.format.sampleRateHz,
                 bitDepth = stream.format.bitDepth,
+                verified = stream.format.verified,
                 isLossless = stream.format.isLossless,
                 isDolbyAtmos = stream.format.isDolbyAtmos,
                 summary = stream.format.summary,
@@ -520,6 +539,7 @@ data class FormatDocument(
     val kbps: Int? = null,
     val sampleRateHz: Int? = null,
     val bitDepth: Int? = null,
+    val verified: Boolean = false,
     val isLossless: Boolean? = null,
     val isDolbyAtmos: Boolean = false,
     val summary: String = "",
@@ -562,4 +582,5 @@ private fun FormatDocument.toFormat(): StreamFormat = StreamFormat(
     kbps = kbps,
     sampleRateHz = sampleRateHz,
     bitDepth = bitDepth,
+    verified = verified,
 )
