@@ -442,8 +442,9 @@ struct RootView: View {
                 ToolbarItem(placement: .navigation) {
                     MacHistoryButtons(navigator: navigator)
                 }
-                ToolbarItem(id: MacToolbarItemID.downloads, placement: .primaryAction) {
-                    MacDownloadsButton()
+                // Search declares these itself, after its field and switcher.
+                if macSide != .search || !navigator.path.isEmpty {
+                    MacWindowControls()
                 }
             }
         }
@@ -534,7 +535,7 @@ struct RootView: View {
         case .webdav:
             LibraryView(lockedSection: .webdav)
         case .search:
-            SearchView()
+            SearchView(hostsWindowControls: navigator.path.isEmpty)
         case .playlist(let id, let title):
             DetailView(browseId: id, initialTitle: title)
         }
@@ -728,6 +729,7 @@ private final class MacWindowToolbarView: NSView {
     private var normalItems: [NSToolbarItem.Identifier: Bool] = [:]
     private var observers: [NSObjectProtocol] = []
     private var updateScheduled = false
+    private var isConfiguring = false
 
     func setPlayerPresented(_ presented: Bool) {
         guard isPlayerPresented != presented else { return }
@@ -742,7 +744,7 @@ private final class MacWindowToolbarView: NSView {
         guard let window else { return }
         for name in [NSToolbar.willAddItemNotification, NSToolbar.didRemoveItemNotification] {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
-                guard let self, (note.object as? NSToolbar) === self.window?.toolbar else { return }
+                guard let self, !self.isConfiguring, (note.object as? NSToolbar) === self.window?.toolbar else { return }
                 self.scheduleUpdate()
             })
         }
@@ -767,7 +769,9 @@ private final class MacWindowToolbarView: NSView {
     }
 
     private func configureToolbar() {
-        guard let toolbar = window?.toolbar else { return }
+        guard let toolbar = window?.toolbar, !isConfiguring else { return }
+        isConfiguring = true
+        defer { isConfiguring = false }
         if isPlayerPresented {
             // Spacing is not a browse control. SwiftUI reuses its spacer
             // identifiers for the player's own toolbar, and hiding them took
@@ -798,61 +802,15 @@ private final class MacWindowToolbarView: NSView {
             if let toggle = toolbar.items.first(where: Self.isSidebarToggle) {
                 toggle.visibilityPriority = .user
             }
-            arrangeTrailingControls(in: toolbar)
             normalItems = Dictionary(toolbar.items.map { ($0.itemIdentifier, $0.isHidden) }, uniquingKeysWith: { first, _ in first })
         }
         wasPlayerPresented = isPlayerPresented
-    }
-
-    /// Music's titlebar reads, from the leading edge: the title, the search
-    /// field, the catalogue switcher, the account control, Downloads.
-    /// SwiftUI appends the `.searchable` field after every `primaryAction`
-    /// item, which put the account and Downloads buttons to its left. This
-    /// moves the three controls we own directly after the search field, in
-    /// that order, rather than reordering the field itself.
-    ///
-    /// `itemIdentifiers` is the diffing setter: the items SwiftUI already
-    /// made are moved, not removed and rebuilt, so their bindings and the
-    /// search field's own state survive.
-    private func arrangeTrailingControls(in toolbar: NSToolbar) {
-        let wanted = [MacToolbarItemID.searchSource, MacToolbarItemID.account, MacToolbarItemID.downloads]
-        guard let search = toolbar.items.first(where: Self.isSearchField) else { return }
-        let present = wanted.compactMap { identifier in
-            toolbar.items.first { $0.itemIdentifier.rawValue == identifier }?.itemIdentifier
-        }
-        guard !present.isEmpty else { return }
-
-        var identifiers = toolbar.items.map(\.itemIdentifier)
-        guard let searchIndex = identifiers.firstIndex(of: search.itemIdentifier) else { return }
-        let trailing = identifiers.dropFirst(searchIndex + 1).prefix(present.count)
-        guard Array(trailing) != present else { return }
-
-        identifiers.removeAll { present.contains($0) }
-        guard let anchor = identifiers.firstIndex(of: search.itemIdentifier) else { return }
-        identifiers.insert(contentsOf: present, at: anchor + 1)
-        toolbar.itemIdentifiers = identifiers
     }
 
     private static func isSpacing(_ item: NSToolbarItem) -> Bool {
         item.itemIdentifier == .flexibleSpace || item.itemIdentifier == .space
             || item.itemIdentifier.rawValue.localizedCaseInsensitiveContains("spacer")
             || item.itemIdentifier.rawValue.localizedCaseInsensitiveContains("space")
-    }
-
-    /// The `.searchable` field SwiftUI adds to this window's toolbar. Class
-    /// first: our own identifiers contain "search" too.
-    private static func isSearchField(_ item: NSToolbarItem) -> Bool {
-        if item is NSSearchToolbarItem { return true }
-        if let group = item as? NSToolbarItemGroup,
-           group.subitems.contains(where: { isSearchField($0) }) {
-            return true
-        }
-        if item.itemIdentifier.rawValue == MacToolbarItemID.searchSource { return false }
-        if let view = item.view,
-           view is NSSearchField || view.subviews.contains(where: { $0 is NSSearchField }) {
-            return true
-        }
-        return item.itemIdentifier.rawValue.localizedCaseInsensitiveContains("search")
     }
 
     private static func isSidebarToggle(_ item: NSToolbarItem) -> Bool {
@@ -875,21 +833,20 @@ struct PlaybackPillMount: ViewModifier {
 
     func body(content: Content) -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *) {
-            // One mount for every iOS device from 26: the system bottom
-            // accessory reflows with the sidebar on its own. The accessory is
-            // window-wide, though, so the pill itself keeps Music's 620 pt
-            // mini-player width and centres on iPad rather than stretching
-            // across the screen when the sidebar is closed.
+        if sizeClass == .regular {
+            // An iPad mounts per tab (iPadPlaybackChrome), on every version.
+            // Since the sidebar became IPadSidebar's push column, the TabView
+            // is `.tabBarOnly`, and the system bottom accessory draws its own
+            // glass bar across the whole content width — framing the pill
+            // inside it only centred the controls in a full-width bar. The
+            // per-tab inset sits in the content column, so it reflows with
+            // the sidebar and keeps Music's 620 pt width.
+            content
+        } else if #available(iOS 26.0, *) {
+            // iPhone from 26: Music's own bottom accessory, full width.
             content.tabViewBottomAccessory {
                 PlaybackPill()
-                    .frame(maxWidth: sizeClass == .regular ? 620 : CGFloat.infinity)
-                    .frame(maxWidth: .infinity)
             }
-        } else if sizeClass == .regular {
-            // Before 26 an iPad mounts per tab (iPadPlaybackChrome): the
-            // TabView-level inset never reflows with the sidebar.
-            content
         } else {
             fallbackMount(content)
         }
@@ -933,9 +890,9 @@ struct iPadPlaybackChrome: ViewModifier {
 
     @ViewBuilder
     private func pill(_ content: Content) -> some View {
-        // From 26 the pill is the system's bottom accessory, mounted once at the
-        // TabView; this is only the pre-26 per-tab fallback.
-        if sizeClass == .regular, #unavailable(iOS 26.0) {
+        // Every iOS version: the system bottom accessory spans the whole
+        // content width on iPad (see PlaybackPillMount).
+        if sizeClass == .regular {
             content.safeAreaInset(edge: .bottom) {
                 PlaybackPill()
                     .frame(maxWidth: 620)

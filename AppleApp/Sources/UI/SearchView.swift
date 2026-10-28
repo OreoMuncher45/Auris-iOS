@@ -120,117 +120,140 @@ enum AddonSearchHistory {
     }
 }
 
-#if os(macOS)
-/// The Mac titlebar's YouTube / Addons switcher.
+/// The titlebar's YouTube / Addons switcher, on the Mac and a regular-width
+/// iPad.
 ///
-/// It is a pill rather than the stock segmented control: two tabs in a capsule
-/// with the chosen one filled in the accent colour, reading as one control
-/// beside the search field. Music keeps its catalogue switcher in the same
-/// place — in the titlebar, to the right of search and to the left of the
-/// account and Downloads buttons.
-struct MacSearchSourceSwitcher: View {
+/// The system's own segmented control rather than a hand-drawn capsule: in a
+/// toolbar from macOS / iPadOS 26 it is drawn as one Liquid Glass pill with
+/// the chosen segment inset inside it, the way Music's own titlebar switchers
+/// are. A custom capsule sat inside the toolbar's glass platter and read as a
+/// pill within a pill. `fixedSize` keeps the toolbar from stretching it.
+struct ToolbarSearchSourceSwitcher: View {
     @Binding var selection: SearchView.SearchSource
 
     var body: some View {
-        HStack(spacing: 2) {
+        Picker("Search source", selection: $selection) {
             ForEach(SearchView.SearchSource.allCases) { source in
-                MacSearchSourceTab(
-                    title: source.label,
-                    isSelected: selection == source
-                ) {
-                    selection = source
-                }
+                Text(source.label).tag(source)
             }
         }
-        .padding(2)
-        .background(Capsule().fill(Color.primary.opacity(0.08)))
-        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5))
+        .pickerStyle(.segmented)
+        .labelsHidden()
         .fixedSize()
-        .animation(.easeOut(duration: 0.15), value: selection)
+        #if os(macOS)
         .help("Search YouTube Music or your addons")
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Search source")
+        #endif
     }
 }
 
-private struct MacSearchSourceTab: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 12, weight: isSelected ? .semibold : .medium))
-                .foregroundStyle(isSelected ? Color.white : Color.primary.opacity(0.78))
-                .padding(.horizontal, 11)
-                .frame(height: 22)
-                .background {
-                    if isSelected {
-                        Capsule().fill(Color.accentColor)
-                    }
-                }
-                .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-#endif
-
-#if os(iOS)
-/// The iPad top bar's YouTube / Addons switcher.
+#if os(macOS)
+/// The Mac titlebar's search field, placed as a first-class `ToolbarItem` so
+/// SwiftUI owns the exact trailing order: search pill, YouTube/Addons switcher,
+/// account and Downloads.
 ///
-/// The same capsule the Mac titlebar uses, sized for touch and set beside the
-/// search field: Music keeps its catalogue switcher in that row too. iPhone
-/// keeps the stock segmented picker above the results, where it has the width.
-struct IPadSearchSourceSwitcher: View {
-    @Binding var selection: SearchView.SearchSource
+/// Relying on `.searchable(placement: .toolbar)` puts the field in a separate
+/// `com.apple.SwiftUI.search` toolbar slot at the far right after every
+/// `primaryAction` item, and mutating `NSToolbar` behind SwiftUI's back to
+/// reorder it caused SwiftUI to reconcile the toolbar on every view update and
+/// flicker the controls.
+private struct MacToolbarSearchField: View {
+    @Binding var text: String
+    var focused: FocusState<Bool>.Binding
+    var onSubmit: () -> Void
 
     var body: some View {
-        HStack(spacing: 2) {
-            ForEach(SearchView.SearchSource.allCases) { source in
-                IPadSearchSourceTab(
-                    title: source.label,
-                    isSelected: selection == source
-                ) {
-                    selection = source
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
+            TextField("Search", text: $text)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .focused(focused)
+                .onSubmit(onSubmit)
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
             }
         }
-        .padding(2)
-        .background(Capsule().fill(Color.primary.opacity(0.08)))
-        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5))
-        .fixedSize()
-        .animation(.easeOut(duration: 0.15), value: selection)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Search source")
+        .padding(.horizontal, 10)
+        .frame(width: 240, height: 28)
+        .contentShape(.rect)
+        .onTapGesture {
+            focused.wrappedValue = true
+        }
+    }
+}
+#else
+/// The iPad top bar's search field, placed as a first-class `ToolbarItem`
+/// ahead of the YouTube/Addons switcher so the two controls stay in a
+/// deterministic order inside the navigation bar.
+private struct IPadToolbarSearchField: View {
+    @Binding var text: String
+    var focused: FocusState<Bool>.Binding
+    var onSubmit: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.secondary)
+            TextField("Artists, Songs, Lyrics, and More", text: $text)
+                .textFieldStyle(.plain)
+                .font(.subheadline)
+                .focused(focused)
+                .submitLabel(.search)
+                .onSubmit(onSubmit)
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 12)
+        .frame(width: 300, height: 36)
+        .contentShape(.rect)
+        .onTapGesture {
+            focused.wrappedValue = true
+        }
     }
 }
 
-private struct IPadSearchSourceTab: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
+private struct CompactPhoneSearchDrawer: ViewModifier {
+    let isCompact: Bool
+    @Binding var query: String
+    @Binding var isPresented: Bool
+    var focused: FocusState<Bool>.Binding
+    var onSubmit: () -> Void
 
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
-                .foregroundStyle(isSelected ? Color.white : Color.primary.opacity(0.78))
-                .padding(.horizontal, 14)
-                .frame(height: 32)
-                .background {
-                    if isSelected {
-                        Capsule().fill(Color.accentColor)
-                    }
-                }
-                .contentShape(Capsule())
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isCompact {
+            content
+                .searchable(
+                    text: $query,
+                    isPresented: $isPresented,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "Artists, Songs, Lyrics, and More"
+                )
+                .searchFocused(focused)
+                .onSubmit(of: .search, onSubmit)
+        } else {
+            content
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 #endif
@@ -303,13 +326,16 @@ struct SearchView: View {
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     #endif
+    private let hostsWindowControls: Bool
 
     init(
         initialQuery: String? = nil,
         initialScope: Scope = .all,
-        initialSource: SearchSource = .youtube
+        initialSource: SearchSource = .youtube,
+        hostsWindowControls: Bool = false
     ) {
         self.initialQuery = initialQuery
+        self.hostsWindowControls = hostsWindowControls
         _query = State(initialValue: initialQuery ?? "")
         _scope = State(initialValue: initialScope)
         _searchSource = State(initialValue: initialSource)
@@ -355,61 +381,51 @@ struct SearchView: View {
                         TopBarLeadingMark()
                     }
                     if horizontalSizeClass == .regular {
-                        // iPad: the top bar carries the search field and the
-                        // catalogue switcher, as Music's does. The account is
-                        // already in the sidebar's footer.
+                        // iPad: the top bar carries the search pill first and
+                        // then the YouTube/Addons switcher, separated into two
+                        // distinct glass pills with a fixed toolbar spacer so
+                        // iPadOS does not merge adjacent trailing items into a
+                        // single shared platter.
                         ToolbarItem(placement: .topBarTrailing) {
-                            IPadSearchSourceSwitcher(selection: $searchSource)
+                            IPadToolbarSearchField(text: $query, focused: $searchFieldFocused) {
+                                Task {
+                                    await performSearch()
+                                    searchFieldFocused = false
+                                }
+                            }
+                        }
+                        if #available(iOS 26.0, *) {
+                            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                            ToolbarItem(placement: .topBarTrailing) {
+                                ToolbarSearchSourceSwitcher(selection: $searchSource)
+                            }
+                            .sharedBackgroundVisibility(.hidden)
+                        } else {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                ToolbarSearchSourceSwitcher(selection: $searchSource)
+                            }
                         }
                     } else {
                         ToolbarItem(placement: .topBarTrailing) { TopBarAccountButton() }
                     }
                     #elseif os(macOS)
-                    // The catalogue switcher lives in the titlebar beside the
-                    // search field, as Music keeps its Library/Store control
-                    // there, rather than floating over the results.
-                    ToolbarItem(id: MacToolbarItemID.searchSource, placement: .primaryAction) {
-                        MacSearchSourceSwitcher(selection: $searchSource)
-                    }
-                    if !searchedTerm.isEmpty {
-                        ToolbarItem(placement: .primaryAction) {
-                            Button {
-                                openWindow(
-                                    id: MacBrowseWindow.sceneID,
-                                    value: MacBrowseWindowRoute.search(
-                                        query: searchedTerm, scope: scope, source: searchSource
-                                    )
-                                )
-                            } label: {
-                                Label("Open in New Window", systemImage: "macwindow.badge.plus")
-                            }
-                            .help("Open these search results in a new window")
-                        }
-                    }
+                    macToolbar
                     #endif
                 }
                 #if os(iOS)
-                .searchable(
-                    text: $query,
+                .modifier(CompactPhoneSearchDrawer(
+                    isCompact: horizontalSizeClass != .regular,
+                    query: $query,
                     isPresented: $isSearchPresented,
-                    // iPad puts the field in the top bar so the catalogue
-                    // switcher can sit beside it, as in Music. The phone keeps
-                    // the full-width drawer.
-                    placement: horizontalSizeClass == .regular
-                        ? .toolbarPrincipal
-                        : .navigationBarDrawer(displayMode: .always),
-                    prompt: "Artists, Songs, Lyrics, and More"
-                )
-                #else
-                .searchable(text: $query, placement: .toolbar, prompt: "Search")
-                #endif
-                .searchFocused($searchFieldFocused)
-                .onSubmit(of: .search) {
-                    Task {
-                        await performSearch()
-                        searchFieldFocused = false
+                    focused: $searchFieldFocused,
+                    onSubmit: {
+                        Task {
+                            await performSearch()
+                            searchFieldFocused = false
+                        }
                     }
-                }
+                ))
+                #endif
                 .task(id: initialQuery) {
                     guard let initialQuery,
                           !initialQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
@@ -507,6 +523,45 @@ struct SearchView: View {
         typeaheadTask?.cancel()
         typeaheadTask = nil
     }
+
+    #if os(macOS)
+    @ToolbarContentBuilder
+    private var macToolbar: some ToolbarContent {
+        if !searchedTerm.isEmpty {
+            // Ahead of the field, so it does not split the search
+            // field from its catalogue switcher.
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    openWindow(
+                        id: MacBrowseWindow.sceneID,
+                        value: MacBrowseWindowRoute.search(
+                            query: searchedTerm, scope: scope, source: searchSource
+                        )
+                    )
+                } label: {
+                    Label("Open in New Window", systemImage: "macwindow.badge.plus")
+                }
+                .help("Open these search results in a new window")
+            }
+        }
+        // Music's titlebar order: search pill first, then the YouTube/Addons
+        // tab switcher, and lastly the window's Profile and Downloads buttons.
+        ToolbarItem(id: MacToolbarItemID.searchField, placement: .primaryAction) {
+            MacToolbarSearchField(text: $query, focused: $searchFieldFocused) {
+                Task {
+                    await performSearch()
+                    searchFieldFocused = false
+                }
+            }
+        }
+        ToolbarItem(id: MacToolbarItemID.searchSource, placement: .primaryAction) {
+            ToolbarSearchSourceSwitcher(selection: $searchSource)
+        }
+        if hostsWindowControls {
+            MacWindowControls()
+        }
+    }
+    #endif
 
     private var resultsColumn: some View {
         VStack(spacing: 0) {

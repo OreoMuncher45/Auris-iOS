@@ -84,7 +84,7 @@ struct PlaybackPill: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .modifier(MiniPlayerChrome(fill: chromeFill))
+        .modifier(MiniPlayerChrome(fill: chromeFill, reduceTransparency: reduceTransparency || reduceBlur))
         .overlay(alignment: .bottom) { progressHairline.clipShape(Capsule()) }
         .contentShape(.rect)
         // Long press: what is coming next. Upstream's mini player answers a long
@@ -472,11 +472,15 @@ struct PlaybackPill: View {
         if reduceTransparency || reduceBlur {
             return AnyShapeStyle(Color.primary.opacity(0.12))
         }
-        if #available(iOS 26.0, *) {
-            // The system bottom accessory is glass already; a material inside it
-            // would be a second, opaque surface inside the first.
+        #if os(iOS)
+        if #available(iOS 26.0, *), horizontalSizeClass == .compact {
+            // On compact width (iPhone), the system bottom accessory draws its
+            // own glass shell; a material inside it would be a second, opaque
+            // surface inside the first. On regular width (iPad), the pill is
+            // mounted via safeAreaInset and owns its own glass/material texture.
             return AnyShapeStyle(.clear)
         }
+        #endif
         return AnyShapeStyle(.ultraThinMaterial)
     }
 
@@ -503,11 +507,30 @@ struct PlaybackPill: View {
     /// as do iOS 26 and the pre-26 fallback.
     private struct MiniPlayerChrome: ViewModifier {
         var fill: AnyShapeStyle
+        var reduceTransparency: Bool
         @Environment(\.horizontalSizeClass) private var sizeClass
 
         func body(content: Content) -> some View {
             if #available(iOS 27.0, *), sizeClass == .compact {
                 content
+            } else if sizeClass == .regular {
+                // Over the library the pill has artwork under it, so on iPad
+                // (where it floats in a safeAreaInset with no system accessory
+                // container) use regular material with the system background
+                // colour beneath — matching the Mac pill's frosted texture so
+                // album sleeves beneath don't bleed through the controls.
+                content
+                    .background {
+                        if reduceTransparency {
+                            Capsule().fill(Color(uiColor: .secondarySystemBackground))
+                        } else {
+                            Capsule().fill(Color(uiColor: .systemBackground).opacity(0.55))
+                                .background(.regularMaterial, in: Capsule())
+                        }
+                    }
+                    .overlay { Capsule().stroke(.white.opacity(0.12), lineWidth: 0.5) }
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.18), radius: 12, y: 5)
             } else {
                 content
                     .background { Capsule().fill(fill) }

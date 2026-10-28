@@ -3,11 +3,10 @@ import SwiftUI
 import AppKit
 import BitChordShared
 
-/// Stable identifiers for the window toolbar's own controls, so the shell can
-/// put them in Music's order: search field, catalogue switcher, account,
-/// Downloads. SwiftUI gives items it creates private identifiers; these three
-/// are ours to find in the `NSToolbar`.
+/// Stable identifiers for the window toolbar's own controls, so toolbar
+/// customisation and SwiftUI's own diffing keep track of them.
 enum MacToolbarItemID {
+    static let searchField = "bitchord.searchField"
     static let searchSource = "bitchord.searchSource"
     static let account = "bitchord.account"
     static let downloads = "bitchord.downloads"
@@ -33,6 +32,20 @@ enum MacInspectorKind: String, Identifiable {
 extension EnvironmentValues {
     /// The inspector the pill's lyrics and queue buttons open and close.
     @Entry var macInspectorSelection: Binding<MacInspectorKind?> = .constant(nil)
+    /// The main window's account sheet, owned by `MacWindowAccountToolbar`.
+    @Entry var macAccountSheet: Binding<Bool> = .constant(false)
+}
+
+/// The main window's trailing controls: account, then Downloads.
+struct MacWindowControls: ToolbarContent {
+    var body: some ToolbarContent {
+        ToolbarItem(id: MacToolbarItemID.account, placement: .primaryAction) {
+            MacAccountToolbarButton()
+        }
+        ToolbarItem(id: MacToolbarItemID.downloads, placement: .primaryAction) {
+            MacDownloadsButton()
+        }
+    }
 }
 
 /// The floating pill under a page in the browse stack. Each page carries it,
@@ -142,12 +155,12 @@ private struct WindowWidthReader: NSViewRepresentable {
 /// matching the account control used by the other Apple shells.
 private struct MacAccountToolbarButton: View {
     @Environment(AuthController.self) private var auth
-    @Binding var isPresented: Bool
+    @Environment(\.macAccountSheet) private var isPresented
 
     var body: some View {
         Menu {
             Button(auth.signedIn ? "Account and Profiles" : "Sign In", systemImage: "person.crop.circle") {
-                isPresented = true
+                isPresented.wrappedValue = true
             }
         } label: {
             Group {
@@ -174,12 +187,9 @@ struct MacWindowAccountToolbar: ViewModifier {
     @State private var presentsAccount = false
 
     func body(content: Content) -> some View {
+        // The button itself is in `MacWindowControls`; this owns its sheet.
         content
-            .toolbar {
-                ToolbarItem(id: MacToolbarItemID.account, placement: .primaryAction) {
-                    MacAccountToolbarButton(isPresented: $presentsAccount)
-                }
-            }
+            .environment(\.macAccountSheet, $presentsAccount)
             .sheet(isPresented: $presentsAccount) {
                 AccountProfileSheet().frame(minWidth: 420, minHeight: 520)
             }
