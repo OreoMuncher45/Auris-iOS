@@ -262,7 +262,8 @@ extension NowPlayingView {
             // The playback-origin caption / nerd line, hidden behind
             // `hide_song_status` exactly as upstream hides it.
             if pane == .main, showsPlaybackStatusLine, let status = songStatusLine {
-                Text(status)
+                Button { showPipeline = true } label: { Text(status) }
+                    .buttonStyle(.plain)
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.white.opacity(0.6))
                     .lineLimit(1)

@@ -201,7 +201,13 @@ extension PlaybackController {
                 if self.nextEntry?.id == mediaId { return "next" }
                 return "gone"
             }
-            guard let better else { return }
+            guard let better else {
+                await MainActor.run { [weak self] in
+                    guard let self, self.playGeneration == generation, self.current?.id == mediaId else { return }
+                    self.sourceDecisionNotes[mediaId] = "No verified upgrade was found. Playback continues from the original source."
+                }
+                return
+            }
             let allowsLosslessSources = await MainActor.run { PlaybackCodecCapabilities.shared.allowLosslessSources }
             guard !better.format.lossless || allowsLosslessSources else { return }
             switch moment {

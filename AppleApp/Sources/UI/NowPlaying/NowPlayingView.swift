@@ -45,7 +45,7 @@ struct NowPlayingView: View {
     /// from the pill while the track plays.
     @AppStorage("show_music_videos") var showMusicVideos = false
     @AppStorage("hide_status_bar_in_player") private var hideStatusBarInPlayer = false
-    @State private var showPipeline = false
+    @State var showPipeline = false
     @State var showLyricsOffset = false
     @State var showLyricsSources = false
     /// Lyric share-picking, driven from the lyrics header: upstream's header
@@ -160,13 +160,7 @@ struct NowPlayingView: View {
         #endif
     }
 
-    var showsPlaybackStatusLine: Bool {
-        #if os(iOS)
-        !isIPad
-        #else
-        false
-        #endif
-    }
+    var showsPlaybackStatusLine: Bool { true }
 
     // iOS only — macOS has its own window-toolbar back button, in
     // `macPlayerToolbar`.
@@ -228,11 +222,13 @@ struct NowPlayingView: View {
     /// while a lossless lookup is still racing. Nil when hidden or unknown.
     var songStatusLine: String? {
         guard !hideSongStatus else { return nil }
+        var parts: [String] = []
+        if let source = controller.playbackSourceName { parts.append(source) }
         if let nerd = controller.nerd {
-            let line = nerdLine(nerd)
-            if !line.trimmingCharacters(in: .whitespaces).isEmpty { return line }
+            parts.append(QualityUpgrade.Format.isLosslessCodec(nerd.codec) ? "Lossless" : nerd.codec)
         }
-        return controller.playbackSourceName.map { "Playing from \($0)" }
+        if controller.racingLossless { parts.append("Checking for better audio…") }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     /// The compact source caption that sits over upstream's full-bleed cover.

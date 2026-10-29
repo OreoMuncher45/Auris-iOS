@@ -763,6 +763,12 @@ final class PlaybackController {
                 self.pollWidgetCommands()
                 self.pollStreamRecovery()
                 guard self.state == .playing else { return }
+                // Load/handoff snapshots precede the first rendered chunk. Refresh
+                // engine evidence as playback changes; do not display that stale snapshot.
+                if self.dolbyRenderer == nil {
+                    let latest = self.engine.nerdStats()
+                    if self.nerd != latest { self.nerd = latest }
+                }
                 self.position = self.playbackPosition
                 self.positionSampledAt = Date()
                 self.nowPlaying.update(position: self.position)
