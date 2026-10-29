@@ -57,6 +57,16 @@ class SourceSelectionWindowTest {
         assertEquals("addon", result?.first?.configId)
     }
 
+    @Test fun patientUpgradeKeepsResultsBeyondThirtySeconds() = runTest {
+        val fast = Provider("fast", 20, StreamFormat(codec = "mp3", kbps = 320))
+        val slow = Provider("slow-lossless", 45_000, StreamFormat(codec = "flac"))
+        val result = SourceResolver.bestAcross(listOf(fast, slow), target, StreamRequest.Lossless,
+            waitForAll = true, selectionWindowMs = 0)
+        assertEquals("slow-lossless", result?.first?.configId)
+        assertTrue(slow.completed)
+        assertFalse(slow.cancelled)
+    }
+
     @Test fun equalQualityRespectsConfiguredOrderEvenWhenFavouriteIsSlower() = runTest {
         val preferred = Provider("preferred", 900, StreamFormat(codec = "flac"))
         val fast = Provider("fast", 20, StreamFormat(codec = "flac"))
