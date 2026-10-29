@@ -28,7 +28,11 @@ import kotlinx.serialization.json.longOrNull
  * Nothing here needs a platform: the catalogue is JioSaavn's own HTTP API and the
  * stream is served from its CDN.
  */
-class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBacked {
+class JioSaavnSource internal constructor(
+    override val config: SourceConfig,
+    private val transport: (suspend (String, Map<String, String>) -> String)?,
+) : MusicSource, ConfigBacked {
+    constructor(config: SourceConfig) : this(config, null)
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
@@ -90,19 +94,17 @@ class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBac
             .onFailure { DebugLog.d("JioSaavn song failed: ${it.message}") }
             .getOrNull() ?: return null
         val cap = request.kbpsCeiling
-        val links = song.links
-        val chosen = when {
-            cap == null -> links.maxByOrNull { it.kbps }
-            cap >= 256 -> links.firstOrNull { it.kbps >= 256 } ?: links.maxByOrNull { it.kbps }
-            cap >= 128 -> links.firstOrNull { it.kbps in 128..255 } ?: links.minByOrNull { it.kbps }
-            else -> links.minByOrNull { it.kbps }
-        } ?: return null
+        val bitrate = listOf(320, 160, 96, 48).firstOrNull { cap == null || it <= cap } ?: return null
+        val encrypted = song.encryptedMediaUrl ?: return null
+        val response = api("song.generateAuthToken", mapOf("url" to encrypted, "bitrate" to bitrate.toString()))
+        val url = (response as? JsonObject)?.str("auth_url")
+            ?.takeIf { it.startsWith("https://") } ?: return null
         return SourceStream(
-            url = chosen.url,
+            url = url,
             // JioSaavn serves AAC in an MP4 container, so the container is what
             // actually matters to the engine and to the extension a download writes.
-            format = StreamFormat(codec = "aac", kbps = chosen.kbps),
-            belowRequest = cap != null && chosen.kbps > cap,
+            format = StreamFormat(codec = "aac", kbps = bitrate),
+            belowRequest = false,
             durationSec = song.durationSec,
             sourceConfigId = config.id,
         )
@@ -110,30 +112,26 @@ class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBac
 
     // ── Transport ─────────────────────────────────────────────────────────
 
-    private suspend fun searchRows(query: String, limit: Int): List<JioSaavnRow> {
-        val body = Http.getText(
-            url = "$API/search",
-            query = mapOf("query" to query, "limit" to limit.toString()),
-            headers = mapOf("Accept" to "application/json"),
+    private suspend fun api(call: String, args: Map<String, String>): JsonElement {
+        val body = transport?.invoke(call, args) ?: Http.getText(
+            url = API,
+            query = mapOf("__call" to call, "_format" to "json", "_marker" to "0",
+                "api_version" to "4", "ctx" to "android") + args,
+            headers = mapOf("Accept" to "application/json", "User-Agent" to "Mozilla/5.0"),
             timeoutMillis = 12_000,
         )
-        return parseSongs(json.parseToJsonElement(body))
+        return json.parseToJsonElement(body)
     }
 
+    private suspend fun searchRows(query: String, limit: Int): List<JioSaavnRow> =
+        parseSongs(api("search.getResults", mapOf("q" to query, "n" to limit.toString(), "p" to "1")))
+
     private suspend fun fetchSong(trackId: String): JioSaavnRow? {
-        val body = Http.getText(
-            url = "$API/songs/${encodeSegment(trackId)}",
-            headers = mapOf("Accept" to "application/json"),
-            timeoutMillis = 12_000,
-        )
-        val root = json.parseToJsonElement(body)
-        // The single-song endpoint wraps its answer in an array; the search endpoint
-        // does not. Both are read so a shape change upstream does not silently turn
-        // into "no results".
-        val obj = (root as? JsonArray)?.firstOrNull() as? JsonObject
-            ?: root as? JsonObject
+        val root = api("song.getDetails", mapOf("pids" to trackId)) as? JsonObject ?: return null
+        val song = (root["songs"] as? JsonArray)?.firstOrNull() as? JsonObject
+            ?: root.values.filterIsInstance<JsonObject>().firstOrNull()
             ?: return null
-        return obj.toRow()
+        return song.toRow()
     }
 
     /**
@@ -155,27 +153,14 @@ class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBac
 
     private fun JsonObject.toRow(): JioSaavnRow? {
         val id = str("id") ?: return null
-        val name = str("name") ?: return null
-        val artists = (get("artists") as? JsonObject)
-            ?.get("primary")
-            .asStringList("name")
-        val album = (get("album") as? JsonObject)?.str("name")
+        val name = str("title") ?: return null
+        val info = get("more_info") as? JsonObject ?: return null
+        val artists = ((info["artistMap"] as? JsonObject)?.get("primary_artists")).asStringList("name")
+        val album = info.str("album")
         val year = str("year")?.toIntOrNull()
-        val explicit = bool("isExplicit") ?: false
-        val durationSec = (get("duration") as? JsonPrimitive)?.longOrNull?.toInt()
-        val artwork = (get("image") as? JsonObject)
-            ?.get("cover_art")
-            .asStringList("url")
-            ?.lastOrNull()
-        val links = (get("downloadUrl") as? JsonObject)
-            ?.entries
-            ?.mapNotNull { (quality, value) ->
-                val link = value as? JsonObject ?: return@mapNotNull null
-                val url = link.str("url") ?: return@mapNotNull null
-                val kbps = link.str("bitrate")?.toIntOrNull() ?: quality.toIntOrNull() ?: 0
-                DownloadLink(url, kbps)
-            }
-            .orEmpty()
+        val explicit = str("explicit_content") == "1"
+        val durationSec = info.str("duration")?.toIntOrNull()
+        val artwork = str("image")?.replace("150x150", "500x500")?.replace("http://", "https://")
         return JioSaavnRow(
             id = id,
             name = name,
@@ -185,7 +170,7 @@ class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBac
             explicit = explicit,
             durationSec = durationSec,
             artworkUrl = artwork,
-            links = links,
+            encryptedMediaUrl = info.str("encrypted_media_url"),
         )
     }
 
@@ -205,7 +190,7 @@ class JioSaavnSource(override val config: SourceConfig) : MusicSource, ConfigBac
         }.orEmpty()
 
     private companion object {
-        const val API = "https://www.jiosaavn.com/api"
+        const val API = "https://www.jiosaavn.com/api.php"
         /** An ordinary word: a nonsense probe that always comes back empty proves less. */
         const val HEALTH_QUERY = "music"
         /** The API has no limit parameter worth trusting, so ask for room to rank. */
@@ -223,7 +208,7 @@ internal data class JioSaavnRow(
     val explicit: Boolean,
     val durationSec: Int?,
     val artworkUrl: String?,
-    val links: List<DownloadLink>,
+    val encryptedMediaUrl: String? = null,
 ) {
     fun toSong(configId: String): Song = Song(
         // The identity is the route back to this source, packed into the one field
@@ -239,13 +224,3 @@ internal data class JioSaavnRow(
         sourceQuality = "AAC",
     )
 }
-
-/** One rendition of a JioSaavn song, at the bitrate JioSaavn names it. */
-internal data class DownloadLink(val url: String, val kbps: Int)
-
-/** Percent-encoding for one path segment. */
-private fun encodeSegment(value: String): String =
-    value.encodeToByteArray().joinToString("") { byte ->
-        val c = byte.toInt().toChar()
-        if ((c.isLetterOrDigit() && c.code < 128) || c in "-_.~") c.toString() else percent(byte.toInt() and 0xFF)
-    }
