@@ -215,6 +215,9 @@ pub fn run_mixer(
 
         // Drain commands.
         while let Ok(cmd) = commands.try_recv() {
+            if shutdown.load(Ordering::Acquire) {
+                return;
+            }
             handle_command(&mut state, cmd, &mut ring);
         }
 

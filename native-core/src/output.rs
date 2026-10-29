@@ -28,6 +28,7 @@ impl Drop for OutputHold<'_> {
 
 #[derive(Clone)]
 pub(super) struct OutputControl {
+    pub(super) shutdown: Arc<AtomicBool>,
     pub(super) commands: crossbeam_channel::Sender<Command>,
     pub(super) stream: Arc<Mutex<Option<cpal::Stream>>>,
     pub(super) rebuilding: Arc<AtomicBool>,
@@ -94,6 +95,9 @@ impl OutputControl {
     }
 
     pub(super) fn request_rebuild(&self, force: bool) {
+        if self.shutdown.load(Ordering::Acquire) {
+            return;
+        }
         if force {
             self.rebuild_forced.store(true, Ordering::Release);
         }
@@ -114,6 +118,10 @@ impl OutputControl {
                 let mut force = force;
                 loop {
                     for attempt in 0..20 {
+                        if ctrl.shutdown.load(Ordering::Acquire) {
+                            ctrl.rebuilding.store(false, Ordering::Release);
+                            return;
+                        }
                         std::thread::sleep(std::time::Duration::from_millis(250));
                         match ctrl.rebuild(force) {
                             Ok(()) => break,
@@ -151,6 +159,9 @@ impl OutputControl {
     pub(super) fn rebuild(&self, force: bool) -> Result<(), EngineError> {
         // Direct per-track preparation and route recovery share this lock.
         let _rebuild = self.rebuild_lock.lock().unwrap();
+        if self.shutdown.load(Ordering::Acquire) {
+            return Err(EngineError::NotStarted);
+        }
         let host = cpal::default_host();
         let device = pick_output_device(&host, self.prefer_usb.load(Ordering::Relaxed))
             .ok_or(EngineError::NoOutputDevice)?;
@@ -328,6 +339,12 @@ impl OutputControl {
         let transport_result;
         let previous = {
             let mut output = self.stream.lock().unwrap();
+            // Teardown may have happened while this replacement was opening.
+            // Check while holding the same cell lock used by Drop, so a late
+            // route-recovery worker cannot recreate the ownership cycle.
+            if self.shutdown.load(Ordering::Acquire) {
+                return Err(EngineError::NotStarted);
+            }
             // Reconcile under the same lock as Play/Pause: a route rebuild
             // must not restart output for playback paused during its setup.
             #[cfg(target_os = "ios")]

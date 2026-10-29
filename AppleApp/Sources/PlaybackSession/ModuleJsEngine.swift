@@ -448,11 +448,11 @@ final class ModuleJsEngine: NSObject, ModuleEngineImpl {
         // Run the callback now, having actually waited. A module that sequences
         // work with `setTimeout` would otherwise have the callback fire long
         // after the answer was read.
-        let timer: @convention(block) (String?, Int) -> Int = { callbackBody, milliseconds in
+        let timer: @convention(block) (String?, Int) -> Int = { [weak context] callbackBody, milliseconds in
             let delay = max(0, milliseconds) / 1000
             if delay > 0 { Thread.sleep(forTimeInterval: min(TimeInterval(delay), 10)) }
             guard let callbackBody, !callbackBody.isEmpty else { return 0 }
-            context.evaluateScript("(\(callbackBody))()")
+            context?.evaluateScript("(\(callbackBody))()")
             return 0
         }
         context.setObject(timer, forKeyedSubscript: "__bch_setTimeout" as NSString)

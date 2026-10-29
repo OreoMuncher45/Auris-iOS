@@ -47,6 +47,7 @@ pub struct PlayerEngine {
     pub(super) output_paused: Arc<AtomicBool>,
     pub(super) output_holds: Arc<AtomicU32>,
     pub(super) started: AtomicBool,
+    pub(super) shutdown: Arc<AtomicBool>,
     pub(super) stream: Arc<Mutex<Option<cpal::Stream>>>,
     pub(super) rebuilding: Arc<AtomicBool>,
     pub(super) output_rate: Arc<AtomicU32>,
@@ -123,6 +124,7 @@ impl PlayerEngine {
             output_paused: Arc::new(AtomicBool::new(false)),
             output_holds: Arc::new(AtomicU32::new(0)),
             started: AtomicBool::new(false),
+            shutdown: Arc::new(AtomicBool::new(false)),
             stream: Arc::new(Mutex::new(None)),
             rebuilding: Arc::new(AtomicBool::new(false)),
             output_rate: Arc::new(AtomicU32::new(0)),
@@ -230,7 +232,7 @@ impl PlayerEngine {
         let position = self.position_ms.clone();
         let duration = self.duration_ms.clone();
         let events = self.events.clone();
-        let shutdown = Arc::new(AtomicBool::new(false));
+        let shutdown = self.shutdown.clone();
         let mixer_flush = self.flush_ring.clone();
         let mixer_bail = self.bail_flush.clone();
         let nerd = self.nerd.clone();
@@ -259,6 +261,7 @@ impl PlayerEngine {
             .map_err(|e| EngineError::StreamInit(e.to_string()))?;
 
         let control = OutputControl {
+            shutdown: self.shutdown.clone(),
             commands: self.commands.clone(),
             stream: self.stream.clone(),
             rebuilding: self.rebuilding.clone(),
@@ -1082,9 +1085,46 @@ impl PlayerEngine {
     }
 }
 
+impl Drop for PlayerEngine {
+    fn drop(&mut self) {
+        self.shutdown.store(true, Ordering::Release);
+        // The stream's error callback owns an OutputControl which owns the
+        // stream cell. Take the stream out to break that cycle. Never dispose
+        // CoreAudio under the cell lock: callbacks may still be winding down.
+        let stream = self.stream.lock().unwrap_or_else(|p| p.into_inner()).take();
+        drop(stream);
+        // The mixer observes shutdown even while idle. It releases its voices,
+        // event callback and ring on exit; joining here could deadlock if the
+        // host released its last engine reference from a mixer callback.
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::PlayerEngine;
+
+    #[test]
+    fn releasing_engine_stops_idle_mixer_and_releases_its_events() {
+        use std::sync::{Arc, atomic::Ordering};
+        let engine = PlayerEngine::new();
+        let events = Arc::downgrade(&engine.events);
+        let shutdown = engine.shutdown.clone();
+        let (producer, _consumer) = rtrb::RingBuffer::new(8192);
+        let rx = engine.command_rx.lock().unwrap().take().unwrap();
+        let args = (engine.buffered_frames.clone(), engine.position_ms.clone(), engine.duration_ms.clone(),
+            engine.events.clone(), engine.shutdown.clone(), engine.flush_ring.clone(), engine.bail_flush.clone(), engine.nerd.clone());
+        let (sent, received) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            crate::mixer::run_mixer(rx, producer, args.0, args.1, args.2, 48000, args.3, args.4, args.5, args.6, args.7);
+            sent.send(()).unwrap();
+        });
+        drop(engine);
+        let stopped = received.recv_timeout(std::time::Duration::from_secs(2)).is_ok();
+        shutdown.store(true, Ordering::Release); // Also clean up after a regression.
+        worker.join().unwrap();
+        assert!(stopped, "dropping the engine left its mixer running");
+        assert!(events.upgrade().is_none(), "mixer retained its event callback cell");
+    }
 
     #[test]
     fn phrase_bars_setting_accepts_supported_values_and_defaults_invalid_to_adaptive() {
