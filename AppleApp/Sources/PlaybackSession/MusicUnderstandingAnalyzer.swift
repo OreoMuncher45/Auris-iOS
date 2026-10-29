@@ -26,9 +26,9 @@ enum MusicUnderstandingAnalyzer {
     /// analysis: the check-then-submit races the lock button — the state reads
     /// `.active`, the app backgrounds mid-inference, and the submission fails
     /// with `BackgroundExecutionNotPermitted`, spraying a wall of Metal/E5RT
-    /// errors into the log once *per track*. The in-flight inference cannot be
-    /// cancelled, so the first background failure teaches the rest of the
-    /// stretch to go straight to the disk cache instead.
+    /// errors into the log once *per track*. The queue now cancels active
+    /// sessions through the framework API and prevents subsequent attempts
+    /// during this background stretch from touching the GPU again.
     ///
     /// iOS only: macOS allows background GPU work, so the flag is never set
     /// there.
@@ -39,6 +39,7 @@ enum MusicUnderstandingAnalyzer {
     static func noteBackground() {
 #if canImport(UIKit)
         setGpuSuspended(true)
+        Task { await MusicAnalysisQueue.shared.cancelAll() }
 #endif
     }
 
@@ -73,7 +74,7 @@ enum MusicUnderstandingAnalyzer {
     /// Analyze a local file and seed the native Automix overlay cache.
     /// Returns true when an overlay was seeded.
     @discardableResult
-    static func analyzeAndSeed(filePath: String) async -> Bool {
+    static func analyzeAndSeed(filePath: String, allowAccelerator: Bool = true) async -> Bool {
         #if DEBUG
         // Isolate native timer/mixer validation from the system GPU models.
         // A device run exposed a StructuralFeaturesModel MPS assertion on the
@@ -89,17 +90,27 @@ enum MusicUnderstandingAnalyzer {
         guard !path.isEmpty, FileManager.default.fileExists(atPath: path) else {
             return false
         }
+        guard !Task.isCancelled else { return false }
+        guard let fingerprint = AutomixOverlayCache.fingerprint(forFilePath: path) else { return false }
+        // Completed, unchanged files already have the needed result. Reusing
+        // it avoids an entire GPU analysis on each queue/transport update.
+        if AutomixOverlayCache.seedCached(forFilePath: path) { return true }
+        guard allowAccelerator else { return false }
         // A background stretch goes straight to the disk cache without an
         // await: no MainActor hop, no race with the lock button.
         if isGpuSuspended() {
             return AutomixOverlayCache.seedCached(forFilePath: path)
         }
-        // Prefer a fresh Music Understanding pass while foregrounded; otherwise
-        // (or on failure) fall back to the disk cache so Automix still plans.
+        // Only an uncached, complete file needs accelerator work. Otherwise
+        // the native planner retains its cached/CPU fallback.
         if #available(iOS 27.0, macOS 27.0, tvOS 27.0, watchOS 27.0, visionOS 27.0, *),
            await isForeground()
         {
-            if await analyzeAvailable(path: path) {
+            let key = "\(path)|\(fingerprint.size)|\(fingerprint.modified)"
+            if await MusicAnalysisQueue.shared.perform(key: key, operation: {
+                if AutomixOverlayCache.seedCached(forFilePath: path) { return true }
+                return await analyzeAvailable(path: path)
+            }) {
                 return true
             }
         }
@@ -127,22 +138,33 @@ enum MusicUnderstandingAnalyzer {
         // Re-check right before GPU work — the first await can race a lock.
         guard await isForeground() else { return false }
         do {
+            guard let fingerprint = AutomixOverlayCache.fingerprint(forFilePath: path) else { return false }
             let url = URL(fileURLWithPath: path)
             let asset = AVURLAsset(
                 url: url,
                 options: [AVURLAssetPreferPreciseDurationAndTimingKey: true]
             )
             let session = try await MusicUnderstandingSession(asset: asset)
-            guard await isForeground() else { return false }
+            guard !Task.isCancelled, !isGpuSuspended(), await isForeground() else { await session.cancel(); return false }
             // Omit `.instrumentActivity` — its MPS graph aborts the process.
             // Omit `.pace` for the same Metal family until Apple stabilizes it.
-            let result = try await session.analyze(for: [
-                .rhythm, .key, .structure, .loudness,
-            ])
+            let result: MusicUnderstandingSession.SessionResult
+            do {
+                result = try await withTaskCancellationHandler {
+                    try await session.analyze(for: [.rhythm, .key, .structure, .loudness])
+                } onCancel: {
+                    Task { await session.cancel() }
+                }
+            } catch {
+                await session.cancel()
+                throw error
+            }
+            guard !Task.isCancelled, !isGpuSuspended(), fingerprint == AutomixOverlayCache.fingerprint(forFilePath: path) else { await session.cancel(); return false }
             let overlay = overlay(from: result)
-            AutomixOverlayCache.store(overlay, forFilePath: path)
+            AutomixOverlayCache.store(overlay, forFilePath: path, expected: fingerprint)
             return seedAutomixAnalysis(path: path, overlay: overlay)
         } catch {
+            guard !Task.isCancelled else { return false }
             if await isForeground() {
                 NSLog("[BitChord] Music Understanding failed for %@: %@", path, String(describing: error))
             } else {

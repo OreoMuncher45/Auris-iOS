@@ -1,4 +1,5 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, OnceLock};
+use std::cell::Cell;
 
 use rten::Model;
 use rten_tensor::prelude::*;
@@ -10,6 +11,39 @@ static VOCAL: Mutex<Option<Model>> = Mutex::new(None);
 /// keys on it, so a model change cannot reuse an Analysis made by the old one.
 static IDENTITY: Mutex<String> = Mutex::new(String::new());
 static CONFIGURED: Mutex<(String, String)> = Mutex::new((String::new(), String::new()));
+
+thread_local! {
+    static INFERENCE_THREADS: Cell<usize> = const { Cell::new(2) };
+}
+
+/// Per-plan budget, restored on scope exit (including panics). Avoid changing
+/// process-wide runtime state when two engines plan concurrently.
+pub(crate) struct InferenceBudget {
+    previous: usize,
+    _thread_bound: std::marker::PhantomData<std::rc::Rc<()>>,
+}
+impl InferenceBudget {
+    pub(crate) fn new(threads: usize) -> Self {
+        let previous = INFERENCE_THREADS.with(|value| value.replace(threads));
+        Self { previous, _thread_bound: std::marker::PhantomData }
+    }
+}
+impl Drop for InferenceBudget {
+    fn drop(&mut self) { INFERENCE_THREADS.with(|value| value.set(self.previous)); }
+}
+
+pub(super) fn run_options() -> rten::RunOptions {
+    static ONE: OnceLock<Arc<rten::ThreadPool>> = OnceLock::new();
+    static TWO: OnceLock<Arc<rten::ThreadPool>> = OnceLock::new();
+    static FOUR: OnceLock<Arc<rten::ThreadPool>> = OnceLock::new();
+    let requested = INFERENCE_THREADS.with(|value| value.get());
+    let (slot, threads) = match requested { 1 => (&ONE, 1), 4 => (&FOUR, 4), _ => (&TWO, 2) };
+    let pool = slot.get_or_init(|| {
+        let available = std::thread::available_parallelism().map_or(1, |n| n.get());
+        Arc::new(rten::ThreadPool::with_num_threads(threads.min(available)))
+    });
+    rten::RunOptions::default().with_thread_pool(Some(pool.clone()))
+}
 
 /// Load ONNX graphs from paths the Swift side resolved out of the app bundle.
 /// Empty paths unload that model. Returns whether the beat tracker is ready
@@ -122,6 +156,27 @@ pub fn flatten_f32(value: &rten::Value) -> Option<Vec<f32>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn per_plan_budget_is_scoped_and_reuses_bounded_pools() {
+        let balanced = run_options().thread_pool.unwrap();
+        {
+            let _scope = InferenceBudget::new(1);
+            let first = run_options().thread_pool.unwrap();
+            let second = run_options().thread_pool.unwrap();
+            assert!(Arc::ptr_eq(&first, &second));
+            assert!(!Arc::ptr_eq(&first, &balanced));
+            assert_eq!(INFERENCE_THREADS.with(Cell::get), 1);
+        }
+        assert_eq!(INFERENCE_THREADS.with(Cell::get), 2);
+        assert!(Arc::ptr_eq(&balanced, &run_options().thread_pool.unwrap()));
+        let _ = std::panic::catch_unwind(|| {
+            let _scope = InferenceBudget::new(4);
+            assert_eq!(INFERENCE_THREADS.with(Cell::get), 4);
+            panic!("exercise scoped restoration");
+        });
+        assert_eq!(INFERENCE_THREADS.with(Cell::get), 2);
+    }
 
     #[test]
     fn load_bundled_beat_model() {

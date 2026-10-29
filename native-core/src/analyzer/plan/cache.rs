@@ -36,7 +36,7 @@ pub(super) mod analysis_cache {
     /// less than holding it. Each entry is tens to hundreds of kilobytes.
     const CAPACITY: usize = 6;
     const DISK_LIMIT_BYTES: u64 = 50 * 1024 * 1024;
-    const SCHEMA_VERSION: u32 = 2;
+    const SCHEMA_VERSION: u32 = 3;
 
     pub(crate) type Key = (String, u64, u64, u64, String, bool);
 
@@ -210,11 +210,16 @@ pub(super) mod analysis_cache {
         duration: f64,
         compute: impl FnOnce() -> Analysis,
     ) -> Arc<Analysis> {
+        let mut identity = crate::analyzer::models::analysis_identity();
+        if let Some(overlay) = super::overlays::identity(path) {
+            identity.push_str(";overlay=");
+            identity.push_str(&overlay);
+        }
         get_or_compute_for_identity(
             path,
             skip_vocals,
             duration,
-            crate::analyzer::models::analysis_identity(),
+            identity,
             compute,
         )
     }
@@ -348,7 +353,7 @@ pub(crate) fn clear_analysis_cache() {
 /// the DSP/ONNX result after `analyze` finishes. Rhythm/key/structure from a
 /// stronger source win; envelope/energy from DSP stay unless the overlay
 /// supplies replacements.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct AnalysisOverlay {
     pub bpm: Option<f64>,
     pub beat_confidence: Option<f64>,
@@ -377,36 +382,44 @@ pub(super) mod overlays {
 
     #[derive(Default)]
     struct Cache {
-        entries: HashMap<String, AnalysisOverlay>,
+        entries: HashMap<String, (AnalysisOverlay, String)>,
         order: VecDeque<String>,
         bytes: usize,
     }
 
     fn cost(path: &str, overlay: &AnalysisOverlay) -> usize {
-        path.len() + overlay.source.capacity() + overlay.key.as_ref().map_or(0, |s| s.capacity())
+        64 + path.len() + overlay.source.capacity() + overlay.key.as_ref().map_or(0, |s| s.capacity())
             + [&overlay.beats, &overlay.downbeats, &overlay.phrase_boundaries]
                 .iter().map(|v| v.as_ref().map_or(0, |v| v.capacity() * std::mem::size_of::<f64>())).sum::<usize>()
     }
 
     impl Cache {
-        fn put(&mut self, path: &str, overlay: AnalysisOverlay) {
-            if let Some(old) = self.entries.remove(path) {
+        fn put(&mut self, path: &str, overlay: AnalysisOverlay) -> bool {
+            if self.entries.get(path).map(|entry| &entry.0) == Some(&overlay) {
+                self.order.retain(|key| key != path);
+                self.order.push_back(path.to_string());
+                return false;
+            }
+            if let Some((old, _)) = self.entries.remove(path) {
                 self.bytes -= cost(path, &old);
                 self.order.retain(|key| key != path);
             }
             let size = cost(path, &overlay);
-            if size > BYTE_LIMIT { return; }
+            if size > BYTE_LIMIT { return true; }
             while self.entries.len() >= CAPACITY || self.bytes + size > BYTE_LIMIT {
                 let Some(key) = self.order.pop_front() else { break };
-                if let Some(old) = self.entries.remove(&key) { self.bytes -= cost(&key, &old); }
+                if let Some((old, _)) = self.entries.remove(&key) { self.bytes -= cost(&key, &old); }
             }
             self.bytes += size;
-            self.entries.insert(path.to_string(), overlay);
+            use sha2::{Digest, Sha256};
+            let identity = format!("{:x}", Sha256::digest(serde_json::to_vec(&overlay).unwrap_or_default()));
+            self.entries.insert(path.to_string(), (overlay, identity));
             self.order.push_back(path.to_string());
+            true
         }
 
         fn get(&mut self, path: &str) -> Option<AnalysisOverlay> {
-            let overlay = self.entries.get(path)?.clone();
+            let overlay = self.entries.get(path)?.0.clone();
             self.order.retain(|key| key != path);
             self.order.push_back(path.to_string());
             Some(overlay)
@@ -422,12 +435,12 @@ pub(super) mod overlays {
         *map().lock().unwrap_or_else(|p| p.into_inner()) = Cache::default();
     }
 
-    pub(crate) fn put(path: &str, overlay: AnalysisOverlay) {
+    pub(crate) fn put(path: &str, overlay: AnalysisOverlay) -> bool {
         let key = path.strip_prefix("file://").unwrap_or(path).to_string();
         map()
             .lock()
             .unwrap_or_else(|p| p.into_inner())
-            .put(&key, overlay);
+            .put(&key, overlay)
     }
 
     pub(crate) fn get(path: &str) -> Option<AnalysisOverlay> {
@@ -436,6 +449,15 @@ pub(super) mod overlays {
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .get(key)
+    }
+
+    pub(crate) fn identity(path: &str) -> Option<String> {
+        let key = path.strip_prefix("file://").unwrap_or(path);
+        let mut cache = map().lock().unwrap_or_else(|p| p.into_inner());
+        let identity = cache.entries.get(key)?.1.clone();
+        cache.order.retain(|path| path != key);
+        cache.order.push_back(key.to_string());
+        Some(identity)
     }
 
     #[cfg(test)]
@@ -459,6 +481,18 @@ pub(super) mod overlays {
             cache.put("large-b", AnalysisOverlay::default());
             assert!(cache.bytes < BYTE_LIMIT / 2);
         }
+
+        #[test]
+        fn identical_overlay_keeps_analysis_valid_but_updates_recency() {
+            let mut cache = Cache::default();
+            let overlay = AnalysisOverlay { bpm: Some(120.0), beats: Some(vec![0.0, 0.5]), ..Default::default() };
+            assert!(cache.put("track", overlay.clone()));
+            let bytes = cache.bytes;
+            assert!(!cache.put("track", overlay.clone()));
+            assert_eq!(cache.bytes, bytes);
+            assert_eq!(cache.order.len(), 1);
+            assert!(cache.put("track", AnalysisOverlay { bpm: Some(121.0), ..overlay }));
+        }
     }
 }
 
@@ -469,9 +503,11 @@ pub fn seed_analysis_overlay(path: &str, overlay: AnalysisOverlay) -> bool {
     if path.is_empty() {
         return false;
     }
-    // Drop any cached analysis so the next plan re-runs with the overlay.
-    analysis_cache::invalidate(path);
-    overlays::put(path, overlay);
+    // Re-seeding the same cached overlay must not force another whole-track
+    // decode and two model passes on every queue/transport update.
+    if overlays::put(path, overlay) {
+        analysis_cache::invalidate(path);
+    }
     true
 }
 

@@ -397,12 +397,9 @@ impl OutputPcmMode {
 
 /// CPU budget for Automix analysis (upstream `AutomixPerformanceMode`).
 ///
-/// rten runs single-threaded — there is no intra-op pool to resize, so the
-/// thread counts (1 / 2 / 4) have no knob here. What the tier does control is
-/// how much analysis runs at all: EFFICIENT skips the open-unmix vocal model
-/// (the expensive half) and plans from the beat grid plus energy, which is
-/// upstream's own "yields to decoding and playback" in effect if not in
-/// mechanism. BALANCED and PERFORMANCE both run the full graphs.
+/// Per-run RTen pools cap neural inference at 1 / 2 / 4 workers, limited by
+/// available CPUs. EFFICIENT also skips the open-unmix vocal model; BALANCED
+/// and PERFORMANCE run the full graphs with different parallelism budgets.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AutomixTier {
     Efficient,
@@ -411,6 +408,9 @@ pub enum AutomixTier {
 }
 
 impl AutomixTier {
+    pub(crate) fn inference_threads(self) -> usize {
+        match self { Self::Efficient => 1, Self::Balanced => 2, Self::Performance => 4 }
+    }
     pub(super) fn parse(mode: &str) -> Self {
         match mode {
             "EFFICIENT" => AutomixTier::Efficient,

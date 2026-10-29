@@ -2,6 +2,39 @@
 
 use super::*;
 
+#[test]
+fn changed_overlay_cannot_reuse_an_old_disk_analysis() {
+    let dir = std::env::temp_dir().join(format!("bitchord-overlay-disk-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    analysis_cache::set_test_disk_dir(dir.clone());
+    let source = dir.join("audio");
+    std::fs::write(&source, b"unchanged audio bytes").unwrap();
+    let path = source.to_string_lossy().to_string();
+    let calls = AtomicUsize::new(0);
+    let overlay = super::super::cache::AnalysisOverlay { bpm: Some(110.0), ..Default::default() };
+    assert!(seed_analysis_overlay(&path, overlay.clone()));
+    let first = analysis_cache::get_or_compute(&path, false, 90.0, || {
+        calls.fetch_add(1, Ordering::SeqCst);
+        Analysis { bpm: 110.0, ..Default::default() }
+    });
+    assert_eq!(first.bpm, 110.0);
+    assert!(seed_analysis_overlay(&path, overlay.clone()));
+    let same = analysis_cache::get_or_compute(&path, false, 90.0, || panic!("unchanged overlay recomputed analysis"));
+    assert_eq!(same.bpm, 110.0);
+    assert!(seed_analysis_overlay(&path, super::super::cache::AnalysisOverlay { bpm: Some(120.0), ..overlay }));
+    let changed = analysis_cache::get_or_compute(&path, false, 90.0, || {
+        calls.fetch_add(1, Ordering::SeqCst);
+        Analysis { bpm: 120.0, ..Default::default() }
+    });
+    assert_eq!(changed.bpm, 120.0, "changed overlay read the prior disk entry");
+    assert_eq!(calls.load(Ordering::SeqCst), 2);
+    analysis_cache::invalidate(&path);
+    let disk = analysis_cache::get_or_compute(&path, false, 90.0, || panic!("new overlay disk entry was not reusable"));
+    assert_eq!(disk.bpm, 120.0);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
 /// The cache is what stops a transport command from re-decoding both tracks.
 /// It must key on the file's *content identity*, not just its path: a
 /// streamed download is appended to under a stable name, and serving a

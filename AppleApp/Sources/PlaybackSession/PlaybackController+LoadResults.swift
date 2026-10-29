@@ -240,6 +240,7 @@ extension PlaybackController {
         let transitionPair = TransitionPair(outgoing: outgoingId ?? "", incoming: nextId)
         let engine = self.engine
         let automix = automixEnabled
+        let allowMusicUnderstanding = automixPerformanceMode != "EFFICIENT"
         // The *file* the engine opened, not `current.source` — which for a
         // YouTube track is `yt:<videoId>` and not something the planner can
         // decode. Passing the identifier made `duration_of` return 0, which
@@ -390,10 +391,10 @@ extension PlaybackController {
                     // GPU asserts abort the process).
                     if attempt == 0, MusicUnderstandingAnalyzer.isAvailable {
                         let outOk = await MusicUnderstandingAnalyzer.analyzeAndSeed(
-                            filePath: currentSource
+                            filePath: currentSource, allowAccelerator: allowMusicUnderstanding
                         )
                         let inOk = await MusicUnderstandingAnalyzer.analyzeAndSeed(
-                            filePath: resolved.source
+                            filePath: resolved.source, allowAccelerator: allowMusicUnderstanding
                         )
                         if outOk || inOk {
                             NSLog(

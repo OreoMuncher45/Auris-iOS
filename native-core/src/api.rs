@@ -86,6 +86,7 @@ pub(super) fn plan_automix_impl_with_tier_and_phrase_bars(
     allow_effects: bool,
     phrase_bars: u32,
 ) -> TransitionPlanRec {
+    let _inference_budget = crate::analyzer::InferenceBudget::new(tier.inference_threads());
     let skip_vocals = !tier.runs_vocal_model();
     let empty_headers = std::collections::HashMap::new();
     if skip_vocals {

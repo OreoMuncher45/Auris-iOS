@@ -409,6 +409,9 @@ fn pcm_mode_parses_the_two_upstream_rungs() {
     assert!(!AutomixTier::Efficient.runs_vocal_model());
     assert!(AutomixTier::Balanced.runs_vocal_model());
     assert!(AutomixTier::Performance.runs_vocal_model());
+    assert_eq!(AutomixTier::Efficient.inference_threads(), 1);
+    assert_eq!(AutomixTier::Balanced.inference_threads(), 2);
+    assert_eq!(AutomixTier::Performance.inference_threads(), 4);
 }
 
 #[test]

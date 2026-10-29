@@ -181,7 +181,7 @@ fn infer_chunks(
         let chunk = values[start * mels..(start + length) * mels].to_vec();
         let tensor = NdTensor::from_data([1, length, mels], chunk);
         let outputs = model
-            .run(vec![(input_id, tensor.into())], model.output_ids(), None)
+            .run(vec![(input_id, tensor.into())], model.output_ids(), Some(models::run_options()))
             .ok()?;
         if outputs.len() < 2 {
             return None;

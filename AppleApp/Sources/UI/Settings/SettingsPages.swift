@@ -44,9 +44,9 @@ struct AutomixPerformancePage: View {
     @Binding var selection: String
 
     private let modes = [
-        ("EFFICIENT", "Efficient", "1 analysis thread · kindest to battery"),
-        ("BALANCED", "Balanced", "2 threads · the default"),
-        ("PERFORMANCE", "Performance", "4 threads · fastest transitions, warmest phone"),
+        ("EFFICIENT", "Efficient", "1 inference worker · skips vocal analysis"),
+        ("BALANCED", "Balanced", "Up to 2 inference workers · the default"),
+        ("PERFORMANCE", "Performance", "Up to 4 inference workers · higher CPU use"),
     ]
 
     var body: some View {

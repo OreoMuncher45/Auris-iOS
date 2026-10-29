@@ -172,7 +172,7 @@ extension SettingsView {
                 SettingsLine(
                     glyph: .cpu,
                     title: "Automix Performance",
-                    subtitle: "Background analysis budget — \(Self.automixPerfLabel(automixPerf)), \(controller.automixInferenceThreads) thread\(controller.automixInferenceThreads == 1 ? "" : "s")"
+                    subtitle: "CPU inference budget — up to \(controller.automixInferenceThreads) worker\(controller.automixInferenceThreads == 1 ? "" : "s")"
                 ) {
                     Text(Self.automixPerfLabel(automixPerf))
                         .foregroundStyle(.secondary)

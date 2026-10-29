@@ -279,6 +279,12 @@ private enum PlayerArtworkBlurCache {
             source = nil
         }
         guard let source else { return nil }
+        guard !Task.isCancelled else { return nil }
+        #if os(iOS)
+        // UI image preparation is expendable when the scene has left the
+        // foreground; do not initiate a new Core Image GPU render there.
+        guard await MainActor.run(body: { UIApplication.shared.applicationState != .background }) else { return nil }
+        #endif
         let prepared = await Task.detached(priority: .utility) {
             renderBlurred(source)
         }.value

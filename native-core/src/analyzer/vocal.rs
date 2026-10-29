@@ -113,7 +113,7 @@ fn infer(model: &rten::Model, spec: &Spectrogram) -> Option<Vec<f32>> {
     let input_id = *model.input_ids().first()?;
     let mix = fill_fixed_frames(&spec.values, spec.frames);
     let tensor = NdTensorView::from_data([1, CHANNELS, BINS, FIXED_FRAMES], mix.as_slice());
-    let outputs = match model.run(vec![(input_id, tensor.into())], model.output_ids(), None) {
+    let outputs = match model.run(vec![(input_id, tensor.into())], model.output_ids(), Some(models::run_options())) {
         Ok(outputs) => outputs,
         Err(error) => {
             // Silence here is how the analyser ends up on the DSP heuristic while
