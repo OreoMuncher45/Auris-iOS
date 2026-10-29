@@ -248,7 +248,7 @@ struct ArtistGroupRow: View {
             )
         } label: {
             HStack(spacing: 12) {
-                ArtworkView(url: nil, data: group.tracks.first?.artwork, side: 56)
+                ArtworkView(url: group.tracks.first?.artworkURL, data: group.tracks.first?.artwork, side: 56)
                     .clipShape(.circle)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(group.name)
@@ -286,7 +286,7 @@ struct LocalGroupPage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 18) {
-                ArtworkView(url: nil, data: artwork, side: 220)
+                ArtworkView(url: tracks.first?.artworkURL, data: artwork, side: 220)
                     .clipShape(.rect(cornerRadius: circularArtwork ? 110 : 12, style: .continuous))
                     .shadow(color: .black.opacity(0.2), radius: 14, y: 6)
                     .padding(.top, 12)

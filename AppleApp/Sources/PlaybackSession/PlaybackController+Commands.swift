@@ -119,6 +119,11 @@ extension PlaybackController {
         guard automixEnabled != enabled else { return }
         automixEnabled = enabled
         AppSettings.shared.setSmartFadeEnabled(value: enabled)
+        Task { [weak self] in
+            guard let self else { return }
+            await reloadAutomixModels(playbackStarted: self.started)
+            if self.automixEnabled { self.syncEngineQueueNext() }
+        }
         if !enabled {
             try? engine.cancelAutomixProcessing()
         }

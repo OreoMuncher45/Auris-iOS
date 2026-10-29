@@ -295,9 +295,9 @@ final class NowPlayingController {
     ) {
         lastRequestedURL = url
         let sized = SharedArtwork.sized(url, 544) ?? url
+        let headers = LocalArtwork.isReference(sized) ? [:] : WebDavBridge.shared.playbackHeaders(fileUrl: sized)
         Task.detached(priority: .utility) { [weak self] in
-            guard let remote = URL(string: sized),
-                  let (data, _) = try? await URLSession.shared.data(from: remote),
+            guard let data = await ArtworkRequests.shared.data(url: sized, headers: headers),
                   !data.isEmpty else { return }
             await MainActor.run { [weak self] in
                 guard let self, self.metadataKey == id, self.lastRequestedURL == url else { return }
@@ -361,10 +361,12 @@ private final class ModernNowPlaying: MediaSessionRepresentable {
         let artwork: Artwork? = (imageData != nil || imageURL != nil)
             ? Artwork(id: "\(contentID)|\(imageURL ?? "embedded")") { _ in
                 if let imageData { return try ArtworkRepresentation(data: imageData) }
-                guard let imageURL,
-                      let url = URL(string: SharedArtwork.sized(imageURL, 544) ?? imageURL)
+                guard let imageURL
                 else { throw ArtworkRepresentation.ArtworkRepresentationError.noRepresentationAvailable }
-                let (data, _) = try await URLSession.shared.data(from: url)
+                let sized = SharedArtwork.sized(imageURL, 544) ?? imageURL
+                let headers = LocalArtwork.isReference(sized) ? [:] : WebDavBridge.shared.playbackHeaders(fileUrl: sized)
+                guard let data = await ArtworkRequests.shared.data(url: sized, headers: headers)
+                else { throw ArtworkRepresentation.ArtworkRepresentationError.noRepresentationAvailable }
                 return try ArtworkRepresentation(data: data)
             }
             : nil

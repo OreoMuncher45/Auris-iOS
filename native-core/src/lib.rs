@@ -34,7 +34,7 @@ mod tests;
 pub use api::{
     align_versions, configure_analyzer, constrain_automix_plan, constrain_automix_plan_for_sources,
     core_version, detect_playback_regions, last_automix_analysis_sources, next_energy_dip,
-    rank_automix_candidates, read_track_metadata, seed_automix_analysis, write_track_tags,
+    rank_automix_candidates, read_track_metadata, read_track_metadata_summary, seed_automix_analysis, write_track_tags,
 };
 pub use callback::EngineCallback;
 pub use engine::PlayerEngine;

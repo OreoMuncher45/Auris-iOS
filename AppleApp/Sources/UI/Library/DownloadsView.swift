@@ -51,7 +51,8 @@ struct DownloadsView: View {
                 artwork: t.artwork,
                 trackNumber: 0,
                 dateAdded: nil,
-                dateModified: nil
+                dateModified: nil,
+                artworkURL: t.artworkURL
             )
         }
     }
@@ -375,7 +376,7 @@ struct DownloadsView: View {
                         )
                     } label: {
                         VStack(alignment: .leading, spacing: 8) {
-                            ArtworkView(url: nil, data: group.tracks.first?.artwork, side: 160)
+                            ArtworkView(url: group.tracks.first?.artworkURL, data: group.tracks.first?.artwork, side: 160)
                                 .clipShape(.rect(cornerRadius: 10, style: .continuous))
                                 .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
                             Text(group.name)

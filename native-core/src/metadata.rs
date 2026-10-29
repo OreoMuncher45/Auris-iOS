@@ -13,6 +13,14 @@ use lofty::tag::Tag;
 use crate::TrackMetadata;
 
 pub fn read_track_metadata(path: &str) -> Option<TrackMetadata> {
+    read_track_metadata_impl(path, true)
+}
+
+pub fn read_track_metadata_summary(path: &str) -> Option<TrackMetadata> {
+    read_track_metadata_impl(path, false)
+}
+
+fn read_track_metadata_impl(path: &str, include_artwork: bool) -> Option<TrackMetadata> {
     let tagged = Probe::open(path).ok()?.read().ok()?;
     let properties = tagged.properties();
     let duration = properties.duration().as_secs_f64();
@@ -22,7 +30,7 @@ pub fn read_track_metadata(path: &str) -> Option<TrackMetadata> {
         tag.and_then(f).map(|s| s.into_owned()).unwrap_or_default()
     };
 
-    let artwork = tag
+    let artwork = tag.filter(|_| include_artwork)
         .map(|t| {
             t.pictures()
                 .first()
@@ -178,6 +186,25 @@ impl ReplayGain {
 #[cfg(test)]
 mod track_number_tests {
     use super::*;
+
+    #[test]
+    fn summary_preserves_metadata_without_returning_cover_bytes() {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/seek-tone.m4a");
+        let path = std::env::temp_dir().join(format!("bitchord-summary-{}.m4a", std::process::id()));
+        std::fs::copy(source, &path).unwrap();
+        let cover = [0xff, 0xd8, 0xff, 0xe0, 0x01, 0x02];
+        assert!(write_track_tags(path.to_str().unwrap(), "Cover test", "Artist", "Album", &cover));
+        let full = read_track_metadata(path.to_str().unwrap()).unwrap();
+        let summary = read_track_metadata_summary(path.to_str().unwrap()).unwrap();
+        assert_eq!(full.artwork, cover);
+        assert!(summary.artwork.is_empty());
+        assert_eq!(summary.title, full.title);
+        assert_eq!(summary.artist, full.artist);
+        assert_eq!(summary.album, full.album);
+        assert_eq!(summary.duration_seconds, full.duration_seconds);
+        assert_eq!(summary.track_number, full.track_number);
+        std::fs::remove_file(path).unwrap();
+    }
 
     /// The scanner's album order is the tag's track number, not the filename.
     #[test]

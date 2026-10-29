@@ -214,6 +214,10 @@ pub(super) fn analyze(
         }
     }
 
+    // No later stage uses whole-track PCM. Free it before the vocal model's
+    // spectrogram/workspace allocations instead of retaining it to scope exit.
+    drop(whole);
+
     // EFFICIENT tier: the beat grid (small graph) stays, the open-unmix vocal
     // model (the expensive half) does not run. The per-frame mask it produces
     // drives vocal-clash avoidance; the scalar `vocal_probability` above stays

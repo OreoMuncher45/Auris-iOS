@@ -166,8 +166,8 @@ struct LocalTrackCard: View {
 
     @ViewBuilder
     private var artwork: some View {
-        if let data = track.artwork, hasArtwork(data) {
-            decoded(data)
+        if track.artworkURL != nil || track.artwork != nil {
+            ArtworkView(url: track.artworkURL, data: track.artwork, side: 180, fill: true, fallbackInitials: initials)
         } else {
             ZStack {
                 Rectangle().fill(.quaternary)
@@ -176,38 +176,6 @@ struct LocalTrackCard: View {
                     .foregroundStyle(.secondary)
             }
         }
-    }
-
-    /// Whether this data decodes to an image at all.
-    ///
-    /// Separate from [decoded] because the card body is a `ViewBuilder`, and a
-    /// guard around a view-building call cannot be expressed without either
-    /// decoding twice or letting a bad image through.
-    private func hasArtwork(_ data: Data) -> Bool {
-        #if os(macOS)
-        return NSImage(data: data) != nil
-        #else
-        return UIImage(data: data) != nil
-        #endif
-    }
-
-    /// The embedded artwork.
-    ///
-    /// Two spellings because the type is genuinely two types — `UIImage` on iOS,
-    /// `NSImage` on macOS — and `Image` initialises from each under a different
-    /// label. Wrapped so the card body above reads as one thing rather than as a
-    /// platform conditional.
-    @ViewBuilder
-    private func decoded(_ data: Data) -> some View {
-        #if os(macOS)
-        if let image = NSImage(data: data) {
-            Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
-        }
-        #else
-        if let image = UIImage(data: data) {
-            Image(uiImage: image).resizable().aspectRatio(contentMode: .fill)
-        }
-        #endif
     }
 
     /// Up to two initials from the title, falling back to the artist.

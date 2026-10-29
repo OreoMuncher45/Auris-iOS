@@ -349,7 +349,7 @@ struct LocalAlbumCell: View {
             controller.play(group.tracks.map(QueueEntry.from), context: group.name, contextID: "local-album:\(group.artist):\(group.name)")
         } label: {
             VStack(alignment: .leading, spacing: 8) {
-                ArtworkView(url: nil, data: group.tracks.first?.artwork, side: 170)
+                ArtworkView(url: group.tracks.first?.artworkURL, data: group.tracks.first?.artwork, side: 170)
                     .clipShape(.rect(cornerRadius: 10, style: .continuous))
                 Text(group.name)
                     .font(.callout.weight(.semibold))

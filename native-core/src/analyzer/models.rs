@@ -9,51 +9,62 @@ static VOCAL: Mutex<Option<Model>> = Mutex::new(None);
 /// A digest of the two graphs this process actually loaded. The analysis cache
 /// keys on it, so a model change cannot reuse an Analysis made by the old one.
 static IDENTITY: Mutex<String> = Mutex::new(String::new());
+static CONFIGURED: Mutex<(String, String)> = Mutex::new((String::new(), String::new()));
 
 /// Load ONNX graphs from paths the Swift side resolved out of the app bundle.
 /// Empty paths unload that model. Returns whether the beat tracker is ready
 /// (vocals are optional — Automix still beat-matches without a mask).
 pub fn configure(beat_path: &str, vocal_path: &str) -> bool {
+    // Configuration is serialized, including identity publication. Unchanged
+    // graphs stay loaded when only the other model/tier changed.
+    let mut configured = CONFIGURED.lock().unwrap();
+    let beat_identity = digest(beat_path);
+    let vocal_identity = digest(vocal_path);
     {
         let mut slot = BEAT.lock().unwrap();
-        *slot = if beat_path.is_empty() {
-            None
-        } else {
-            match Model::load_file(beat_path) {
-                Ok(model) => {
-                    log::info!("automix: loaded beat model from {beat_path}");
-                    Some(model)
+        if configured.0 != beat_identity || (slot.is_none() && !beat_path.is_empty()) {
+            *slot = if beat_path.is_empty() {
+                None
+            } else {
+                match Model::load_file(beat_path) {
+                    Ok(model) => {
+                        log::info!("automix: loaded beat model from {beat_path}");
+                        Some(model)
+                    }
+                    Err(err) => {
+                        log::warn!("automix: beat model failed to load ({err}); energy fallback");
+                        None
+                    }
                 }
-                Err(err) => {
-                    log::warn!("automix: beat model failed to load ({err}); energy fallback");
-                    None
-                }
-            }
-        };
+            };
+        }
     }
     {
         let mut slot = VOCAL.lock().unwrap();
-        *slot = if vocal_path.is_empty() {
-            None
-        } else {
-            match Model::load_file(vocal_path) {
-                Ok(model) => {
-                    log::info!("automix: loaded vocal model from {vocal_path}");
-                    Some(model)
+        if configured.1 != vocal_identity || (slot.is_none() && !vocal_path.is_empty()) {
+            *slot = if vocal_path.is_empty() {
+                None
+            } else {
+                match Model::load_file(vocal_path) {
+                    Ok(model) => {
+                        log::info!("automix: loaded vocal model from {vocal_path}");
+                        Some(model)
+                    }
+                    Err(err) => {
+                        log::warn!("automix: vocal model failed to load ({err}); no mask");
+                        None
+                    }
                 }
-                Err(err) => {
-                    log::warn!("automix: vocal model failed to load ({err}); no mask");
-                    None
-                }
-            }
-        };
+            };
+        }
     }
     let identity = format!(
         "beat={};vocal={}",
-        digest(beat_path),
-        digest(vocal_path)
+        beat_identity,
+        vocal_identity
     );
     *IDENTITY.lock().unwrap() = identity;
+    *configured = (beat_identity, vocal_identity);
     analyzer_ready()
 }
 
@@ -64,10 +75,16 @@ fn digest(path: &str) -> String {
     if path.is_empty() {
         return "none".into();
     }
-    match std::fs::read(path) {
-        Ok(bytes) => {
+    match std::fs::File::open(path) {
+        Ok(mut file) => {
+            use std::io::Read;
             let mut hasher = Sha256::new();
-            hasher.update(&bytes);
+            let mut bytes = [0u8; 64 * 1024];
+            loop {
+                let Ok(count) = file.read(&mut bytes) else { return "missing".into() };
+                if count == 0 { break; }
+                hasher.update(&bytes[..count]);
+            }
             format!("{:x}", hasher.finalize())
         }
         Err(_) => "missing".into(),
@@ -81,6 +98,10 @@ pub(crate) fn analysis_identity() -> String {
 
 pub fn analyzer_ready() -> bool {
     BEAT.lock().unwrap().is_some()
+}
+
+pub fn vocal_ready() -> bool {
+    VOCAL.lock().unwrap().is_some()
 }
 
 pub fn with_beat<T>(f: impl FnOnce(&Model) -> T) -> Option<T> {

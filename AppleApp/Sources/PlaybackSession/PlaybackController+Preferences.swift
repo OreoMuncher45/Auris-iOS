@@ -246,6 +246,11 @@ extension PlaybackController {
         automixPerformanceMode = valid
         PlatformSettings.shared.putString(key: "automix_performance", value: valid)
         engine.setAutomixPerformance(mode: valid)
+        Task { [weak self] in
+            guard let self else { return }
+            await reloadAutomixModels(playbackStarted: self.started)
+            if self.automixEnabled { self.syncEngineQueueNext() }
+        }
     }
 
     func setAutomixPhraseBars(_ bars: Int) {

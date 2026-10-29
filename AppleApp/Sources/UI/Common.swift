@@ -17,6 +17,7 @@ struct ArtworkView: View {
     /// `side`-square: the mood tiles and any other caller whose artwork is a
     /// region rather than a thumbnail.
     var fill = false
+    var fallbackInitials: String? = nil
     /// The id of a track in a remote file library, when the picture may be inside
     /// its file rather than beside it.
     ///
@@ -37,13 +38,14 @@ struct ArtworkView: View {
         )
     }
 
-    init(url: String?, data: Data?, side: CGFloat? = nil, remoteId: String? = nil, fill: Bool = false) {
+    init(url: String?, data: Data?, side: CGFloat? = nil, remoteId: String? = nil, fill: Bool = false, fallbackInitials: String? = nil) {
         // Ask for the size the screen will actually draw at, on the screen's
         // actual scale. The old fixed `× 2` under-sampled every Retina row — a
         // 160pt card on a @3x display needs 480px and was being sent 320.
         let points = side ?? 300
         let scale = Double(PlatformScale.current)
         self.fill = fill
+        self.fallbackInitials = fallbackInitials
         self.url = url.flatMap { SharedArtwork.sized($0, Int((points * scale).rounded())) }
         self.data = data
         self.side = side
@@ -85,7 +87,7 @@ struct ArtworkView: View {
         } else if let url, let cached = ArtworkCache.shared.get(url) {
             scaled(cached)
         } else if let url {
-            RemoteArtwork(url: url)
+            RemoteArtwork(url: url, fallbackInitials: fallbackInitials)
         } else {
             placeholder
         }
@@ -135,6 +137,18 @@ struct ArtworkView: View {
 
 private struct RemoteArtwork: View {
     let url: String
+    var fallbackInitials: String? = nil
+    @State private var finished = false
+
+    @ViewBuilder private var missingArtwork: some View {
+        if let fallbackInitials {
+            Text(fallbackInitials).font(.title2.weight(.semibold)).foregroundStyle(.secondary)
+        } else if finished && LocalArtwork.isReference(url) {
+            Image(.bchMusicNote).resizable().scaledToFit().padding(20).foregroundStyle(.secondary)
+        } else {
+            ProgressView().controlSize(.mini)
+        }
+    }
 #if os(iOS)
     @State private var image: UIImage?
 #else
@@ -148,20 +162,24 @@ private struct RemoteArtwork: View {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
                 Rectangle().fill(.quaternary.opacity(0.6))
-                    .overlay(ProgressView().controlSize(.mini))
+                    .overlay { missingArtwork }
             }
 #else
             if let image {
                 Image(nsImage: image).resizable().scaledToFill()
             } else {
                 Rectangle().fill(.quaternary.opacity(0.6))
-                    .overlay(ProgressView().controlSize(.mini))
+                    .overlay { missingArtwork }
             }
 #endif
         }
         .task(id: url) {
             image = nil
-            image = await ArtworkCache.shared.load(url)
+            finished = false
+            let result = await ArtworkCache.shared.load(url)
+            guard !Task.isCancelled else { return }
+            image = result
+            finished = true
         }
     }
 }
@@ -226,6 +244,7 @@ final class ArtworkCache: @unchecked Sendable {
     /// The warm path. A memory hit returns immediately; a miss returns nil and
     /// the caller falls back to its async load, which populates both tiers.
     private func cacheKey(_ url: String) -> String {
+        if LocalArtwork.isReference(url) { return PageRequestCoordinator.digest(url) }
         let headers = WebDavBridge.shared.playbackHeaders(fileUrl: url)
         return PageRequestCoordinator.digest(url + headers.sorted { $0.key < $1.key }.map { "\($0.key):\($0.value)" }.joined(separator: "\u{0}"))
     }
@@ -316,6 +335,7 @@ final class ArtworkCache: @unchecked Sendable {
 enum SharedArtwork {
     /// `String?.artworkAt(px)` from the shared module's model helpers.
     static func sized(_ url: String, _ px: Int) -> String? {
+        if LocalArtwork.isReference(url) { return LocalArtwork.sizedReference(url, pixels: px) }
         guard let match = url.range(of: #"w\d+-h\d+"#, options: .regularExpression) else {
             return url
         }
@@ -1137,6 +1157,7 @@ actor ArtworkRequests {
         let key = PageRequestCoordinator.digest(url + headers.sorted { $0.key < $1.key }.map { "\($0.key):\($0.value)" }.joined())
         if let task = flights[key] { return await task.value }
         let task = Task<Data?, Never> {
+            if LocalArtwork.isReference(url) { return await LocalArtwork.shared.data(for: url) }
             guard let endpoint = URL(string: url) else { return nil }
             var request = URLRequest(url: endpoint)
             headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }

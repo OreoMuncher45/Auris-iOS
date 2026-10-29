@@ -21,6 +21,7 @@ struct LocalTrack: Identifiable, Hashable {
     /// every time the library was rescanned.
     let dateAdded: Date?
     let dateModified: Date?
+    var artworkURL: String? = nil
 
     var id: String { path }
 }
@@ -34,7 +35,12 @@ struct LocalTrack: Identifiable, Hashable {
 final class LocalLibrary {
     static let shared = LocalLibrary()
 
-    private(set) var tracks: [LocalTrack] = []
+    private(set) var tracks: [LocalTrack] = [] {
+        didSet { viewRowsJSON = nil; visibleTracksCache = nil; tracksByPath = nil }
+    }
+    @ObservationIgnored private var viewRowsJSON: String?
+    @ObservationIgnored private var tracksByPath: [String: LocalTrack]?
+    @ObservationIgnored private var visibleTracksCache: (sort: LocalMusicSort, query: String, tracks: [LocalTrack])?
     private(set) var scanned = false
     var onChange: (() -> Void)?
 
@@ -107,6 +113,8 @@ final class LocalLibrary {
         }
     }
 
+    func waitForScan() async { await scanTask?.value }
+
     nonisolated private static func readTracks(folder: URL) -> [LocalTrack] {
         let fm = FileManager.default
         let keys: [URLResourceKey] = [.isRegularFileKey]
@@ -129,7 +137,7 @@ final class LocalLibrary {
             if Task.isCancelled { return [] }
             let fileName = URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent
             let dates = fileDates(at: path)
-            if let meta = readTrackMetadata(path: path) {
+            if let meta = readTrackMetadataSummary(path: path) {
                 // Untagged files parse fine but carry empty strings; give them
                 // the same fallbacks as the unreadable path so rows never
                 // render invisible zero-height text.
@@ -139,10 +147,11 @@ final class LocalLibrary {
                     artist: meta.artist.isEmpty ? "Unknown artist" : meta.artist,
                     album: meta.album,
                     durationSeconds: meta.durationSeconds,
-                    artwork: meta.artwork.isEmpty ? nil : meta.artwork,
+                    artwork: nil,
                     trackNumber: meta.trackNumber,
                     dateAdded: dates.added,
-                    dateModified: dates.modified
+                    dateModified: dates.modified,
+                    artworkURL: LocalArtwork.reference(path: path)
                 ))
             } else {
                 found.append(LocalTrack(
@@ -191,6 +200,27 @@ final class LocalLibrary {
     /// comparators is how the order on screen ends up subtly different from the
     /// one the sort menu names.
     var visibleTracks: [LocalTrack] {
+        // Register the scan as an Observation dependency even on a cache hit.
+        _ = tracks.count
+        if let cached = visibleTracksCache, cached.sort == sort, cached.query == query { return cached.tracks }
+        if viewRowsJSON == nil { viewRowsJSON = makeViewRowsJSON() }
+        guard let json = viewRowsJSON else { return tracks }
+        let document = LocalLibraryBridge.shared.view(tracksJson: json, order: sort.rawValue, query: query)
+        guard let answer = document.data(using: .utf8),
+              let ordered = try? JSONSerialization.jsonObject(with: answer) as? [[String: Any]]
+        else { return tracks }
+        if tracksByPath == nil {
+            tracksByPath = Dictionary(tracks.map { ($0.path, $0) }, uniquingKeysWith: { first, _ in first })
+        }
+        let result = ordered.compactMap { row -> LocalTrack? in
+            guard let path = row["path"] as? String else { return nil }
+            return tracksByPath?[path]
+        }
+        visibleTracksCache = (sort, query, result)
+        return result
+    }
+
+    private func makeViewRowsJSON() -> String? {
         let rows = tracks.map { track -> [String: Any] in
             var row: [String: Any] = [
                 "path": track.path,
@@ -210,18 +240,8 @@ final class LocalLibrary {
         }
         guard let data = try? JSONSerialization.data(withJSONObject: rows),
               let json = String(data: data, encoding: .utf8)
-        else { return tracks }
-        let document = LocalLibraryBridge.shared.view(
-            tracksJson: json, order: sort.rawValue, query: query
-        )
-        guard let answer = document.data(using: .utf8),
-              let ordered = try? JSONSerialization.jsonObject(with: answer) as? [[String: Any]]
-        else { return tracks }
-        let byPath = Dictionary(tracks.map { ($0.path, $0) }, uniquingKeysWith: { first, _ in first })
-        return ordered.compactMap { row in
-            guard let path = row["path"] as? String else { return nil }
-            return byPath[path]
-        }
+        else { return nil }
+        return json
     }
 
     /// Every sort order with its name, from the shared module.

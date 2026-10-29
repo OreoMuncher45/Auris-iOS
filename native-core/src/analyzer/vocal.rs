@@ -26,11 +26,12 @@ pub const MAX_WINDOW_SECONDS: f64 = (FIXED_FRAMES as f64 - 2.0) * HOP as f64 / S
 const LOW_HZ: f64 = 200.0;
 const HIGH_HZ: f64 = 4000.0;
 
-use rten_tensor::NdTensor;
+use rten_tensor::NdTensorView;
+use rten_tensor::prelude::*;
 
 /// One vocal-presence value per STFT frame in [0, 1].
 pub fn track(left: &[f32], right: &[f32], rate: f64) -> Option<Vec<f32>> {
-    if left.is_empty() || left.len() != right.len() {
+    if !models::vocal_ready() || left.is_empty() || left.len() != right.len() {
         return None;
     }
     let left = if (rate - SAMPLE_RATE).abs() > 1.0 {
@@ -111,7 +112,7 @@ fn compute(left: &[f32], right: &[f32], sample_rate: f64) -> Option<Spectrogram>
 fn infer(model: &rten::Model, spec: &Spectrogram) -> Option<Vec<f32>> {
     let input_id = *model.input_ids().first()?;
     let mix = fill_fixed_frames(&spec.values, spec.frames);
-    let tensor = NdTensor::from_data([1, CHANNELS, BINS, FIXED_FRAMES], mix.clone());
+    let tensor = NdTensorView::from_data([1, CHANNELS, BINS, FIXED_FRAMES], mix.as_slice());
     let outputs = match model.run(vec![(input_id, tensor.into())], model.output_ids(), None) {
         Ok(outputs) => outputs,
         Err(error) => {
@@ -121,7 +122,11 @@ fn infer(model: &rten::Model, spec: &Spectrogram) -> Option<Vec<f32>> {
             return None;
         }
     };
-    let target = super::models::flatten_f32(outputs.first()?)?;
+    let output = outputs.first()?.as_tensor_view::<f32>()?;
+    let target = match output.data() {
+        Some(data) => std::borrow::Cow::Borrowed(data),
+        None => std::borrow::Cow::Owned(output.to_vec()),
+    };
     if target.len() < CHANNELS * BINS * FIXED_FRAMES {
         return None;
     }

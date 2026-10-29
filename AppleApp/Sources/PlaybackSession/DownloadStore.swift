@@ -9,6 +9,7 @@ struct DownloadedTrack: Identifiable, Hashable {
     var artist: String
     var album: String
     var artwork: Data?
+    var artworkURL: String? = nil
     var id: String { path }
 }
 
@@ -308,9 +309,8 @@ final class DownloadStore {
         refreshTask?.cancel()
         let work = Task.detached(priority: .utility) {
             assets.filter { FileManager.default.fileExists(atPath: $0.path) }.map { asset in
-                let metadata = readTrackMetadata(path: asset.path)
                 return DownloadedTrack(path: asset.path, title: asset.entry.title, artist: asset.entry.artist,
-                    album: asset.entry.albumName ?? "", artwork: metadata?.artwork)
+                    album: asset.entry.albumName ?? "", artwork: nil, artworkURL: LocalArtwork.reference(path: asset.path))
             }.sorted { $0.title < $1.title }
         }
         refreshTask = Task {

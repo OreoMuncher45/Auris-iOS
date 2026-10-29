@@ -118,7 +118,7 @@ extension PlaybackController {
             await MainActor.run { [weak self] in
                 guard let self, self.current?.id == entry.id else { return }
                 self.current?.artworkData = data
-                if let i = self.queue.firstIndex(where: { $0.id == entry.id }) {
+                if !LocalArtwork.isReference(raw), let i = self.queue.firstIndex(where: { $0.id == entry.id }) {
                     self.queue[i].artworkData = data
                 }
                 self.nowPlaying.update(

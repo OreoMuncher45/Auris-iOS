@@ -134,20 +134,19 @@ struct BitChordApp: App {
                     // the system sends it to the other device.
                     PlaybackHandoff.shared.refresh(controller: controller)
                     AppShortcutRefresh.schedule()
-                    // What is on disk decides what the analyzer gets. Refreshed first
-                    // so a resumed or already-downloaded graph is visible, and loaded
-                    // in the background: 123 MB of ONNX is seconds of work and the
-                    // engine should not wait behind it. Whatever is missing stays
-                    // missing, and Automix keeps its tempo fallback — the whole reason
-                    // the models are optional.
+                    // Reconcile installed models after content appears. Graphs
+                    // are loaded off-main when playback starts, so browsing a
+                    // library does not keep unused inference models resident.
                     Task {
                         await LaunchReadiness.shared.waitForContent()
                         Task { await PageRequestCoordinator.shared.removeLegacyCache() }
                         AutomixModelStore.shared.refresh()
                         AutomixModelStore.shared.onChanged = {
-                            Task { await reloadAutomixModels() }
+                            Task {
+                                await reloadAutomixModels(playbackStarted: controller.started)
+                                if controller.automixEnabled { controller.syncEngineQueueNext() }
+                            }
                         }
-                        Task { await reloadAutomixModels() }
                         // Engine is started on-demand when the user actually begins
                         // playback (via playQueue, togglePlayPause, or remote commands)
                         // so opening the app never interrupts other audio playing on the device.
@@ -328,16 +327,18 @@ struct BitChordApp: App {
 /// or never downloaded, must mean: Automix falls back to the tempo planner and
 /// stops avoiding vocal clashes rather than refusing to transition at all.
 ///
-/// Called once at launch and again after every install or removal, so a model that
-/// arrives mid-session is in use without a relaunch.
+/// Called at playback startup, preference changes, and model install/removal.
+/// Disabling Automix unloads both graphs; Efficient mode unloads vocals.
 @MainActor
-private func reloadAutomixModels() async {
+func reloadAutomixModels(playbackStarted: Bool) async {
     let paths = AutomixModelStore.shared.analyzerPaths
-    let ready = await Task.detached(priority: .userInitiated) {
-        configureAnalyzer(beatModelPath: paths.beat, vocalModelPath: paths.vocal)
-    }.value
+    let enabled = PlatformSettings.shared.getBoolean(key: "smart_fade_enabled", default: true)
+    let efficient = PlatformSettings.shared.getString(key: "automix_performance", default: "BALANCED") == "EFFICIENT"
+    let selected = AutomixModelPolicy.paths(beat: paths.beat, vocal: paths.vocal,
+        playbackStarted: playbackStarted, enabled: enabled, efficient: efficient)
+    let ready = await AutomixModelLoader.shared.configure(beat: selected.beat, vocal: selected.vocal)
     DebugLog.shared.d(
-        message: "automix models: beat=\(paths.beat) vocal=\(paths.vocal) loaded=\(ready)"
+        message: "automix models: beat=\(selected.beat) vocal=\(selected.vocal) loaded=\(ready)"
     )
 }
 

@@ -35,7 +35,7 @@ extension QueueEntry {
             title: track.title.isEmpty ? URL(fileURLWithPath: track.path).deletingPathExtension().lastPathComponent : track.title,
             artist: track.artist,
             source: track.path,
-            thumbnailUrl: nil,
+            thumbnailUrl: track.artworkURL,
             durationText: track.durationSeconds > 0 ? formatDuration(track.durationSeconds) : nil,
             albumName: track.album.isEmpty ? nil : track.album,
             artworkData: track.artwork,
@@ -692,6 +692,11 @@ final class PlaybackController {
     func startEngineIfNeeded() {
         guard !started else { return }
         started = true
+        Task { [weak self] in
+            guard let self else { return }
+            await reloadAutomixModels(playbackStarted: self.started)
+            if self.automixEnabled { self.syncEngineQueueNext() }
+        }
         // Engine start touches HAL / cpal which blocks (~1s) and triggers
         // Thread Performance Checker if done on main. Run on utility QoS
         // so it doesn't outrank the Default QoS cpal monitor thread

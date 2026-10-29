@@ -39,6 +39,7 @@ pub struct Grid {
 /// because the longer read failed is how nine of the thirteen cached tracks
 /// in the corpus ended up planned from a 0.3-confidence DSP tempo.
 pub fn track(pcm: &[f32], sample_rate: f64, offset_seconds: f64) -> Option<Grid> {
+    if !models::analyzer_ready() { return None; }
     best_grid(
         grid_from_pcm(pcm, sample_rate, offset_seconds),
         || {
@@ -71,9 +72,9 @@ fn grid_from_pcm(pcm: &[f32], sample_rate: f64, offset_seconds: f64) -> Option<G
         return None;
     }
     let mono = if (sample_rate - BEAT_SPECTROGRAM_SAMPLE_RATE).abs() > 1.0 {
-        resample(pcm, sample_rate, BEAT_SPECTROGRAM_SAMPLE_RATE)
+        std::borrow::Cow::Owned(resample(pcm, sample_rate, BEAT_SPECTROGRAM_SAMPLE_RATE))
     } else {
-        pcm.to_vec()
+        std::borrow::Cow::Borrowed(pcm)
     };
     let spectrogram = compute_beat_spectrogram(&mono, BEAT_SPECTROGRAM_SAMPLE_RATE);
     if spectrogram.frames == 0 {

@@ -36,7 +36,7 @@ pub(super) mod analysis_cache {
     /// less than holding it. Each entry is tens to hundreds of kilobytes.
     const CAPACITY: usize = 6;
     const DISK_LIMIT_BYTES: u64 = 50 * 1024 * 1024;
-    const SCHEMA_VERSION: u32 = 1;
+    const SCHEMA_VERSION: u32 = 2;
 
     pub(crate) type Key = (String, u64, u64, u64, String, bool);
 
@@ -369,16 +369,57 @@ pub struct AnalysisOverlay {
 
 pub(super) mod overlays {
     use super::AnalysisOverlay;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, VecDeque};
     use std::sync::{Mutex, OnceLock};
 
-    fn map() -> &'static Mutex<HashMap<String, AnalysisOverlay>> {
-        static MAP: OnceLock<Mutex<HashMap<String, AnalysisOverlay>>> = OnceLock::new();
-        MAP.get_or_init(|| Mutex::new(HashMap::new()))
+    const CAPACITY: usize = 32;
+    const BYTE_LIMIT: usize = 8 * 1024 * 1024;
+
+    #[derive(Default)]
+    struct Cache {
+        entries: HashMap<String, AnalysisOverlay>,
+        order: VecDeque<String>,
+        bytes: usize,
+    }
+
+    fn cost(path: &str, overlay: &AnalysisOverlay) -> usize {
+        path.len() + overlay.source.capacity() + overlay.key.as_ref().map_or(0, |s| s.capacity())
+            + [&overlay.beats, &overlay.downbeats, &overlay.phrase_boundaries]
+                .iter().map(|v| v.as_ref().map_or(0, |v| v.capacity() * std::mem::size_of::<f64>())).sum::<usize>()
+    }
+
+    impl Cache {
+        fn put(&mut self, path: &str, overlay: AnalysisOverlay) {
+            if let Some(old) = self.entries.remove(path) {
+                self.bytes -= cost(path, &old);
+                self.order.retain(|key| key != path);
+            }
+            let size = cost(path, &overlay);
+            if size > BYTE_LIMIT { return; }
+            while self.entries.len() >= CAPACITY || self.bytes + size > BYTE_LIMIT {
+                let Some(key) = self.order.pop_front() else { break };
+                if let Some(old) = self.entries.remove(&key) { self.bytes -= cost(&key, &old); }
+            }
+            self.bytes += size;
+            self.entries.insert(path.to_string(), overlay);
+            self.order.push_back(path.to_string());
+        }
+
+        fn get(&mut self, path: &str) -> Option<AnalysisOverlay> {
+            let overlay = self.entries.get(path)?.clone();
+            self.order.retain(|key| key != path);
+            self.order.push_back(path.to_string());
+            Some(overlay)
+        }
+    }
+
+    fn map() -> &'static Mutex<Cache> {
+        static MAP: OnceLock<Mutex<Cache>> = OnceLock::new();
+        MAP.get_or_init(|| Mutex::new(Cache::default()))
     }
 
     pub(crate) fn clear() {
-        map().lock().unwrap_or_else(|p| p.into_inner()).clear();
+        *map().lock().unwrap_or_else(|p| p.into_inner()) = Cache::default();
     }
 
     pub(crate) fn put(path: &str, overlay: AnalysisOverlay) {
@@ -386,7 +427,7 @@ pub(super) mod overlays {
         map()
             .lock()
             .unwrap_or_else(|p| p.into_inner())
-            .insert(key, overlay);
+            .put(&key, overlay);
     }
 
     pub(crate) fn get(path: &str) -> Option<AnalysisOverlay> {
@@ -395,7 +436,29 @@ pub(super) mod overlays {
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .get(key)
-            .cloned()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn evicts_cold_overlays_and_bounds_vector_bytes() {
+            let mut cache = Cache::default();
+            for i in 0..CAPACITY { cache.put(&i.to_string(), AnalysisOverlay::default()); }
+            assert!(cache.get("0").is_some());
+            cache.put("next", AnalysisOverlay::default());
+            assert!(cache.get("1").is_none());
+            assert!(cache.get("0").is_some());
+            let large = AnalysisOverlay { beats: Some(vec![0.0; BYTE_LIMIT / 16]), ..Default::default() };
+            cache.put("large-a", large.clone());
+            cache.put("large-b", large);
+            assert!(cache.bytes <= BYTE_LIMIT);
+            assert!(cache.get("large-a").is_none());
+            assert!(cache.get("large-b").is_some());
+            cache.put("large-b", AnalysisOverlay::default());
+            assert!(cache.bytes < BYTE_LIMIT / 2);
+        }
     }
 }
 

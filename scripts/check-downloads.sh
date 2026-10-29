@@ -18,6 +18,7 @@ xcrun swiftc -module-cache-path "$WORK/modules" -parse-as-library -o "$WORK/veri
  -Xlinker -rpath -Xlinker "$SHARED/BitChordShared.framework/Versions/A" \
  "$ROOT/AppleApp/Generated/NativeCore.swift" "$WORK/QueueEntry.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/DownloadStore.swift" \
+ "$ROOT/AppleApp/Sources/PlaybackSession/LocalArtwork.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/PlaybackDebugLog.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/PlaybackRegionStore.swift" \
  "$ROOT/scripts/downloads-verify/main.swift"
