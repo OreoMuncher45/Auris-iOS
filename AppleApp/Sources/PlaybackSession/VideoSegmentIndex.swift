@@ -10,8 +10,8 @@ import Foundation
 /// The same bytes described as an HLS media playlist (the init segment as
 /// `EXT-X-MAP`, each fragment as an `EXT-X-BYTERANGE`) need only the init
 /// segment and the first fragment, and every seek fetches just its fragment.
-struct VideoSegmentIndex: Equatable {
-    struct Segment: Equatable {
+struct VideoSegmentIndex: Equatable, Sendable {
+    struct Segment: Equatable, Sendable {
         let offset: Int64
         let size: Int64
         let seconds: Double

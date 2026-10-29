@@ -9,8 +9,9 @@ import BitChordShared
 /// One muted `AVPlayer` feeds every visible surface, and a video-side request
 /// exists only while **all** of these are true: the "Show Music Videos" switch
 /// is on, at least one player surface is on screen, the app is active, and a
-/// track with a videoId is playing. Nothing is prefetched for the queue: the
-/// switch going on does not start a request until a surface registers.
+/// track with a videoId is playing. While it is visible, at most one upcoming
+/// video's choice, alignment and segment index are prepared; no second player
+/// or decoder runs for that preparation.
 @MainActor
 @Observable
 final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
@@ -30,6 +31,13 @@ final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
     @ObservationIgnored private var lastGateLog: String?
     @ObservationIgnored private var aheadTask: Task<Void, Never>?
     @ObservationIgnored private var aheadId: String?
+    private struct PreparedVideo {
+        let songId: String
+        let side: ResolvedVideoSide
+        let map: VideoVersionAlignment.Map?
+        let saved: Date
+    }
+    @ObservationIgnored private var preparedAhead: PreparedVideo?
 
     private override init() { super.init() }
 
@@ -225,6 +233,19 @@ final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
         say(nil)
         controller.detach()
 
+        if !forceRefresh, let prepared = preparedAhead, prepared.songId == id,
+           Date().timeIntervalSince(prepared.saved) < 120 {
+            preparedAhead = nil
+            preparing = false
+            resolvedId = id
+            side = prepared.side
+            controller.attach(prepared.side, timeMap: prepared.map)
+            PlaybackDebugLog.shared.record("video: using prepared video choice and alignment", about: id)
+            prepareAhead()
+            return
+        }
+        preparedAhead = nil
+
         let requestedTrack = hooks?.track()
         PlaybackDebugLog.shared.record(
             "video: resolving song=\(requestedTrack?.title ?? id) artist=\(requestedTrack?.artist ?? "") (forceRefresh=\(forceRefresh))",
@@ -349,13 +370,16 @@ final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
         guard gate.canRequest, let next = hooks?.next(), next.videoId != aheadId else { return }
         aheadId = next.videoId
         aheadTask?.cancel()
-        aheadTask = Task(priority: .utility) {
+        aheadTask = Task(priority: .utility) { [weak self] in
             let own = try? await InnertubeStreamResolver.shared.resolveVideo(videoId: next.videoId)
             if let own {
                 let qualifies = own.isAuthoritativeMusicVideo
                     ? own.qualifiesAsCounterpartVideo()
                     : own.qualifiesAsSearchVideo(isOfficialMusicVideo: false)
-                if qualifies { return }
+                if qualifies {
+                    await self?.rememberPrepared(songId: next.videoId, side: own, map: nil)
+                    return
+                }
             }
             let track = (title: next.title, artist: next.artist, seconds: next.seconds, durationText: next.durationText)
             for candidate in await Self.findVideoVersions(videoId: next.videoId, track: track).prefix(3) {
@@ -372,8 +396,21 @@ final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
                     "video: lined up \(next.title) by \(next.artist) ahead with \(candidate.videoId): \(map?.confident == true ? "aligned" : "not aligned") map=\(map?.summary ?? "none") min-window=\(map.map { String(format: "%.3f", $0.minimumWindowSimilarity) } ?? "?")",
                     about: next.videoId
                 )
-                if map?.confident == true { return }
+                if map?.confident == true {
+                    await self?.rememberPrepared(songId: next.videoId, side: side, map: map)
+                    return
+                }
             }
+        }
+    }
+
+    private func rememberPrepared(songId: String, side: ResolvedVideoSide, map: VideoVersionAlignment.Map?) async {
+        guard !Task.isCancelled, gate.canRequest, networkAllowed, aheadId == songId else { return }
+        preparedAhead = PreparedVideo(songId: songId, side: side, map: map, saved: Date())
+        // Only metadata is warmed. AVFoundation remains the sole video decoder,
+        // and no GPU work is started for an offscreen upcoming item.
+        if let string = side.url, let url = URL(string: string) {
+            _ = try? await VideoIndexCache.shared.index(source: url, headers: side.headers)
         }
     }
 
@@ -381,6 +418,7 @@ final class VideoPlayback: NSObject, AVPictureInPictureControllerDelegate {
         aheadTask?.cancel()
         aheadTask = nil
         aheadId = nil
+        preparedAhead = nil
         resolveTask?.cancel()
         resolveTask = nil
         mountedId = nil

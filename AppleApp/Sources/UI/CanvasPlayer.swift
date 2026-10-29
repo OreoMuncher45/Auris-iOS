@@ -139,6 +139,7 @@ final class CanvasVideoView: PlatformCanvasView {
             activeLoad = nil
         }
         layoutVideo()
+        if let item = player.currentItem { updateVideoOutput(for: item) }
         if value.active {
             if pendingLoad != nil { startPendingLoad() }
             if !wasActive { lastSampleTime = -.infinity }
@@ -185,11 +186,7 @@ final class CanvasVideoView: PlatformCanvasView {
         self.cachedRemoteRetryURL = cachedRemoteRetryURL
         clearItem()
         let item = AVPlayerItem(asset: CanvasMediaRequest.asset(url))
-        let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-        ])
-        item.add(output)
-        videoOutput = output
+        updateVideoOutput(for: item)
         // Install observers before assigning the item: cached clips may become
         // ready immediately. Each callback checks item identity after hopping.
         sizeObserver = item.observe(\.presentationSize, options: [.initial, .new]) { [weak self] item, _ in
@@ -331,6 +328,20 @@ final class CanvasVideoView: PlatformCanvasView {
             self.sampling = false
             guard self.generation == requestedGeneration, let data else { return }
             self.configuration?.onFrame(data)
+        }
+    }
+
+    private func updateVideoOutput(for item: AVPlayerItem) {
+        if configuration?.sampleFrames == true {
+            guard videoOutput == nil else { return }
+            let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+            ])
+            item.add(output)
+            videoOutput = output
+        } else if let output = videoOutput {
+            item.remove(output)
+            videoOutput = nil
         }
     }
 

@@ -112,6 +112,7 @@ final class VideoSideController {
             // Keep the current item, including a failed one: a repeated body
             // pass must not rebuild (and retry) a video that already refused.
             self.side = side
+            tick()
             return
         }
         tearDownItem()

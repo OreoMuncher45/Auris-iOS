@@ -91,23 +91,13 @@ final class ChunkedVideoLoader: NSObject, AVAssetResourceLoaderDelegate, @unchec
                 }
                 // A few ranges in flight at once, answered in order: one range
                 // at a time leaves most of the line idle between round trips.
-                while offset < end {
-                    try Task.checkCancellation()
-                    let starts = stride(from: offset, to: min(end, offset + Self.chunkBytes * Self.parallel), by: Int(Self.chunkBytes))
-                    let pieces = try await withThrowingTaskGroup(of: (Int64, Data).self) { group in
-                        for start in starts {
-                            group.addTask { (start, try await self.fetch(from: start, through: min(end, start + Self.chunkBytes) - 1)) }
-                        }
-                        var pieces: [(Int64, Data)] = []
-                        for try await piece in group { pieces.append(piece) }
-                        return pieces.sorted { $0.0 < $1.0 }
-                    }
-                    for (_, bytes) in pieces {
-                        guard !bytes.isEmpty else { offset = end; break }
+                try await VideoRangeDelivery.stream(from: offset, to: end,
+                    chunkBytes: Self.chunkBytes, parallel: Int(Self.parallel),
+                    fetch: { try await self.fetch(from: $0, through: $1) },
+                    receive: { bytes in
                         data.respond(with: bytes)
                         offset += Int64(bytes.count)
-                    }
-                }
+                    })
             }
             if !Task.isCancelled { request.finishLoading() }
         } catch is CancellationError {
@@ -123,12 +113,8 @@ final class ChunkedVideoLoader: NSObject, AVAssetResourceLoaderDelegate, @unchec
     private func servePlaylist(_ request: AVAssetResourceLoadingRequest) async {
         let started = Date()
         do {
-            var index: VideoSegmentIndex?
-            for headBytes in [65_536, 1_048_576] where index == nil {
-                let head = try await get(range: "bytes=0-\(headBytes - 1)").0
-                index = VideoSegmentIndex.parse(head: head)
-            }
-            guard let index else { throw URLError(.cannotParseResponse) }
+            let index = try await VideoIndexCache.shared.index(source: source, headers: headers)
+            try Task.checkCancellation()
             let playlist = Data(index.playlist(url: source.absoluteString).utf8)
             if let info = request.contentInformationRequest {
                 info.contentType = "public.m3u-playlist"
