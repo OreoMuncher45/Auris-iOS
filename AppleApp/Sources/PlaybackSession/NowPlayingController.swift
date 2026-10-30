@@ -320,7 +320,7 @@ final class NowPlayingController {
 @Observable
 @MainActor
 private final class ModernNowPlaying: MediaSessionRepresentable {
-    let id = "bitchord-player-\(UUID().uuidString)"
+    let id = "auris-player-\(UUID().uuidString)"
     weak var delegate: NowPlayingController?
     var title = ""
     var artist = ""

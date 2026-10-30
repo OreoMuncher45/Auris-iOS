@@ -223,7 +223,7 @@ object StreamDownloadBridge {
                         url.contains("itag=18") -> "mp4"
                     else -> "m4a"
                 }
-                val path = "$tmpDir/bitchord-${NSUUID().UUIDString}.$ext"
+                val path = "$tmpDir/auris-${NSUUID().UUIDString}.$ext"
                 tmpPath = path
 
                 // Upstream reads the total out of the URL's own `clen` rather than

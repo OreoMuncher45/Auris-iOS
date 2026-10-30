@@ -11,9 +11,9 @@ import UniformTypeIdentifiers
 /// engine's `fetch_loop` and the aligner fetch the same way). The asset is
 /// opened under a private scheme so every request comes here instead.
 final class ChunkedVideoLoader: NSObject, AVAssetResourceLoaderDelegate, @unchecked Sendable {
-    static let scheme = "bitchord-chunked"
+    static let scheme = "auris-chunked"
     /// The playlist `VideoSegmentIndex` builds, served from here.
-    static let hlsScheme = "bitchord-hls"
+    static let hlsScheme = "auris-hls"
     static let playlistURL = URL(string: "\(hlsScheme)://picture/playlist.m3u8")!
     private static let chunkBytes: Int64 = 1 << 20
     private static let parallel: Int64 = 4

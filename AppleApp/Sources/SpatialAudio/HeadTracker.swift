@@ -19,7 +19,7 @@ final class HeadTracker: NSObject {
     private let manager = CMHeadphoneMotionManager()
     private let queue: OperationQueue = {
         let q = OperationQueue()
-        q.name = "bitchord.head-tracker"
+        q.name = "auris.head-tracker"
         q.maxConcurrentOperationCount = 1
         q.qualityOfService = .userInteractive
         return q

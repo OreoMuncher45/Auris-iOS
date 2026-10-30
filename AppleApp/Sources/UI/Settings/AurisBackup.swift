@@ -24,7 +24,7 @@ enum AurisBackup {
     static func suggestedName() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        return "bitchord-backup-\(formatter.string(from: Date()))"
+        return "auris-backup-\(formatter.string(from: Date()))"
     }
 
     static func exportText() -> String {
@@ -35,7 +35,7 @@ enum AurisBackup {
             prefs = prefs == "{}" ? "{\(insert)}" : String(prefs.dropLast()) + ",\(insert)}"
         }
         let listening = ListeningStore.shared.exportJSON().flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
-        return "{\"app\":\"bitchord\",\"version\":1,\"prefs\":\(prefs),\"listening\":\(listening)}"
+        return "{\"app\":\"auris\",\"version\":1,\"prefs\":\(prefs),\"listening\":\(listening)}"
     }
 
     static func importText(_ raw: String) {

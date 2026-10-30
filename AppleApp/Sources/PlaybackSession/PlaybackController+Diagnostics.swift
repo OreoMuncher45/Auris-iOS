@@ -16,7 +16,7 @@ extension PlaybackController {
     /// Explicit, muted cold-launch diagnostic: exercise the saved queue that
     /// init restored, rather than loading a replacement fixture in this process.
     func verifyRestoredResumeBehavior(mixing: Bool) async {
-        let savedQueue = UserDefaults.standard.data(forKey: "bitchord_last_played")
+        let savedQueue = UserDefaults.standard.data(forKey: "auris_last_played")
         let savedContext = PlatformSettings.shared.getString(key: "last_playback_context", default: "")
         let savedMixing = mixWithOtherAudio
         let savedAutomix = automixEnabled
@@ -91,11 +91,11 @@ extension PlaybackController {
         setMixWithOtherAudio(savedMixing)
         setAutomixEnabled(savedAutomix)
         volume = savedVolume
-        if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "bitchord_last_played") }
-        else { UserDefaults.standard.removeObject(forKey: "bitchord_last_played") }
+        if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "auris_last_played") }
+        else { UserDefaults.standard.removeObject(forKey: "auris_last_played") }
         PlatformSettings.shared.putString(key: "last_playback_context", value: savedContext)
         restoreSession()
-        checks["saved_queue_restored"] = UserDefaults.standard.data(forKey: "bitchord_last_played") == savedQueue
+        checks["saved_queue_restored"] = UserDefaults.standard.data(forKey: "auris_last_played") == savedQueue
         checks["saved_preferences_restored"] = mixWithOtherAudio == savedMixing && automixEnabled == savedAutomix
             && volume == savedVolume
         let result: [String: Any] = ["checks": checks, "samples": samples, "mixing": mixing,
@@ -111,7 +111,7 @@ extension PlaybackController {
     /// Explicit, muted device diagnostic. Uses the signed-in account already
     /// restored by AuthController and restores the user's saved queue afterward.
     func verifyRapidNavigation() async {
-        let savedQueue = UserDefaults.standard.data(forKey: "bitchord_last_played")
+        let savedQueue = UserDefaults.standard.data(forKey: "auris_last_played")
         let savedContext = PlatformSettings.shared.getString(key: "last_playback_context", default: "")
         let savedAutomix = automixEnabled
         let savedVolume = volume
@@ -120,8 +120,8 @@ extension PlaybackController {
             UIApplication.shared.endBackgroundTask(background)
             setAutomixEnabled(savedAutomix)
             volume = savedVolume
-            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "bitchord_last_played") }
-            else { UserDefaults.standard.removeObject(forKey: "bitchord_last_played") }
+            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "auris_last_played") }
+            else { UserDefaults.standard.removeObject(forKey: "auris_last_played") }
             PlatformSettings.shared.putString(key: "last_playback_context", value: savedContext)
             restoreSession()
         }
@@ -209,7 +209,7 @@ extension PlaybackController {
 
     /// Reproduces a failed/unarmed prefetch using local audio and the real engine.
     func verifyNaturalEndFallback() async {
-        let savedQueue = UserDefaults.standard.data(forKey: "bitchord_last_played")
+        let savedQueue = UserDefaults.standard.data(forKey: "auris_last_played")
         let savedContext = PlatformSettings.shared.getString(key: "last_playback_context", default: "")
         let savedAutomix = automixEnabled, savedVolume = volume
         let savedRepeat = repeatMode
@@ -218,8 +218,8 @@ extension PlaybackController {
         defer {
             UIApplication.shared.endBackgroundTask(background)
             setAutomixEnabled(savedAutomix); volume = savedVolume; repeatMode = savedRepeat
-            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "bitchord_last_played") }
-            else { UserDefaults.standard.removeObject(forKey: "bitchord_last_played") }
+            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "auris_last_played") }
+            else { UserDefaults.standard.removeObject(forKey: "auris_last_played") }
             PlatformSettings.shared.putString(key: "last_playback_context", value: savedContext)
             restoreSession()
         }
@@ -273,7 +273,7 @@ extension PlaybackController {
     /// decoder and published MediaSession. User queue/preferences are restored.
     func verifyNativeResumeBehavior() async {
         let engine = self.engine
-        let savedQueue = UserDefaults.standard.data(forKey: "bitchord_last_played")
+        let savedQueue = UserDefaults.standard.data(forKey: "auris_last_played")
         let savedContext = PlatformSettings.shared.getString(key: "last_playback_context", default: "")
         let savedMixing = mixWithOtherAudio
         let savedAutomix = automixEnabled
@@ -284,8 +284,8 @@ extension PlaybackController {
             setMixWithOtherAudio(savedMixing)
             setAutomixEnabled(savedAutomix)
             volume = savedVolume
-            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "bitchord_last_played") }
-            else { UserDefaults.standard.removeObject(forKey: "bitchord_last_played") }
+            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "auris_last_played") }
+            else { UserDefaults.standard.removeObject(forKey: "auris_last_played") }
             PlatformSettings.shared.putString(key: "last_playback_context", value: savedContext)
             restoreSession()
         }
@@ -570,7 +570,7 @@ extension PlaybackController {
         sequencingTask?.cancel()
         try? engine.stop()
         let result: [String: Any] = ["checks": checks, "passed": checks.values.allSatisfy { $0 }]
-        let report = URL(fileURLWithPath: "/tmp/bitchord-queue-runtime.json")
+        let report = URL(fileURLWithPath: "/tmp/auris-queue-runtime.json")
         if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: report, options: .atomic) }
         print("QUEUE VALIDATION \(checks)")
         #if os(macOS)
@@ -647,7 +647,7 @@ extension PlaybackController {
 #if DEBUG && os(iOS)
 extension PlaybackController {
     func verifyDolbyQueue() async {
-        let savedQueue = UserDefaults.standard.data(forKey: "bitchord_last_played")
+        let savedQueue = UserDefaults.standard.data(forKey: "auris_last_played")
         let savedContext = PlatformSettings.shared.getString(key: "last_playback_context", default: "")
         let savedVolume = volume
         let sampleURL = "https://devstreaming-cdn.apple.com/videos/streaming/examples/adv_dv_atmos/Job932393e2-1e4f-4fdb-ab59-0d201f752656-107660254-Transcode_audio_full_en_atmos_0_1-en_audio/prog_index.m3u8"
@@ -656,8 +656,8 @@ extension PlaybackController {
             pausePlayback()
             dolbyRenderer?.stop(); dolbyRenderer = nil
             volume = savedVolume
-            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "bitchord_last_played") }
-            else { UserDefaults.standard.removeObject(forKey: "bitchord_last_played") }
+            if let savedQueue { UserDefaults.standard.set(savedQueue, forKey: "auris_last_played") }
+            else { UserDefaults.standard.removeObject(forKey: "auris_last_played") }
             PlatformSettings.shared.putString(key: "last_playback_context", value: savedContext)
             restoreSession()
         }

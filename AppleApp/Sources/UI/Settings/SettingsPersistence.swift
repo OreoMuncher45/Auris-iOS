@@ -187,8 +187,8 @@ struct SettingsAdvancedPersist: ViewModifier {
             .onChange(of: smartAlign) { _, value in controller.setSmartVersionAlignment(value) }
             .onChange(of: hideSongStatus) { _, value in controller.updateHideSongStatus(value) }
             // The read side is `DownloadStore.folder`: on, downloads land in the
-            // shared Music/BitChord folder where other music apps can see them;
-            // off, they stay in BitChord's own storage.
+            // shared Music/Auris folder where other music apps can see them;
+            // off, they stay in Auris's own storage.
             .onChange(of: exportDownloads) { _, value in PlatformSettings.shared.putBoolean(key: "export_downloads", value: value) }
             // The read side is the local-library scan, which drops rows that
             // fail `LocalMusicEligibility` while this is on.

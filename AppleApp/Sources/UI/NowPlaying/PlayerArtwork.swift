@@ -22,6 +22,20 @@ struct SleeveArt: View {
     var canvasActive = true
     var side: CGFloat
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The hero zoom: the sleeve breathes very slightly while the track plays.
+    ///
+    /// Upstream Auris grows the cover by a hair over the track ("hero zoom"),
+    /// so the picture keeps moving while the music plays instead of sitting
+    /// still under a static mesh. The movement is deliberately tiny — a cover
+    /// that visibly pulses reads as a rendering fault — and it is skipped
+    /// entirely under Reduce Motion, which is a request for no motion at all
+    /// rather than for less of it.
+    private var heroZoomScale: CGFloat {
+        isPlaying && !reduceMotion ? 1.018 : 1
+    }
+
     var body: some View {
         ZStack {
             ArtworkView(entry: entry, side: side)
@@ -32,8 +46,13 @@ struct SleeveArt: View {
         .frame(width: side, height: side)
         .clipShape(.rect(cornerRadius: 12, style: .continuous))
         .shadow(color: .black.opacity(0.45), radius: 24, y: 10)
-        .scaleEffect(isPlaying ? 1 : 0.86)
-        .animation(.spring(response: 0.85, dampingFraction: 0.75), value: isPlaying)
+        .scaleEffect(isPlaying ? heroZoomScale : 0.86)
+        .animation(
+            isPlaying && !reduceMotion
+                ? .easeInOut(duration: 6).repeatForever(autoreverses: true)
+                : .spring(response: 0.85, dampingFraction: 0.75),
+            value: isPlaying
+        )
         .frame(width: side, height: side)
     }
 }

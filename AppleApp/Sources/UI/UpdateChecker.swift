@@ -118,7 +118,7 @@ import Observation
 }
 
 enum UpdateAcknowledgementStore {
-    private static let key = "bitchord.acknowledgedUpdateVersions"
+    private static let key = "auris.acknowledgedUpdateVersions"
     static func contains(_ version: String) -> Bool { (UserDefaults.standard.stringArray(forKey: key) ?? []).contains(version) }
     static func record(_ version: String) {
         var versions = Set(UserDefaults.standard.stringArray(forKey: key) ?? [])
