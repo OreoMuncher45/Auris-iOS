@@ -179,14 +179,15 @@ object SourceResolver {
         // recording and can be a wrong song altogether.
         if (target.title.isBlank() || target.isVideo) return null
         val active = SourceRegistry.activeForPlayback()
-        val youtube = active.firstOrNull { it.kind == SourceKind.YOUTUBE } ?: return null
+        val preferred = rankedAboveYouTube(active)
+        if (preferred.isEmpty()) return null
         val requested = requestForNow()
         val mayUseLossless = PlaybackCodecCapabilities.allowLosslessSources
         // The chosen source quality still applies on Bluetooth. The physical
         // output capability remains separate for addons that explicitly require it.
         val routeRequest = if (requested is StreamRequest.Lossless && !mayUseLossless) StreamRequest.Best else requested
         val (source, stream) = bestAcross(
-            rankedAbove(youtube.configId, active), target, routeRequest,
+            preferred, target, routeRequest,
             allowLossless = mayUseLossless,
             accept = { _, candidate -> mayUseLossless || candidate.format.isLossless != true },
         )
@@ -234,8 +235,8 @@ object SourceResolver {
     suspend fun prefetchSubstitute(target: TrackMatcher.Target): SourceStream? {
         if (target.title.isBlank() || target.isVideo) return null
         val active = SourceRegistry.activeForPlayback()
-        val youtube = active.firstOrNull { it.kind == SourceKind.YOUTUBE } ?: return null
-        val preferred = rankedAbove(youtube.configId, active)
+        val preferred = rankedAboveYouTube(active)
+        if (preferred.isEmpty()) return null
         val request = requestForNow()
         val mayUseLossless = PlaybackCodecCapabilities.allowLosslessSources
         val routeRequest = if (request is StreamRequest.Lossless && !mayUseLossless) StreamRequest.Best else request
@@ -287,7 +288,6 @@ object SourceResolver {
     ): SourceStream? {
         if (target.title.isBlank() || target.durationSec == null || target.isVideo) return null
         val active = SourceRegistry.activeForPlayback()
-        val youtube = active.firstOrNull { it.kind == SourceKind.YOUTUBE } ?: return null
         // Every source gets asked, whether or not it can serve lossless, and they are
         // asked at once.
         //
@@ -304,7 +304,7 @@ object SourceResolver {
         // produce a 128kbps MP3 that was then refused, and only after all of that
         // was JioSaavn asked, which answered with 320kbps in 246ms.
         val (source, chosen) = bestAcross(
-            rankedAbove(youtube.configId, active).filterNot { it.configId == servedBy },
+            rankedAboveYouTube(active).filterNot { it.configId == servedBy },
             target,
             if (requestForNow() is StreamRequest.Lossless && !PlaybackCodecCapabilities.allowLosslessSources) {
                 StreamRequest.Best
@@ -550,9 +550,21 @@ object SourceResolver {
      * has asked a source for it.
      */
     fun canSubstituteForYouTube(): Boolean =
-        SourceRegistry.activeForPlayback().indexOfFirst { it.kind == SourceKind.YOUTUBE } > 0
+        rankedAboveYouTube(SourceRegistry.activeForPlayback()).isNotEmpty()
 
     // ── The race ────────────────────────────────────────────────────────────
+
+    /**
+     * The enabled sources that outrank YouTube.
+     *
+     * YouTube's kind says what ranks above it, so its own instance is not
+     * needed to answer that. A switch that turns YouTube off must not turn the
+     * add-ons off with it, and a source list where YouTube is absent used to
+     * mean "nothing outranks YouTube" — which silently turned every add-on off
+     * as well.
+     */
+    private fun rankedAboveYouTube(active: List<MusicSource>): List<MusicSource> =
+        active.filter { it.kind != SourceKind.YOUTUBE && it.kind.rank < SourceKind.YOUTUBE.rank }
 
     /**
      * The sources ranked above [configId], in order.

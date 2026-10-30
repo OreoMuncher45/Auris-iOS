@@ -35,6 +35,12 @@ extension PlaybackController {
             // Pausing a track that is still loading keeps the load: the bytes
             // and the resolved URL are the expensive part, and throwing them
             // away made the next tap start from nothing.
+            //
+            // A load the listener asked for by name is not pausable this way:
+            // it starts on its own when it is ready, and treating the tap as a
+            // pause left the track loaded but silent — the reason people had
+            // to press play a second time.
+            if pendingLoadIntent == .selection { return }
             holdAfterLoad = true
             state = .paused
             nowPlaying.updateRate(0, position: position)
@@ -56,7 +62,7 @@ extension PlaybackController {
             restoredStart = nil
             let fresh = recoveryNeedsFreshResolution
             if fresh, let current { streamRecovery.select(current.id, resetAttempts: true) }
-            loadCurrent(playingIndex, startAt: start, refreshAutoplay: false, freshResolution: fresh)
+            loadCurrent(playingIndex, startAt: start, refreshAutoplay: false, freshResolution: fresh, intent: .transport)
             return
         }
         if isPlaying {
@@ -276,7 +282,7 @@ extension PlaybackController {
             }
             return
         }
-        loadCurrent(target, refreshAutoplay: userInitiated)
+        loadCurrent(target, refreshAutoplay: userInitiated, intent: .transport)
     }
 
     /// Promotes the engine's armed successor when it is the requested queue
@@ -308,7 +314,7 @@ extension PlaybackController {
         // The engine moved under a concurrent edit; converge on the target
         // with a full load rather than playing the wrong track.
         guard info.title == entry.title, info.artist == entry.artist else {
-            loadCurrent(target, refreshAutoplay: false)
+            loadCurrent(target, refreshAutoplay: false, intent: .transport)
             return true
         }
         // Promoting an armed successor is a new selection too. Invalidate
@@ -319,7 +325,7 @@ extension PlaybackController {
         // Ensure the promoted output is unmuted; this is idempotent for an
         // already playing session.
         do { try engine.play() } catch {
-            loadCurrent(target, refreshAutoplay: false)
+            loadCurrent(target, refreshAutoplay: false, intent: .transport)
             return true
         }
         let headers = sourceHeadersByPath.removeValue(forKey: info.source) ?? [:]
@@ -336,11 +342,11 @@ extension PlaybackController {
             return
         }
         if playingIndex > 0 {
-            loadCurrent(playingIndex - 1)
+            loadCurrent(playingIndex - 1, intent: .transport)
         } else if prependPreviousContextEntry() {
-            loadCurrent(0)
+            loadCurrent(0, intent: .transport)
         } else if repeatMode == .all, queue.count > 1 {
-            loadCurrent(queue.count - 1)
+            loadCurrent(queue.count - 1, intent: .transport)
         } else {
             seek(to: 0)
         }

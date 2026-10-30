@@ -261,7 +261,7 @@ struct IPadSidebarView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(.bchLogo)
+            Image(.aurisLogo)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 28, height: 18)

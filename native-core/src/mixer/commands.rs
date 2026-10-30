@@ -387,8 +387,23 @@ pub(super) fn handle_command(state: &mut MixerState, cmd: Command, ring: &mut Pr
                     transition.fade_frames =
                         (transition.plan.fade_seconds * state.device_rate as f64) as u64;
                     let cue = incoming.regions.next_allowed(transition.plan.cue_seconds);
-                    if incoming.decoder.seek_seconds(cue).is_ok() {
-                        incoming.reset_processing();
+                    // The regions arrive again while the analysis of the armed
+                    // track is still settling — once a second while its file
+                    // grows. Moving the cue only when it actually moved keeps
+                    // the primed audio and the tempo stage alive: dropping them
+                    // here left the blend starting on a cold decode with an
+                    // empty stretcher, which is an audible hole exactly where
+                    // the listener is listening.
+                    if (incoming.decoder.position_seconds() - cue).abs() > 0.05 {
+                        if incoming.decoder.seek_seconds(cue).is_ok() {
+                            incoming.reset_processing();
+                            // A moved cue clears the primed buffer and the tempo
+                            // stage; put both back, the same way the armed
+                            // transition path does, so the first fade chunk is
+                            // warm audio at the beat-matched rate.
+                            incoming.set_plan_rate(incoming.base_plan_rate);
+                            super::prime_voice(incoming, state.device_rate);
+                        }
                     }
                 }
             }

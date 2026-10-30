@@ -112,6 +112,16 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('native-core/Cargo.toml', 'native-core/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
 
+      - name: Check the Automix model download
+        run: |
+          url="https://github.com/OreoMuncher45/Auris-iOS/releases/download/model-beat-this-final0-v1/beat_this_full_int8.onnx"
+          code=$(curl -sIL -o /dev/null -w '%{http_code}' "$url")
+          echo "model URL status: $code"
+          if [ "$code" != "200" ]; then
+            echo "The Automix beat model is not reachable ($code). The app would download nothing and fall back to the DSP tempo grid." >&2
+            exit 1
+          fi
+
       - name: Build shared framework (Kotlin/Native)
         run: scripts/build-shared-framework.sh
         env:

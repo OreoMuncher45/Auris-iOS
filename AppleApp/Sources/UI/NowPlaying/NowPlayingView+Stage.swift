@@ -101,15 +101,31 @@ extension NowPlayingView {
             .animation(.snappy(duration: 0.28), value: pane)
             // Additive sleeve swipe, upstream's vertical drag: up past 60pt
             // opens Up Next, down while a panel is up returns to the player.
-            // The pane buttons stay the primary control; this never replaces
-            // them. A plain `gesture` so an open panel's own scroll wins the
-            // touch first.
+            // A horizontal pull skips: right goes to the next track, left to
+            // the previous one. The pane buttons stay the primary control;
+            // this never replaces them. A plain `gesture` so an open panel's
+            // own scroll wins the touch first.
             .gesture(
                 DragGesture(minimumDistance: 30)
                     .onEnded { value in
                         let dy = value.translation.height
                         let dx = value.translation.width
-                        // Clearly vertical before it counts.
+                        // Horizontal first: a sideways pull is a skip, and the
+                        // vertical sleeve drag only claims a clearly vertical
+                        // one.
+                        if abs(dx) > abs(dy), abs(dx) > 60 {
+                            guard pane == .main else { return }
+                            if dx > 0 {
+                                guard controller.canPlayNext else { return }
+                                Haptics.play(.skipNext)
+                                controller.next()
+                            } else {
+                                guard controller.canPlayPrevious else { return }
+                                Haptics.play(.skipPrevious)
+                                controller.previous()
+                            }
+                            return
+                        }
                         guard abs(dy) > abs(dx) else { return }
                         if dy < -60 && pane == .main {
                             Haptics.play(.expand)
@@ -120,7 +136,7 @@ extension NowPlayingView {
                         }
                     }
             )
-            .accessibilityHint("Swipe up for Up Next, swipe down to return to the player.")
+            .accessibilityHint("Swipe up for Up Next, swipe down to return to the player, swipe sideways to skip.")
         }
     }
 

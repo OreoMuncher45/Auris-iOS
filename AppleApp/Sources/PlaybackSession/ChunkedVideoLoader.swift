@@ -18,7 +18,7 @@ final class ChunkedVideoLoader: NSObject, AVAssetResourceLoaderDelegate, @unchec
     private static let chunkBytes: Int64 = 1 << 20
     private static let parallel: Int64 = 4
 
-    let queue = DispatchQueue(label: "app.bitchord.video-loader")
+    let queue = DispatchQueue(label: "app.auris.video-loader")
     private let source: URL
     private let headers: [String: String]
     private let lock = NSLock()

@@ -149,9 +149,9 @@ struct SourcesView: View {
                 onMetered: isMetered,
                 ceiling: ceilingLabel,
                 onClick: config.needsServer ? { editing = config } : nil,
-                // YouTube gets no switch at all. It needs no configuration, so a
-                // switch off it would be a switch hiding itself — and
-                // `SourceRegistry.setEnabled` refuses it there for the same reason.
+                // Every source can be switched off, YouTube included: the
+                // switch decides where the audio comes from. The catalogue the
+                // app browses still comes from YouTube.
                 onToggle: toggle(for: config),
                 // The grip is last in the row and deliberately outside the
                 // dimming: a source switched off still has a position worth
@@ -274,9 +274,8 @@ struct SourcesView: View {
     }
 
     /// Nil for a source that cannot be switched off, which the row renders as a
-    /// label rather than a switch.
+    /// label rather than a switch. Every source has one.
     private func toggle(for config: ConfigDocument) -> ((Bool) -> Void)? {
-        if config.kind == "YOUTUBE" { return nil }
         return { on in
             // JioSaavn is opt-in because its catalogue matching can select a
             // different recording, so the switch asks first.

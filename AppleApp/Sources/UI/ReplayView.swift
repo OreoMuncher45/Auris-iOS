@@ -524,7 +524,7 @@ struct ReplayCreditCardView: View {
                 )
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("BITCHORD")
+                        Text("AURIS")
                             .font(.caption2.weight(.bold))
                             .tracking(1.4)
                         Spacer()
@@ -1010,7 +1010,7 @@ private struct ReplayPosterView: View {
                 // 300pt one because someone set their text large. It is a rendered
                 // artefact, like a chart's axis labels, not interface text.
                 VStack(alignment: .leading, spacing: 16 * k) {
-                    Text("BITCHORD REPLAY")
+                    Text("AURIS REPLAY")
                         .scaledFont(size: 30 * k, weight: .bold)
                         .tracking(2 * k)
                         .foregroundStyle(.white.opacity(0.7))

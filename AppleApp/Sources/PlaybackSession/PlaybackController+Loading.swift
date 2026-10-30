@@ -12,7 +12,13 @@ import AppKit
 
 // Loading a queue entry into the engine, including Dolby Atmos.
 extension PlaybackController {
-    func loadCurrent(_ index: Int, startAt: Double? = nil, refreshAutoplay: Bool = true, freshResolution: Bool = false) {
+    func loadCurrent(
+        _ index: Int,
+        startAt: Double? = nil,
+        refreshAutoplay: Bool = true,
+        freshResolution: Bool = false,
+        intent: LoadIntent = .selection
+    ) {
         guard queue.indices.contains(index) else { return }
         startEngineIfNeeded()
         let engineStartupTask = self.engineStartupTask
@@ -81,6 +87,7 @@ extension PlaybackController {
         lastError = nil
         state = .buffering
         holdAfterLoad = false
+        pendingLoadIntent = intent
         loadingGeneration = generation
         if refreshAutoplay {
             maybeAutoplay(force: true)
@@ -115,14 +122,21 @@ extension PlaybackController {
         let resume = startAt ?? 0
         let task = Task.detached(priority: .utility) {
             do {
+                // The engine boot and the source resolution are independent
+                // work: the network round trip does not need the output, and
+                // the output does not need the URL. Resolving while the engine
+                // starts takes the HAL/cpal boot — about a second — off the
+                // path of the first song, which is the one that has no warm
+                // engine and no warm cache.
+                async let resolution = await Self.resolveSource(
+                    entry, prefs: prefs, freshResolution: requiresFreshResolution, latencyResolved: latencyRecorder
+                )
                 // In particular, after a cold restore the output task and the
                 // track resolver used to race. A quick local/cache resolve
                 // could send LoadTrack before the engine had an output stream;
                 // the UI then had lyrics and a playing state without audio.
                 try await engineStartupTask?.value
-                let outcome = try await Self.resolveSource(
-                    entry, prefs: prefs, freshResolution: requiresFreshResolution, latencyResolved: latencyRecorder
-                )
+                let outcome = try await resolution
                 let stillCurrent = await MainActor.run { [weak self] in
                     self?.playGeneration == generation
                 }

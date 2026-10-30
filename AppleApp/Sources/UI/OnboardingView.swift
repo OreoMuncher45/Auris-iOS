@@ -47,7 +47,7 @@ struct OnboardingView: View {
     private var welcome: some View {
         VStack(spacing: 22) {
             Spacer(minLength: 20)
-            Image(.bchLogo)
+            Image(.aurisLogo)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 92, height: 62)

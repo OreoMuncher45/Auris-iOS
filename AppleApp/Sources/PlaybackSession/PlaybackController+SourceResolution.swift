@@ -42,6 +42,10 @@ extension PlaybackController {
         var resolutionAt: TimeInterval? = nil
         var origin: Origin = .other
         var youtubeVideoId: String? = nil
+        /// Which configured source supplied this stream, when one did. An
+        /// add-on's id, so the player can name it instead of saying
+        /// "Alternative source".
+        var sourceConfigId: String? = nil
 
         enum Origin: String, Sendable { case local, cache, youtube, substitute, other }
 
@@ -64,6 +68,20 @@ extension PlaybackController {
         let source: ResolvedSource
         let leftover: Task<QualityUpgrade.Candidate?, Never>?
         var decisionNote: String? = nil
+    }
+
+    /// How many manual taps in a row the substitute lookup failed to answer in
+    /// time. Each one shortens the head start it gets on the next tap.
+    @MainActor static var losslessRaceTimeouts = 0
+
+    /// The head start a substitute lookup gets on a manual tap.
+    ///
+    /// It starts at a second and a half — long enough for a healthy addon to
+    /// answer — and shrinks with every race it loses, down to the same budget
+    /// an ordinary source gets. An addon that never answers in time then
+    /// costs the first sound of a song nothing.
+    @MainActor static var manualLosslessBudget: TimeInterval {
+        max(0.8, 1.5 - 0.35 * Double(losslessRaceTimeouts))
     }
 
     struct ResolvePrefs: Sendable {
@@ -132,7 +150,8 @@ extension PlaybackController {
                     source: ResolvedSource(
                         source: stream.url, headers: stream.headers, kbps: stream.kbps ?? 0,
                         lossless: stream.lossless, codec: stream.codec,
-                        durationSec: stream.durationSec, origin: .substitute
+                        durationSec: stream.durationSec, origin: .substitute,
+                        sourceConfigId: stream.sourceConfigId
                     ),
                     leftover: nil, decisionNote: report.explanation
                 )
@@ -183,6 +202,11 @@ extension PlaybackController {
         // rather than after it, or a revert still costs a network round trip to
         // arrive at the answer it already knew.
         if OriginalVersion.shared.isPinned(videoId: videoId) {
+            guard Self.youtubeAllowed else {
+                throw InnertubeStreamResolver.StreamError(
+                    message: "YouTube is switched off in Sources, and no add-on could play this track."
+                )
+            }
             let source = try await Self.resolveYouTube(videoId: videoId, prefs: prefs)
             await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                    "cold", source.clientName ?? "unknown")
@@ -206,6 +230,25 @@ extension PlaybackController {
         )
     }
 
+    /// Whether YouTube's own streams may be played right now.
+    ///
+    /// The sources screen can switch YouTube off. The switch decides where the
+    /// audio comes from: with YouTube off, a track is served by the sources
+    /// ranked above it or not at all.
+    private static var youtubeAllowed: Bool {
+        SourceResolverBridge.shared.youtubeEnabled()
+    }
+
+    /// A substitute stream, with the source that supplied it.
+    ///
+    /// The candidate is what the engine loads and the quality upgrade compares;
+    /// the config id is what the player shows, so "Add-on" can be the add-on's
+    /// own name.
+    private struct SubstituteLookup: Sendable {
+        var candidate: QualityUpgrade.Candidate
+        var sourceConfigId: String?
+    }
+
     /// Upstream `resolveWithModulePriority`: start YouTube and substitutes
     /// together. Lossless gives configured sources up to three seconds to answer
     /// before a ready YouTube fallback is selected. A lookup that loses is **not** cancelled — it is handed
@@ -217,7 +260,7 @@ extension PlaybackController {
         latencyResolved: PlaybackLatencyRecorder? = nil
     ) async throws -> ResolveOutcome {
         let report = PlaybackLookupReport()
-        let lookup = Task<QualityUpgrade.Candidate?, Never> {
+        let lookup = Task<SubstituteLookup?, Never> {
             if preparationBudget != nil && prefs.canSubstitute && !entry.isVideo {
                 let stream = await SourceSubstitution.prefetch(
                     title: entry.title, artist: entry.artist,
@@ -226,16 +269,31 @@ extension PlaybackController {
                     isExplicit: entry.isExplicit.map { KotlinBoolean(value: $0) },
                     diagnostic: report.record
                 )
-                return stream.map { QualityUpgrade.Candidate(
-                    url: $0.url, headers: $0.headers,
-                    format: QualityUpgrade.Format(codec: $0.codec, kbps: $0.kbps, lossless: $0.lossless),
-                    durationSec: $0.durationSec
+                return stream.map { SubstituteLookup(
+                    candidate: QualityUpgrade.Candidate(
+                        url: $0.url, headers: $0.headers,
+                        format: QualityUpgrade.Format(codec: $0.codec, kbps: $0.kbps, lossless: $0.lossless),
+                        durationSec: $0.durationSec,
+                        sourceConfigId: $0.sourceConfigId
+                    ),
+                    sourceConfigId: $0.sourceConfigId
                 ) }
             }
-            return await Self.resolveSubstitute(entry, prefs: prefs, diagnostic: report.record)?.asCandidate()
+            guard let resolved = await Self.resolveSubstitute(entry, prefs: prefs, diagnostic: report.record)
+            else { return nil }
+            var candidate = resolved.asCandidate()
+            candidate.sourceConfigId = resolved.sourceConfigId
+            return SubstituteLookup(candidate: candidate, sourceConfigId: resolved.sourceConfigId)
         }
         let fallback = Task<ResolvedSource, Error> {
-            try await Self.resolveYouTube(videoId: videoId, prefs: prefs)
+            // YouTube switched off: its own stream is not an answer, and asking
+            // for one anyway would be a request the listener refused.
+            guard Self.youtubeAllowed else {
+                throw InnertubeStreamResolver.StreamError(
+                    message: "YouTube is switched off in Sources, and no add-on could play this track."
+                )
+            }
+            return try await Self.resolveYouTube(videoId: videoId, prefs: prefs)
         }
 
         // Prefer-music-only for a music video: the video's own upload is the
@@ -245,16 +303,17 @@ extension PlaybackController {
         // same switch after the fact (`switchToMusicOnly`); here the wait
         // happens before anything starts, so the video never plays first.
         if prefs.preferMusicOnly, entry.isVideo {
-            if let stream = await lookup.value {
+            if let found = await lookup.value {
                 fallback.cancel()
                 await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cold", "source substitute")
                 return ResolveOutcome(
                     source: ResolvedSource(
-                        source: stream.url, headers: stream.headers,
-                        kbps: stream.format.kbps ?? 0,
-                        lossless: stream.format.lossless, codec: stream.format.codec,
-                        durationSec: stream.durationSec,
-                        origin: .substitute
+                        source: found.candidate.url, headers: found.candidate.headers,
+                        kbps: found.candidate.format.kbps ?? 0,
+                        lossless: found.candidate.format.lossless, codec: found.candidate.format.codec,
+                        durationSec: found.candidate.durationSec,
+                        origin: .substitute,
+                        sourceConfigId: found.sourceConfigId
                     ),
                     leftover: nil
                 )
@@ -267,21 +326,28 @@ extension PlaybackController {
         }
 
         let preferLossless = prefs.wantLossless && prefs.canSubstitute
-        let race = PlaybackSourceRace<QualityUpgrade.Candidate, ResolvedSource>(preferPrimary: preferLossless)
+        let race = PlaybackSourceRace<SubstituteLookup, ResolvedSource>(preferPrimary: preferLossless)
         _ = Task { await race.finishLookup(await lookup.value) }
         _ = Task { await race.finishFallback(try? await fallback.value) }
 
-        let waitSeconds = preferLossless ? (preparationBudget ?? 3) : 0.8
+        // A manual tap gets the substitute a short head start, and less of one
+        // every time the lookup loses that race: an addon that cannot answer
+        // in time must not hold the first sound of every song. The prepared
+        // next track keeps the long budget — it is resolved while the current
+        // song plays, so its head start costs the listener nothing.
+        let waitSeconds = preferLossless ? (preparationBudget ?? Self.manualLosslessBudget) : 0.8
         switch await race.wait(timeoutNanoseconds: UInt64(waitSeconds * 1_000_000_000)) {
-        case .preferred(let stream):
+        case .preferred(let found):
             fallback.cancel()
+            Self.losslessRaceTimeouts = 0
             await latencyResolved?(ProcessInfo.processInfo.systemUptime, "cold", "source substitute")
             let source = ResolvedSource(
-                source: stream.url, headers: stream.headers,
-                kbps: stream.format.kbps ?? 0,
-                lossless: stream.format.lossless, codec: stream.format.codec,
-                durationSec: stream.durationSec,
-                origin: .substitute
+                source: found.candidate.url, headers: found.candidate.headers,
+                kbps: found.candidate.format.kbps ?? 0,
+                lossless: found.candidate.format.lossless, codec: found.candidate.format.codec,
+                durationSec: found.candidate.durationSec,
+                origin: .substitute,
+                sourceConfigId: found.sourceConfigId
             )
             return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
                 ? "A preferred source supplied verified lossless audio." : report.explanation)
@@ -297,11 +363,16 @@ extension PlaybackController {
             // A substitute lookup gets a short head start, then the direct
             // YouTube URL carries first sound while the lookup stays available
             // to the existing in-playback quality-upgrade path.
+            if preparationBudget == nil { Self.losslessRaceTimeouts += 1 }
             do {
                 let source = try await fallback.value
                 await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                        "cold", source.clientName ?? "unknown")
-                return ResolveOutcome(source: source, leftover: lookup, decisionNote: report.explanation ?? (prefs.canSubstitute
+                // The upgrade path wants the candidate; the lookup carries the
+                // source id as well, so it is handed over as a second task
+                // rather than by changing what the upgrade path compares.
+                let leftover = Task<QualityUpgrade.Candidate?, Never> { await lookup.value?.candidate }
+                return ResolveOutcome(source: source, leftover: leftover, decisionNote: report.explanation ?? (prefs.canSubstitute
                 ? "Preferred sources did not provide a verified stream before the playback deadline."
                 : "YouTube is the selected source."))
             } catch {
@@ -339,20 +410,23 @@ extension PlaybackController {
     /// does the original failure stand, and the queue moves on.
     private static func recoverRefusedTrack(
         _ entry: QueueEntry, videoId: String, prefs: ResolvePrefs,
-        lookup: Task<QualityUpgrade.Candidate?, Never>, error: Error
+        lookup: Task<SubstituteLookup?, Never>, error: Error
     ) async throws -> ResolvedSource {
-        if let stream = await lookup.value {
+        if let found = await lookup.value {
             PlaybackDebugLog.shared.record("YouTube refused; playing the same recording from another catalogue", about: videoId)
             return ResolvedSource(
-                source: stream.url, headers: stream.headers,
-                kbps: stream.format.kbps ?? 0,
-                lossless: stream.format.lossless, codec: stream.format.codec,
-                durationSec: stream.durationSec,
-                origin: .substitute
+                source: found.candidate.url, headers: found.candidate.headers,
+                kbps: found.candidate.format.kbps ?? 0,
+                lossless: found.candidate.format.lossless, codec: found.candidate.format.codec,
+                durationSec: found.candidate.durationSec,
+                origin: .substitute,
+                sourceConfigId: found.sourceConfigId
             )
         }
-        // The counterpart is another YouTube ask, which a bot check refuses too.
+        // The counterpart is another YouTube ask, which a bot check refuses too
+        // — and which a switched-off YouTube refuses as well.
         if !InnertubeStreamResolver.StreamError.isBotCheck(error),
+           Self.youtubeAllowed,
            let twin = await counterpart(of: entry, videoId: videoId) {
             do {
                 var source = try await resolveYouTube(videoId: twin, prefs: prefs)
@@ -568,7 +642,8 @@ extension PlaybackController {
             kbps: stream.kbps ?? 0,
             lossless: stream.lossless, codec: stream.codec,
             durationSec: stream.durationSec,
-            origin: .substitute
+            origin: .substitute,
+            sourceConfigId: stream.sourceConfigId
         )
     }
 
@@ -649,6 +724,8 @@ extension PlaybackController {
         urlPrefetchFingerprint = fingerprint
         urlPrefetchTask?.cancel()
         guard !prefetch.isEmpty else { return }
+        // YouTube switched off: there is no YouTube URL to warm.
+        guard Self.youtubeAllowed else { return }
         PlaybackDebugLog.shared.record("latency: prefetch url \(prefetch.count) rows")
         urlPrefetchTask = Task.detached(priority: .utility) { [weak self] in
             for entry in prefetch {
