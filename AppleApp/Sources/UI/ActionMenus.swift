@@ -1,5 +1,9 @@
 import SwiftUI
 import AurisShared
+#if os(iOS)
+import Photos
+import UIKit
+#endif
 
 /// Apple equivalent of upstream `SongActionsSheet` / `BrowseActionsSheet`:
 /// context menu on both platforms, swipe actions on iOS.
@@ -88,6 +92,28 @@ struct SongActionButtons: View {
         if !entry.isLocal {
             downloadRow(entry)
         }
+        // Upstream's song menu carries the spatial switch and the replay, and
+        // the port had them only in settings — a walk to another screen for
+        // something the player itself controls.
+        if entry.id == controller.current?.id {
+            Divider()
+            Button(spatialTitle, systemImage: "airpodspro") {
+                let next = !PlatformSettings.shared.getBoolean(key: "spatial_audio", default: false)
+                PlatformSettings.shared.putBoolean(key: "spatial_audio", value: next)
+                controller.applySpatialPreference(enabled: next)
+                toast.show(next ? "Spatial audio on" : "Spatial audio off")
+            }
+        }
+        Button("Your Replay", systemImage: "chart.bar.xaxis") {
+            appModel.replayPresented = true
+        }
+        #if os(iOS)
+        if entry.artworkData != nil || entry.thumbnailUrl != nil {
+            Button("Save Cover Art", systemImage: "square.and.arrow.down") {
+                saveCoverArt(entry)
+            }
+        }
+        #endif
         if WebDavStore.shared.canUpload(path: entry.source, id: entry.id) {
             Button("Upload to WebDAV", systemImage: "arrow.up.doc") {
                 toast.show("Uploading \(entry.title)…", kind: .info)
@@ -124,6 +150,52 @@ struct SongActionButtons: View {
                 toast.showTrackLog(entry)
             }
         }
+    }
+
+    #if os(iOS)
+    /// Saves the sleeve to the photo library, as upstream's menu row does.
+    ///
+    /// The artwork is usually already in hand; when it is not, it is fetched
+    /// once rather than asking the library for permission before there is
+    /// anything to save.
+    private func saveCoverArt(_ entry: QueueEntry) {
+        Task { @MainActor in
+            guard let image = await coverImage(for: entry) else {
+                toast.show("No cover art to save", kind: .failure)
+                return
+            }
+            let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+            guard status == .authorized || status == .limited else {
+                toast.show("Photos access is needed to save the cover", kind: .failure)
+                return
+            }
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }, completionHandler: { success, error in
+                Task { @MainActor in
+                    if success {
+                        toast.show("Cover saved", kind: .success)
+                    } else {
+                        toast.show(error?.localizedDescription ?? "Couldn't save the cover", kind: .failure)
+                    }
+                }
+            })
+        }
+    }
+
+    private func coverImage(for entry: QueueEntry) async -> UIImage? {
+        if let data = entry.artworkData, let image = UIImage(data: data) { return image }
+        guard let raw = entry.thumbnailUrl, let url = URL(string: raw) else { return nil }
+        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return nil }
+        return UIImage(data: data)
+    }
+    #endif
+
+    /// The spatial row says what the tap will do, not what the state is.
+    private var spatialTitle: String {
+        PlatformSettings.shared.getBoolean(key: "spatial_audio", default: false)
+            ? "Turn Off Spatial Audio"
+            : "Turn On Spatial Audio"
     }
 
     private var shareURL: URL {

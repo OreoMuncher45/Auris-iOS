@@ -144,7 +144,7 @@ final class InnertubeStreamResolver: Sendable {
                 return "Playback is temporarily unavailable. Try again shortly."
             }
             if said.contains("not a bot") {
-                return "YouTube is asking this network to confirm it isn’t a bot, so it won’t serve audio for now. Switching between Wi-Fi and mobile data, or waiting a while, usually clears it."
+                return "YouTube is asking this network to confirm it isn’t a bot, so it won’t serve audio for now. That is a verdict on the network rather than on your account, so signing in does not clear it. Switching between Wi-Fi and mobile data, or waiting a while, usually does."
             }
             if said.contains("sign in") {
                 return "YouTube is asking this device to sign in before it will serve anything. That is YouTube's gate rather than anything to do with the track."

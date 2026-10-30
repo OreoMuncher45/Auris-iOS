@@ -210,6 +210,10 @@ final class AuthController {
                     self.accountPhotoUrl = info.photoUrl
                     self.publishAccount()
                     Task { await self.refreshAccount() }
+                    // A signed-in session has its own player config to fetch and
+                    // its own PoToken to mint. Paying for them here means the
+                    // first track after signing in does not wait on them.
+                    PlayerBridge.shared.warmUpstream()
                     onComplete?(true)
                 }
             })

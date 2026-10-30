@@ -48,7 +48,7 @@ struct UpNextPane: View {
                     .font(.title2.weight(.bold))
                     .foregroundStyle(.white)
                 Spacer()
-                if !manualUpcoming.isEmpty || !autoplayUpcoming.isEmpty {
+                if !userQueueUpcoming.isEmpty || !playlistUpcoming.isEmpty || !autoplayUpcoming.isEmpty {
                     Button("Clear") { controller.clearUpcoming() }
                         .buttonStyle(.plain)
                         .font(.callout.weight(.semibold))
@@ -58,7 +58,7 @@ struct UpNextPane: View {
             .padding(.horizontal, 24)
             .id("queueTop")
 
-            if controller.current == nil && manualUpcoming.isEmpty && autoplayUpcoming.isEmpty {
+            if controller.current == nil && userQueueUpcoming.isEmpty && playlistUpcoming.isEmpty && autoplayUpcoming.isEmpty {
                 Text("Nothing playing.")
                     .font(.callout)
                     .foregroundStyle(.white.opacity(0.55))
@@ -90,19 +90,35 @@ struct UpNextPane: View {
                                 .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 6, trailing: 24))
                             currentQueueRow
                         }
-                        if !manualUpcoming.isEmpty {
-                            Text("Up next")
+                        if !userQueueUpcoming.isEmpty {
+                            Text("Queue")
                                 .font(.headline.weight(.medium))
                                 .foregroundStyle(.white.opacity(0.75))
                                 .padding(.top, 16)
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                                 .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 6, trailing: 24))
-                            ForEach(Array(manualUpcoming.enumerated()), id: \.element.id) { localIndex, item in
-                                queueListRow(item, section: 0, index: localIndex, rows: manualUpcoming)
+                            ForEach(Array(userQueueUpcoming.enumerated()), id: \.element.id) { localIndex, item in
+                                queueListRow(item, section: 0, index: localIndex, rows: userQueueUpcoming)
                             }
-                            .onMove { source, dest in move(source, dest, rows: manualUpcoming) }
-                            .onDelete { offsets in remove(offsets, rows: manualUpcoming) }
+                            .onMove { source, dest in move(source, dest, rows: userQueueUpcoming) }
+                            .onDelete { offsets in remove(offsets, rows: userQueueUpcoming) }
+                        }
+                        if !playlistUpcoming.isEmpty {
+                            // "Next from …", as upstream names the playlist the
+                            // rest of the queue came from.
+                            Text(playlistHeading)
+                                .font(.headline.weight(.medium))
+                                .foregroundStyle(.white.opacity(0.75))
+                                .padding(.top, 16)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 6, trailing: 24))
+                            ForEach(Array(playlistUpcoming.enumerated()), id: \.element.id) { localIndex, item in
+                                queueListRow(item, section: 1, index: localIndex, rows: playlistUpcoming)
+                            }
+                            .onMove { source, dest in move(source, dest, rows: playlistUpcoming) }
+                            .onDelete { offsets in remove(offsets, rows: playlistUpcoming) }
                         }
                         if controller.autoplayEnabled || !autoplayUpcoming.isEmpty {
                             HStack(spacing: 8) {
@@ -128,7 +144,7 @@ struct UpNextPane: View {
                             .listRowInsets(EdgeInsets(top: 14, leading: 24, bottom: 14, trailing: 24))
                             if !autoplayUpcoming.isEmpty {
                                 ForEach(Array(autoplayUpcoming.enumerated()), id: \.element.id) { localIndex, item in
-                                    queueListRow(item, section: 1, index: localIndex, rows: autoplayUpcoming)
+                                    queueListRow(item, section: 2, index: localIndex, rows: autoplayUpcoming)
                                 }
                                 .onMove { source, dest in move(source, dest, rows: autoplayUpcoming) }
                                 .onDelete { offsets in remove(offsets, rows: autoplayUpcoming) }
@@ -208,10 +224,13 @@ struct UpNextPane: View {
                 ArtworkView(entry: controller.current, side: 40)
                     .clipShape(.rect(cornerRadius: 6, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(controller.current?.title ?? "")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(controller.current?.title ?? "")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        explicitChip(controller.current)
+                    }
                     ArtistCreditText(
                         credit: controller.current?.artist ?? "",
                         font: .caption,
@@ -230,12 +249,46 @@ struct UpNextPane: View {
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
         .id("nowPlaying")
+        // Swiping the playing track to the right skips it. The row itself is a
+        // button that replays the same track, so the skip lives on the swipe.
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                guard controller.canPlayNext else { return }
+                Haptics.play(.skipNext)
+                controller.next()
+            } label: {
+                Label("Skip", systemImage: "forward.end.fill")
+            }
+            .tint(.orange)
+        }
     }
 
     private var historyRows: [QueueRow] {
         guard showQueueHistory, controller.playingIndex > 0 else { return [] }
         return (0..<min(controller.playingIndex, controller.queue.count)).map { index in
             QueueRow(index: index, entry: controller.queue[index])
+        }
+    }
+
+    /// The heading over the playlist rows: where they came from.
+    private var playlistHeading: String {
+        if let context = controller.playbackContext, !context.isEmpty {
+            return "Next from \(context)"
+        }
+        return "Up next"
+    }
+
+    /// The explicit chip beside a title, as upstream draws it in the queue.
+    @ViewBuilder
+    private func explicitChip(_ entry: QueueEntry?) -> some View {
+        if entry?.isExplicit == true {
+            Text("E")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.8))
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 3))
+                .accessibilityLabel("Explicit")
         }
     }
 
@@ -247,10 +300,13 @@ struct UpNextPane: View {
                 ArtworkView(entry: item.entry, side: 44)
                     .clipShape(.rect(cornerRadius: 6, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.entry.title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(item.entry.title)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        explicitChip(item.entry)
+                    }
                     Text(item.entry.artist)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.65))
@@ -286,10 +342,13 @@ struct UpNextPane: View {
                     ArtworkView(entry: item.entry, side: 44)
                         .clipShape(.rect(cornerRadius: 6, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.entry.title)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
+                        HStack(spacing: 5) {
+                            Text(item.entry.title)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                            explicitChip(item.entry)
+                        }
                         Text(item.entry.artist)
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.65))
@@ -322,9 +381,18 @@ struct UpNextPane: View {
 
     private var autoplayStart: Int { controller.autoplaySectionStart }
 
-    /// Upcoming manual rows — never includes AutoPlay, never the playing track.
-    private var manualUpcoming: [QueueRow] {
+    /// The songs the listener queued by name — upstream Android's USER_QUEUE
+    /// block. They play before the playlist they came from.
+    private var userQueueUpcoming: [QueueRow] {
         rows(in: controller.firstMovableQueueIndex..<autoplayStart)
+            .filter { controller.isUserQueued($0.entry) }
+    }
+
+    /// The playlist rows still ahead, without the listener's own additions and
+    /// without the AutoPlay tail.
+    private var playlistUpcoming: [QueueRow] {
+        rows(in: controller.firstMovableQueueIndex..<autoplayStart)
+            .filter { !controller.isUserQueued($0.entry) }
     }
 
     private var autoplayUpcoming: [QueueRow] {
@@ -381,7 +449,7 @@ struct UpNextPane: View {
     /// What the row-motion animation tracks: every move changes it, nothing
     /// else does.
     private var queueSignature: String {
-        (manualUpcoming.map(\.id) + autoplayUpcoming.map(\.id)).joined(separator: "|")
+        (userQueueUpcoming.map(\.id) + playlistUpcoming.map(\.id) + autoplayUpcoming.map(\.id)).joined(separator: "|")
     }
 
     private func move(_ source: IndexSet, _ dest: Int, rows: [QueueRow]) {

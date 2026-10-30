@@ -166,7 +166,7 @@ extension PlaybackController {
                 about: entry.id
             )
             automaticLoadEntryId = queue[next].id
-            loadCurrent(next, refreshAutoplay: true)
+            loadCurrent(next, refreshAutoplay: true, intent: .transport)
             return
         }
         automaticLoadEntryId = nil

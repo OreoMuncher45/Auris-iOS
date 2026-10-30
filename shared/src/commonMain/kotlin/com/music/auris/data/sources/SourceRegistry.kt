@@ -144,7 +144,6 @@ object SourceRegistry {
             .filterNot { it.kind == SourceKind.MODULE }
             .map { config ->
                 when {
-                    config.kind == SourceKind.YOUTUBE && !config.enabled -> config.copy(enabled = true)
                     config.kind == SourceKind.JIOSAAVN && forceJioSaavnOff -> config.copy(enabled = false)
                     else -> config
                 }
@@ -298,16 +297,15 @@ object SourceRegistry {
     /**
      * Turns one source on or off.
      *
-     * YouTube is not switchable and silently ignores a request to disable it. It
-     * is the only source that can supply a home feed, radio or related tracks,
-     * and nothing else holds the full catalogue — switching it off does not even
-     * stop it being played, because a YouTube-queued track whose substitutes all
-     * miss still falls back to it. A switch that cannot honour its own off
-     * position is worse than no switch, so it is not offered one.
+     * Every source is switchable, YouTube included. What YouTube off means is
+     * narrow and honest: YouTube's own streams are not played, so a track is
+     * served by the sources ranked above it or not at all. The catalogue the app
+     * browses still comes from YouTube — home, radio and search need it, and no
+     * other source holds one — so the switch is about where audio comes from,
+     * not about what the app can show.
      */
     fun setEnabled(configId: String, enabled: Boolean) {
         init()
-        if (!enabled && config(configId)?.kind == SourceKind.YOUTUBE) return
         publish(_configs.value.map { if (it.id == configId) it.copy(enabled = enabled) else it })
     }
 

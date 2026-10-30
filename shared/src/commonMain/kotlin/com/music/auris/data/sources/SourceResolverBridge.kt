@@ -390,6 +390,26 @@ object SourceResolverBridge {
      */
     fun addonCount(): Int = runCatching { SourceRegistry.active().count { it is AddonSource } }.getOrDefault(0)
 
+    /**
+     * Whether YouTube's own streams may be played right now.
+     *
+     * The sources screen can switch YouTube off, and the player has to honour
+     * that: a track is then served by the sources ranked above it, or not at
+     * all. The catalogue the app browses is unaffected — only the audio is.
+     */
+    fun youtubeEnabled(): Boolean =
+        runCatching { SourceRegistry.active().any { it.kind == SourceKind.YOUTUBE } }.getOrDefault(true)
+
+    /**
+     * The display name of one configured source, for the player's source row.
+     *
+     * A stream that came from an add-on carries the add-on's config id, and the
+     * id means nothing to a listener: "Alternative source" and "Add-on" are
+     * placeholders for a name the app already has.
+     */
+    fun displayName(configId: String): String? =
+        runCatching { SourceRegistry.config(configId)?.displayName }.getOrNull()
+
     fun setEnabled(configId: String, enabled: Boolean, callback: ActionCallback) {
         sourceAction(callback) { SourceRegistry.setEnabled(configId, enabled) }
     }

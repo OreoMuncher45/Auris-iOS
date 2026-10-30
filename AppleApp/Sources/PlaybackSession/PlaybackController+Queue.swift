@@ -535,6 +535,41 @@ extension PlaybackController {
         min(playingIndex + 1, autoplaySectionStart)
     }
 
+    /// A row the listener queued by name: no place in the originating
+    /// playlist, and not an AutoPlay suggestion either.
+    func isUserQueued(_ entry: QueueEntry) -> Bool {
+        entry.contextOrder == nil && !entry.fromAutoplay
+    }
+
+    /// Where a song the listener adds to the queue belongs.
+    ///
+    /// Upstream Android calls this block USER_QUEUE: the songs a person asked
+    /// for by name sit directly behind the playing track and ahead of the
+    /// playlist they came from, so "add to queue" never buries a song at the
+    /// bottom of a long list. Play next still jumps the whole block.
+    var userQueueInsertionIndex: Int {
+        let start = min(playingIndex + 1, queue.count)
+        for index in start..<queue.count where !isUserQueued(queue[index]) {
+            return index
+        }
+        return queue.count
+    }
+
+    /// The songs the listener queued by name, in queue order.
+    var userQueuedUpcoming: [QueueEntry] {
+        let start = firstMovableQueueIndex
+        guard start < autoplaySectionStart else { return [] }
+        return queue[start..<autoplaySectionStart].filter { isUserQueued($0) }
+    }
+
+    /// The playlist rows that are still ahead, without the listener's own
+    /// additions and without the AutoPlay tail.
+    var playlistUpcoming: [QueueEntry] {
+        let start = firstMovableQueueIndex
+        guard start < autoplaySectionStart else { return [] }
+        return queue[start..<autoplaySectionStart].filter { !isUserQueued($0) }
+    }
+
     static func autoplaySectionStart(fromAutoplay: [Bool], currentIndex: Int) -> Int {
         let after = min(max(currentIndex + 1, 0), fromAutoplay.count)
         if after >= fromAutoplay.count { return fromAutoplay.count }
@@ -543,6 +578,10 @@ extension PlaybackController {
 
     /// Upstream `addToQueue`: the item joins the end of what the *listener*
     /// queued, which outranks whatever AutoPlay lined up behind it.
+    ///
+    /// That block sits directly behind the playing track, ahead of the playlist
+    /// rows it would otherwise land at the bottom of — the same USER_QUEUE
+    /// block upstream Android keeps (see `userQueueInsertionIndex`).
     ///
     /// Adding to an idle player is also how playback *starts*. Upstream inserts
     /// into the player's own playlist, and ExoPlayer takes an item added to an
@@ -557,7 +596,7 @@ extension PlaybackController {
         entry.contextOrder = nil
         entry.fromAutoplay = false
         removeAutoplayDuplicate(of: entry)
-        let at = min(autoplaySectionStart, queue.count)
+        let at = wasEmpty ? 0 : userQueueInsertionIndex
         queue.insert(entry, at: at)
         queueEditRevision &+= 1
         persistSession()

@@ -18,12 +18,14 @@ extension PlaybackController {
         return PlaybackSourceLabel.name(
             origin: resolvedOrigin[current.id]?.rawValue,
             source: current.source,
-            isLocal: current.isLocal
+            isLocal: current.isLocal,
+            sourceConfigId: resolvedSourceConfigId[current.id]
         )
     }
 
     func noteResolved(_ entry: QueueEntry, outcome: ResolveOutcome, prefs: ResolvePrefs) {
         resolvedOrigin[entry.id] = outcome.source.origin
+        resolvedSourceConfigId[entry.id] = outcome.source.sourceConfigId
         sourceDecisionNotes[entry.id] = outcome.decisionNote
         if let videoId = outcome.source.youtubeVideoId { resolvedVideoIds[outcome.source.source] = videoId }
         prepareRegions(source: outcome.source.source, videoId: outcome.source.youtubeVideoId)
@@ -339,6 +341,7 @@ extension PlaybackController {
             guard let self, self.playGeneration == generation, self.nextEntry?.id == mediaId else { return }
             self.adoptAutomixPlan(plan)
             self.resolvedOrigin[mediaId] = .substitute
+            self.resolvedSourceConfigId[mediaId] = stream.sourceConfigId
         }
         QualityUpgrade.unshelve(mediaId)
         log.record("upgrade joined the blend as \(stream.format.summary)", about: mediaId)
@@ -506,6 +509,7 @@ extension PlaybackController {
                 self.loadedSourcePath = info.source
                 self.loadedSourceHeaders = stream.headers
                 self.resolvedOrigin[mediaId] = .substitute
+                self.resolvedSourceConfigId[mediaId] = stream.sourceConfigId
                 self.duration = info.durationSeconds
                 // The playhead is continuous across a swap; the engine keeps it.
                 self.position = engine.positionSeconds()

@@ -259,11 +259,18 @@ extension NowPlayingView {
                     // it at all.
                     actionRowPill
                     #if os(iOS)
-                    Text(outputCaption)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.62))
-                        .lineLimit(1)
-                        .accessibilityLabel(outputCaption)
+                    Button {
+                        Haptics.play(.tap)
+                        showOutputDevice = true
+                    } label: {
+                        Text(outputCaption)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.62))
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(outputCaption)
+                    .accessibilityHint("Shows the audio output")
                     #endif
                 }
                 .frame(maxWidth: leftColumnMaximum - 40)

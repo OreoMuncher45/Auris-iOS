@@ -178,7 +178,7 @@ extension PlaybackController {
         case .off:
             if let next = nextPlayableIndex(after: playingIndex) {
                 automaticLoadEntryId = queue[next].id
-                loadCurrent(next, refreshAutoplay: false)
+                loadCurrent(next, refreshAutoplay: false, intent: .transport)
                 return
             }
             state = .stopped
@@ -213,7 +213,7 @@ extension PlaybackController {
         dolbyRenderer?.stop()
         dolbyRenderer = nil
         engineLoadedId = nil
-        loadCurrent(index, refreshAutoplay: false)
+        loadCurrent(index, refreshAutoplay: false, intent: .transport)
     }
 
     func handleDuration(_ seconds: Double) {

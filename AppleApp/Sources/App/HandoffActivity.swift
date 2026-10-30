@@ -16,7 +16,7 @@ struct PlaybackHandoffPayload: Codable, Equatable {
     /// The activity type. The same string is declared in the app's
     /// `NSUserActivityTypes`, which is what lets the system launch this app for
     /// an activity that arrives from the other device.
-    static let activityType = "app.bitchord.playback"
+    static let activityType = "app.auris.playback"
 
     /// Where the payload rides inside `NSUserActivity.userInfo`.
     static let userInfoKey = "payload"

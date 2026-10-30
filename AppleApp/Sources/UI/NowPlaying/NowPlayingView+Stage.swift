@@ -77,12 +77,14 @@ extension NowPlayingView {
                     if isIPad {
                         artworkStage(side: full, collapsed: false)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                            .offset(x: sleeveOffset)
                     } else {
                         artworkStage(
                             side: hero ? geo.size.width : full,
                             collapsed: false,
                             hero: hero
                         )
+                        .offset(x: sleeveOffset)
                     }
                 }
                 if collapsed {
@@ -101,15 +103,45 @@ extension NowPlayingView {
             .animation(.snappy(duration: 0.28), value: pane)
             // Additive sleeve swipe, upstream's vertical drag: up past 60pt
             // opens Up Next, down while a panel is up returns to the player.
-            // The pane buttons stay the primary control; this never replaces
-            // them. A plain `gesture` so an open panel's own scroll wins the
-            // touch first.
+            // A horizontal pull skips: right goes to the next track, left to
+            // the previous one. The pane buttons stay the primary control;
+            // this never replaces them. A plain `gesture` so an open panel's
+            // own scroll wins the touch first.
             .gesture(
                 DragGesture(minimumDistance: 30)
+                    .onChanged { value in
+                        // The sleeve follows the finger, damped: a hint that a
+                        // sideways pull skips, not a drag to position. A
+                        // vertical pull is the sleeve's own gesture and leaves
+                        // the artwork where it is.
+                        let dx = value.translation.width
+                        let dy = value.translation.height
+                        guard pane == .main, abs(dx) > abs(dy) else {
+                            sleeveOffset = 0
+                            return
+                        }
+                        sleeveOffset = dx * 0.35
+                    }
                     .onEnded { value in
                         let dy = value.translation.height
                         let dx = value.translation.width
-                        // Clearly vertical before it counts.
+                        withAnimation(.snappy(duration: 0.28)) { sleeveOffset = 0 }
+                        // Horizontal first: a sideways pull is a skip, and the
+                        // vertical sleeve drag only claims a clearly vertical
+                        // one.
+                        if abs(dx) > abs(dy), abs(dx) > 60 {
+                            guard pane == .main else { return }
+                            if dx > 0 {
+                                guard controller.canPlayNext else { return }
+                                Haptics.play(.skipNext)
+                                controller.next()
+                            } else {
+                                guard controller.canPlayPrevious else { return }
+                                Haptics.play(.skipPrevious)
+                                controller.previous()
+                            }
+                            return
+                        }
                         guard abs(dy) > abs(dx) else { return }
                         if dy < -60 && pane == .main {
                             Haptics.play(.expand)
@@ -120,7 +152,7 @@ extension NowPlayingView {
                         }
                     }
             )
-            .accessibilityHint("Swipe up for Up Next, swipe down to return to the player.")
+            .accessibilityHint("Swipe up for Up Next, swipe down to return to the player, swipe sideways to skip.")
         }
     }
 
@@ -170,11 +202,19 @@ extension NowPlayingView {
             .frame(width: side, height: side)
             .overlay(alignment: .top) {
                 if let caption = playbackOriginCaption {
-                    Text(caption)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.92))
-                        .shadow(color: .black.opacity(0.55), radius: 5, y: 1)
-                        .padding(.top, 22)
+                    // Tappable, as upstream's is: the caption says where the
+                    // track came from, and tapping it takes you there — the
+                    // album it is on, or the queue it is in.
+                    Button {
+                        openPlaybackOrigin()
+                    } label: {
+                        Text(caption)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.92))
+                            .shadow(color: .black.opacity(0.55), radius: 5, y: 1)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 22)
                 }
             }
             .accessibilityLabel(controller.current?.title ?? "Nothing playing")
@@ -194,6 +234,18 @@ extension NowPlayingView {
             .padding(.bottom, 20)
             .accessibilityLabel(controller.current?.title ?? "Nothing playing")
         }
+    }
+
+    /// Where the playing track came from, opened from the caption that says so.
+    ///
+    /// The album when the track is on one, the queue otherwise: upstream's
+    /// `openPlaybackOrigin`, narrowed to what the phone can show.
+    private func openPlaybackOrigin() {
+        if let albumId = controller.current?.albumId {
+            appModel.pendingDetail = .detail(browseId: albumId, title: controller.current?.albumName ?? "Album")
+            return
+        }
+        pane = .queue
     }
 
     /// The selected content pane, filling the portrait stage or the requested

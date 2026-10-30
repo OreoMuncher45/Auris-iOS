@@ -44,6 +44,9 @@ enum QualityUpgrade {
         var headers: [String: String]
         var format: Format
         var durationSec: Int?
+        /// Which configured source supplied this stream, so the player can name
+        /// the add-on once the upgrade has joined.
+        var sourceConfigId: String? = nil
     }
 
     struct Target: Sendable {

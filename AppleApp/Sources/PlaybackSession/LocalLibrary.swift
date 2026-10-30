@@ -48,11 +48,13 @@ final class LocalLibrary {
     private var scanID = UUID()
     private var securityURL: URL?
 
-    /// Restores the persisted bookmark and rescans. BITCHORD_LIBRARY_PATH is
+    /// Restores the persisted bookmark and rescans. AURIS_LIBRARY_PATH is
     /// a dev-only override so automated UI tests can seed the library without
-    /// driving the modal open panel.
+    /// driving the modal open panel. The old BITCHORD_LIBRARY_PATH name still
+    /// works, so a test script written against the previous name keeps working.
     func restore() {
-        if let override = ProcessInfo.processInfo.environment["BITCHORD_LIBRARY_PATH"],
+        let environment = ProcessInfo.processInfo.environment
+        if let override = environment["AURIS_LIBRARY_PATH"] ?? environment["BITCHORD_LIBRARY_PATH"],
            !override.isEmpty {
             scan(folder: URL(fileURLWithPath: override))
             return

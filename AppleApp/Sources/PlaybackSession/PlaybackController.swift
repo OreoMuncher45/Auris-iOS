@@ -81,7 +81,7 @@ struct TransitionWindow: Equatable, Sendable {
 
 enum PlaybackLatencySignposts {
     private static let log = OSLog(
-        subsystem: Bundle.main.bundleIdentifier ?? "com.bitchord.app",
+        subsystem: Bundle.main.bundleIdentifier ?? "app.auris.Auris",
         category: "PlaybackLatency"
     )
 
@@ -233,6 +233,17 @@ final class PlaybackController {
     /// The listener paused while the track was still loading: finish the load,
     /// then sit paused at its start instead of discarding it.
     var holdAfterLoad = false
+    /// What asked for the load in flight.
+    ///
+    /// A selection is the listener naming a track: it plays when it is ready,
+    /// and a tap on the transport while it loads is ignored rather than
+    /// parking the load as paused (which is what made people press play a
+    /// second time). A transport advance is a skip: the same tap means pause.
+    enum LoadIntent {
+        case selection
+        case transport
+    }
+    @ObservationIgnored var pendingLoadIntent: LoadIntent = .transport
     /// How often each track has been reloaded after its download failed.
     /// Tracks that failed every way of asking for them, and until when the
     /// queue steps over them instead of stopping on them.
@@ -1021,6 +1032,9 @@ final class PlaybackController {
     @ObservationIgnored var playbackRate = 1.0
 
     var resolvedOrigin: [String: ResolvedSource.Origin] = [:]
+    /// Which configured source supplied each track's stream, when one did.
+    /// The player names it; without this the label can only say "Add-on".
+    @ObservationIgnored var resolvedSourceConfigId: [String: String] = [:]
 
 
     /// The provider picker's model, upstream's `lyricsProviderStates`: every

@@ -555,7 +555,7 @@ struct TopBarLeadingMark: View {
     }
 
     private var mark: some View {
-        Image(.bchLogo)
+        Image(.aurisLogo)
             .resizable()
             .scaledToFit()
             .frame(width: 28, height: 18)

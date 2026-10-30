@@ -55,6 +55,9 @@ struct NowPlayingView: View {
     /// The offset, held here so a change re-renders the lyrics without the sheet
     /// being open. The notification is the signal; this is the value it carries.
     @State var lyricsOffsetMs: Int32 = LyricsOffsetBridge.offsetMs()
+    /// How far the sleeve has followed a sideways pull, damped. The pull is a
+    /// hint that a swipe skips, not a drag to position.
+    @State var sleeveOffset: CGFloat = 0
 
     var body: some View {
         // The platform split has to close *inside* a `Group`: a `#if` in a view
@@ -217,11 +220,21 @@ struct NowPlayingView: View {
         PlatformSettings.shared.getBoolean(key: "legacy_mesh_gradient", default: false)
     }
 
+    /// Upstream `AppSettings.showNerdStats`: codec, bitrate, sample rate and
+    /// the rest of the measured format on the player. The setting was stored
+    /// and never read, so the switch did nothing.
+    private var nerdStatsOn: Bool {
+        PlatformSettings.shared.getBoolean(key: "show_nerd_stats", default: false)
+    }
+
     /// The playback-origin caption under the credits: upstream's
     /// `playbackOriginText` ("Playing from …"), falling back to the nerd line
     /// while a lossless lookup is still racing. Nil when hidden or unknown.
     var songStatusLine: String? {
         guard !hideSongStatus else { return nil }
+        // The measured line replaces the short one while it is switched on —
+        // upstream shows the same line in that slot, not both.
+        if nerdStatsOn, let nerd = controller.nerd { return nerdLine(nerd) }
         var parts: [String] = []
         if let source = controller.playbackSourceName { parts.append(source) }
         if let nerd = controller.nerd {

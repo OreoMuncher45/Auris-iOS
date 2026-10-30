@@ -21,6 +21,12 @@ struct SourcesView: View {
 
     @State private var sourceState = SourceListState.shared
     private var configs: [ConfigDocument] { sourceState.configs }
+    /// Whether YouTube's own streams may be played. The catalogue the app
+    /// browses is YouTube's either way — the switch is about where the audio
+    /// comes from.
+    private var youtubeIsOn: Bool {
+        configs.first { $0.kind == "YOUTUBE" }?.enabled ?? true
+    }
     private var health: [String: Health] { sourceState.health }
     private var probing: Set<String> { sourceState.probing }
     @State private var editing: ConfigDocument?
@@ -149,9 +155,9 @@ struct SourcesView: View {
                 onMetered: isMetered,
                 ceiling: ceilingLabel,
                 onClick: config.needsServer ? { editing = config } : nil,
-                // YouTube gets no switch at all. It needs no configuration, so a
-                // switch off it would be a switch hiding itself — and
-                // `SourceRegistry.setEnabled` refuses it there for the same reason.
+                // Every source can be switched off, YouTube included: the
+                // switch decides where the audio comes from. The catalogue the
+                // app browses still comes from YouTube.
                 onToggle: toggle(for: config),
                 // The grip is last in the row and deliberately outside the
                 // dimming: a source switched off still has a position worth
@@ -229,6 +235,9 @@ struct SourcesView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Reachable means the provider answered its checks. Audio quality is verified separately for each track.")
             Text("If a source does not have a track or cannot be reached, Auris tries the next one. Sources above YouTube can replace its recording when they return a better version.")
+            if !youtubeIsOn {
+                Text("YouTube Music is switched off, so its own recordings are not streamed. Tracks play from the add-ons above it, and a track no addon has will not play. Search, home and your library still come from YouTube Music.")
+            }
             if !AudioRouteState.shared.carriesLossless {
                 Text("Bluetooth compresses the output. Choosing Lossless still allows lossless sources; addons that require a lossless output need a speaker or wired connection.")
             }
@@ -274,9 +283,8 @@ struct SourcesView: View {
     }
 
     /// Nil for a source that cannot be switched off, which the row renders as a
-    /// label rather than a switch.
+    /// label rather than a switch. Every source has one.
     private func toggle(for config: ConfigDocument) -> ((Bool) -> Void)? {
-        if config.kind == "YOUTUBE" { return nil }
         return { on in
             // JioSaavn is opt-in because its catalogue matching can select a
             // different recording, so the switch asks first.

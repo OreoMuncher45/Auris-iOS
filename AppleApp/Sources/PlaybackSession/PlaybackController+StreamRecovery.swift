@@ -63,7 +63,7 @@ extension PlaybackController {
         SourceResolverBridge.shared.refreshPlaybackSources()
         if let videoId = youtubeVideoID(for: entry) { PlayerBridge.shared.forgetPlaybackUrl(videoId: videoId) }
         engineLoadedId = nil
-        loadCurrent(playingIndex, startAt: max(0, at - 0.25), refreshAutoplay: false, freshResolution: true)
+        loadCurrent(playingIndex, startAt: max(0, at - 0.25), refreshAutoplay: false, freshResolution: true, intent: .transport)
         return true
     }
 }
