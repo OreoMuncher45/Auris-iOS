@@ -36,7 +36,7 @@ struct ReleaseAsset: Decodable {
     var url: URL? {
         guard let url = URL(string: browser_download_url), url.scheme == "https",
               url.host == "github.com", url.user == nil, url.password == nil,
-              url.path.hasPrefix("/bagumamartin/BitChord/releases/download/"), !url.path.contains("..") else { return nil }
+              url.path.hasPrefix("/OreoMuncher45/Auris-iOS/releases/download/"), !url.path.contains("..") else { return nil }
         return url
     }
 }

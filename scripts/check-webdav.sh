@@ -44,14 +44,14 @@ for _ in $(seq 1 40); do
   sleep 0.25
 done
 
-fw="$repo/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+fw="$repo/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 bin="$(mktemp -d)/webdav-verify"
 grep -Fq 'refreshAfterUpload: false' "$repo/AppleApp/Sources/UI/Library/DownloadsView.swift"
 grep -Fq 'Upload selected to WebDAV' "$repo/AppleApp/Sources/UI/Library/DownloadsView.swift"
 echo "  ok  Downloads selection uploads through the deferred-refresh batch path"
 xcrun swiftc -O -o "$bin" \
-  -F "$fw" -framework BitChordShared \
-  -Xlinker -rpath -Xlinker "$fw/BitChordShared.framework/Versions/A" \
+  -F "$fw" -framework AurisShared \
+  -Xlinker -rpath -Xlinker "$fw/AurisShared.framework/Versions/A" \
   "$repo/AppleApp/Sources/UI/WebDavStore.swift" \
   "$here/webdav-verify/main.swift"
 

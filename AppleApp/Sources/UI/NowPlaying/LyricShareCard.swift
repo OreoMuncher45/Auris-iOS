@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 import AVKit
 import CoreImage
@@ -107,7 +107,7 @@ struct LyricShareCard: View {
             Spacer(minLength: 0)
 
             HStack {
-                Text("BitChord")
+                Text("Auris")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.55))
                 Spacer(minLength: 8)

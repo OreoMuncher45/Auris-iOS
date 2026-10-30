@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -202,7 +202,7 @@ extension PlaybackController {
                             sessionChannels: sessionFormat?.channels
                         )
                     } catch {
-                        NSLog("[BitChord] track output preparation failed; continuing with current output: \(error)")
+                        NSLog("[Auris] track output preparation failed; continuing with current output: \(error)")
                     }
                     guard loadSubmissionGate.isCurrent(generation) else { return nil as TrackInfoRec? }
                     return try engine.loadTrackPaused(request: loadRequest)

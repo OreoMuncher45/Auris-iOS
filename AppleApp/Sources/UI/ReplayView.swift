@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 enum ReplayStoryPage: Int, CaseIterable, Identifiable {
     case intro, minutes, artists, songs, albums, genres, habits, summary

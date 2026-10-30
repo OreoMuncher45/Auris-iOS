@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Menu-bar and keyboard commands for macOS.
 ///

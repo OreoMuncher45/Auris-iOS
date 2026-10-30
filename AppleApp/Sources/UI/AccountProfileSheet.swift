@@ -2,7 +2,7 @@ import SwiftUI
 #if os(iOS)
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 
 /// Account & Settings hub — Apple-style modal account sheet and profile switcher.
 ///

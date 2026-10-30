@@ -1,7 +1,7 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
-import BitChordShared
+import AurisShared
 
 /// Stable identifiers for the window toolbar's own controls, so toolbar
 /// customisation and SwiftUI's own diffing keep track of them.

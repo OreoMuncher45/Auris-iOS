@@ -2,7 +2,7 @@
 name = "native-core"
 version = "0.1.0"
 edition = "2021"
-description = "BitChord native core: analyzer + decode/mix playback engine behind one UniFFI boundary (spec sections 2 and 3)."
+description = "Auris native core: analyzer + decode/mix playback engine behind one UniFFI boundary (spec sections 2 and 3)."
 
 [lib]
 name = "native_core"

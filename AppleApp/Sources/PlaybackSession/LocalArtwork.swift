@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 final class LocalArtwork: @unchecked Sendable {
     static let shared = LocalArtwork()
     private static let scheme = "bitchord-local-artwork"
-    private let queue = DispatchQueue(label: "app.bitchord.BitChord.local-artwork", qos: .utility)
+    private let queue = DispatchQueue(label: "app.auris.Auris.local-artwork", qos: .utility)
     private let memory = NSCache<NSString, NSData>()
 
     init() {

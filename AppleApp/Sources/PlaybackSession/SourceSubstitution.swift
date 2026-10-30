@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Swift face of the shared module's [SourceResolver].
 ///

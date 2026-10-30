@@ -8,10 +8,10 @@ if [ "$#" -ne 2 ]; then
 fi
 WORK="$ROOT/native-core/target/audio-validation-work/capture-monitor"
 mkdir -p "$WORK"
-FW="$ROOT/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
+FW="$ROOT/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
 xcrun swiftc -O -o "$WORK/capture-output" \
-  -F "$FW" -framework NativeCoreFFI -framework CoreAudio \
+  -F "$FW" -framework AurisCoreFFI -framework CoreAudio \
   -framework AudioToolbox -framework CoreFoundation \
-  "$ROOT/AppleApp/Generated/NativeCore.swift" \
+  "$ROOT/AppleApp/Generated/AurisCore.swift" \
   "$ROOT/scripts/audio-verify/capture-output/main.swift"
 exec "$WORK/capture-output" "$1" "$WORK/capture" "$2"

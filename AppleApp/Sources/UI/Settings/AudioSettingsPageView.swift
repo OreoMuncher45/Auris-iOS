@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Bind to the owning Settings screen so the existing persistence path stays authoritative.
 struct AudioSettingsPreferences: DynamicProperty {
@@ -58,7 +58,7 @@ struct AudioSettingsPageView: View {
     private var readout: AudioSettingsReadout { controller.settingsAudioReadout }
     private var footer: String {
         switch page {
-        case .source: return "This is the quality BitChord requests, not a guarantee of the returned format. Lossless includes Hi-Res when a source supplies it. Downloads have their own quality setting."
+        case .source: return "This is the quality Auris requests, not a guarantee of the returned format. Lossless includes Hi-Res when a source supplies it. Downloads have their own quality setting."
         case .processing: return "Preferences stay saved when an effect cannot run. The status under each option describes the current audio path. Playback speed and transitions remain under Playback."
         case .output: return "Decoded source quality and device output are different stages. Bluetooth may compress a lossless source. Unknown values stay unreported until playback measures them."
         case .technical: return "These preferences affect the device output, not the quality supplied by an addon. The operating system and connected hardware determine which formats are available."

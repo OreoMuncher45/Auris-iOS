@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// How far back a Replay reaches — same three chips as upstream `ReplayPeriod`.
 /// Named separately from the UI's `ReplayPeriod` so both can compile until Replay
@@ -92,7 +92,7 @@ final class ListeningStore {
     /// that lands while another is queued replaces it rather than joining a
     /// queue. State below is main-thread only; the writer hops back to clear it.
     private let persistQueue = DispatchQueue(
-        label: "app.bitchord.BitChord.listening-persist",
+        label: "app.auris.Auris.listening-persist",
         qos: .utility
     )
     /// Fastest the store will rewrite the disk while a track is playing. The
@@ -863,7 +863,7 @@ final class ListeningStore {
         #endif
         let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
-        return root.appendingPathComponent("BitChord/listening", isDirectory: true)
+        return root.appendingPathComponent("Auris/listening", isDirectory: true)
     }
 
     nonisolated static func monthKey(_ date: Date = Date()) -> String {

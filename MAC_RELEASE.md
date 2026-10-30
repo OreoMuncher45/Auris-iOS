@@ -19,13 +19,13 @@ xcodebuild \
   -scheme BitChord \
   -configuration Release \
   -destination 'platform=macOS,arch=arm64' \
-  -archivePath "$TMPDIR/BitChord-mac.xcarchive" \
+  -archivePath "$TMPDIR/Auris-mac.xcarchive" \
   archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=
 
-mkdir -p "$TMPDIR/BitChord-mac-export"
-ditto "$TMPDIR/BitChord-mac.xcarchive/Products/Applications/BitChord.app" \
-  "$TMPDIR/BitChord-mac-export/BitChord.app"
-scripts/package-mac-dmg.sh 1.0.0 "$TMPDIR/BitChord-mac-export"
+mkdir -p "$TMPDIR/Auris-mac-export"
+ditto "$TMPDIR/Auris-mac.xcarchive/Products/Applications/Auris.app" \
+  "$TMPDIR/Auris-mac-export/Auris.app"
+scripts/package-mac-dmg.sh 1.0.0 "$TMPDIR/Auris-mac-export"
 ```
 
 The script checks the app version, stages a copy, removes provisioning profiles
@@ -60,8 +60,8 @@ After moving the app to Applications, an informed user can also clear the
 quarantine flag in Terminal:
 
 ```sh
-xattr -dr com.apple.quarantine "/Applications/BitChord.app"
-open "/Applications/BitChord.app"
+xattr -dr com.apple.quarantine "/Applications/Auris.app"
+open "/Applications/Auris.app"
 ```
 
 This removes the downloaded-file quarantine attribute; it does not add a

@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "srgb:0.98431,0.36078,0.45490,1.00000",
-      "srgb:0.98039,0.13725,0.23137,1.00000"
+      "srgb:0.12941,0.20392,0.41569,1.00000",
+      "srgb:0.04706,0.06275,0.13725,1.00000"
     ]
   },
   "groups" : [
@@ -10,8 +10,8 @@
       "layers" : [
         {
           "glass" : true,
-          "image-name" : "waves.svg",
-          "name" : "waves"
+          "image-name" : "auris-mark.png",
+          "name" : "auris-mark"
         }
       ],
       "shadow" : {

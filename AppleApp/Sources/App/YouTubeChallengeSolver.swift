@@ -18,7 +18,7 @@ final class YouTubeChallengeSolver {
             context.evaluateScript(code)
             try checkException()
         }
-        context.evaluateScript("function bitChordPrepare(code) { var result = {}; Function('_result', code)(result); return result; }")
+        context.evaluateScript("function aurisPrepare(code) { var result = {}; Function('_result', code)(result); return result; }")
         try checkException()
     }
 
@@ -30,7 +30,7 @@ final class YouTubeChallengeSolver {
             try checkException()
             guard let code = result?.objectForKeyedSubscript("preprocessed_player")?.toString(),
                   !code.isEmpty else { throw Failure("Player JavaScript could not be prepared") }
-            functions = context.objectForKeyedSubscript("bitChordPrepare")?.call(withArguments: [code])
+            functions = context.objectForKeyedSubscript("aurisPrepare")?.call(withArguments: [code])
             try checkException()
         }
         guard let function = functions?.objectForKeyedSubscript(type), !function.isNull, !function.isUndefined else {

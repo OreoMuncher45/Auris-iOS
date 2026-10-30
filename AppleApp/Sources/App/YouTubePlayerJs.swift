@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Player timestamp and both media-URL transforms, using one deployment of the
 /// player script and a pinned, bundled solver. Work stays off the main actor.

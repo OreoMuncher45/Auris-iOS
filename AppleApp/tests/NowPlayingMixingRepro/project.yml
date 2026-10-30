@@ -13,7 +13,7 @@ targets:
       - ProbeApp.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.bitchord.BitChord.nowplayingprobe
+        PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris.nowplayingprobe
         CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1,2"
     info:

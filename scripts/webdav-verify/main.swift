@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // The remote library, checked against a real WebDAV server.
 //
@@ -352,7 +352,7 @@ do {
     check("a track on another host has no cover rather than the password handed over", false, describe(error))
 }
 
-let logPath = ProcessInfo.processInfo.environment["WEBDAV_REQUEST_LOG"] ?? "/tmp/bitchord-webdav-requests.log"
+let logPath = ProcessInfo.processInfo.environment["WEBDAV_REQUEST_LOG"] ?? "/tmp/auris-webdav-requests.log"
 if let log = try? String(contentsOfFile: logPath, encoding: .utf8) {
     let refused = log.split(separator: "\n").filter { $0.contains("401") }
     check(

@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// The listener's lyrics timing correction, as the player sees it.
 ///

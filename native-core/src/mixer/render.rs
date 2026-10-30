@@ -422,7 +422,7 @@ pub(super) fn render_available(state: &mut MixerState, ring: &mut Producer<f32>)
                             .map(|v| v.decoder.sanitized_samples())
                             .unwrap_or(0);
                     nerd.queued_target_ms = state.queue_target_ms;
-                    nerd.build_revision = env!("BITCHORD_CORE_REVISION").into();
+                    nerd.build_revision = env!("AURIS_CORE_REVISION").into();
                 }
             }
 
@@ -539,7 +539,7 @@ pub(super) fn render_bitperfect_available(state: &mut MixerState, ring: &mut Pro
                 nerd.loudness_gain_db = None;
                 nerd.loudness_origin = "Bypassed for qualified integer output".into();
                 nerd.queued_target_ms = state.queue_target_ms;
-                nerd.build_revision = env!("BITCHORD_CORE_REVISION").into();
+                nerd.build_revision = env!("AURIS_CORE_REVISION").into();
                 if let Some(v) = state.current.as_ref() {
                     nerd.decoder_implementation = v.decoder.implementation().into();
                     nerd.decoded_layout = v.decoder.layout();

@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import zipfile
 
-BUNDLE_ID = 'app.bitchord.BitChord'
+BUNDLE_ID = 'app.auris.Auris'
 
 
 def identity(plist):
@@ -35,7 +35,7 @@ def prepare(ipa, dmg, ios, mac, output):
     version, build = identity(ios)
     if identity(mac) != (version, build):
         raise ValueError('iOS and Mac must have the same version AND build; no release files were written')
-    revisions = {ios.get('BitChordRevision', 'unknown'), mac.get('BitChordRevision', 'unknown')}
+    revisions = {ios.get('AurisRevision', 'unknown'), mac.get('AurisRevision', 'unknown')}
     if len(revisions) != 1:
         raise ValueError('iOS and Mac must be built from the same revision')
     revision = revisions.pop()
@@ -59,7 +59,7 @@ This release contains one iOS IPA and one Apple Silicon Mac DMG, built from revi
 - **Mac update:** use Version & Updates in BitChord and open the Mac updater. The signed Sparkle feed must name this exact build and DMG.
 - **First Mac install/manual recovery:** open `{dmg.name}` and move BitChord to Applications, replacing the installed app. Do not uninstall the app or delete its data first.
 
-The latest release page is the permanent entry point: https://github.com/bagumamartin/BitChord/releases/latest
+The latest release page is the permanent entry point: https://github.com/OreoMuncher45/Auris-iOS/releases/latest
 The in-app build number distinguishes packages that share a marketing version. Downloading an installer does not itself install it.
 
 SHA-256 checksums are listed in SHA256.txt and release.json. Keep these artifacts immutable once published.
@@ -85,7 +85,7 @@ def main():
         parser.error('Both existing installers are required')
     with zipfile.ZipFile(args.ipa) as archive:
         ios = plistlib.loads(archive.read('Payload/BitChord.app/Info.plist'))
-    with tempfile.TemporaryDirectory(prefix='bitchord-release-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='auris-release-') as temporary:
         mount = Path(temporary) / 'mount'
         mount.mkdir()
         subprocess.run(['hdiutil', 'attach', '-readonly', '-nobrowse', '-mountpoint', str(mount), str(args.dmg.resolve())], check=True, capture_output=True)
@@ -94,7 +94,7 @@ def main():
             result = prepare(args.ipa, args.dmg, ios, mac, args.output_dir)
         finally:
             subprocess.run(['diskutil', 'eject', str(mount)], check=True, capture_output=True)
-    print(f"Prepared BitChord {result['version']} build {result['build']}; no release was published")
+    print(f"Prepared Auris {result['version']} build {result['build']}; no release was published")
 
 
 if __name__ == '__main__':

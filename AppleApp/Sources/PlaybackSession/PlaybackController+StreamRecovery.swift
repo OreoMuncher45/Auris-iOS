@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 extension PlaybackController {
     func pollStreamRecovery() {

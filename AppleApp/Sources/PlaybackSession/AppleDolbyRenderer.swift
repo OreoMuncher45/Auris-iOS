@@ -76,14 +76,14 @@ final class AppleDolbyRenderer {
             await instance.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
             instance.volume = volume
         }
-        NSLog("[BitChord] Apple audio asset track count=%d", tracks.count)
+        NSLog("[Auris] Apple audio asset track count=%d", tracks.count)
         var format: AudioStreamBasicDescription?
         var bitrate = claimedKbps
         for track in tracks {
             let descriptions = try await track.load(.formatDescriptions)
             for description in descriptions {
                 if let value = CMAudioFormatDescriptionGetStreamBasicDescription(description)?.pointee {
-                    NSLog("[BitChord] Apple audio asset format id=%u channels=%u rate=%.0f", value.mFormatID, value.mChannelsPerFrame, value.mSampleRate)
+                    NSLog("[Auris] Apple audio asset format id=%u channels=%u rate=%.0f", value.mFormatID, value.mChannelsPerFrame, value.mSampleRate)
                 }
                 if let value = CMAudioFormatDescriptionGetStreamBasicDescription(description)?.pointee,
                    value.mFormatID == kAudioFormatEnhancedAC3 || value.mFormatID == kAudioFormatAC3 {

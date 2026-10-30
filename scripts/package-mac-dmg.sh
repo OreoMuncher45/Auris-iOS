@@ -45,14 +45,14 @@ done
 [[ "$publish" -eq 0 || "$create_release" -eq 0 ]] || fail "choose either --publish or --create-release"
 [[ "$replace_asset" -eq 0 || "$publish" -eq 1 ]] || fail "--replace-asset requires --publish"
 [[ -d "$export_dir" ]] || fail "export folder does not exist: $export_dir"
-app_source="$export_dir/BitChord.app"
-[[ -d "$app_source" ]] || fail "expected BitChord.app inside: $export_dir"
+app_source="$export_dir/Auris.app"
+[[ -d "$app_source" ]] || fail "expected Auris.app inside: $export_dir"
 if [[ -z "$output_dir" ]]; then output_dir="$export_dir"; fi
 mkdir -p "$output_dir"; output_dir="$(cd "$output_dir" && pwd)"
 input_plist="$app_source/Contents/Info.plist"
 build_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$input_plist")"
 [[ "$build_version" =~ ^[0-9]+$ ]] || fail 'export has no numeric build number'
-dmg_name="BitChord-$version-build$build_version-mac-arm64.dmg"
+dmg_name="Auris-$version-build$build_version-mac-arm64.dmg"
 dmg_path="$output_dir/$dmg_name"
 [[ ! -e "$dmg_path" || "$overwrite" -eq 1 ]] || fail "DMG already exists: $dmg_path (pass --overwrite to replace it)"
 [[ -z "$notes_file" || -f "$notes_file" ]] || fail "release notes file does not exist: $notes_file"
@@ -72,7 +72,7 @@ if [[ "$publish" -eq 1 || "$create_release" -eq 1 ]]; then
   if [[ "$publish" -eq 1 ]]; then
     release_assets="$(gh release view "$tag" --repo "$github_repo" --json assets --jq '.assets[].name')" || fail "GitHub release $tag does not exist; use --create-release for a new release"
     if printf '%s\n' "$release_assets" | grep -Fxq "$dmg_name" && [[ "$replace_asset" -ne 1 ]]; then
-      fail "release already has BitChord-$version.dmg; pass --replace-asset to replace it"
+      fail "release already has Auris-$version.dmg; pass --replace-asset to replace it"
     fi
   elif gh release view "$tag" --repo "$github_repo" >/dev/null 2>&1; then
     fail "GitHub release $tag already exists; use --publish to add or update its asset"
@@ -105,15 +105,15 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 mkdir -p "$stage/payload"
-ditto "$app_source" "$stage/payload/BitChord.app"
-app="$stage/payload/BitChord.app"
-rw_image="$stage/BitChord-$version-rw.dmg"
-created_image="$stage/BitChord-$version-created.dmg"
-candidate="$stage/BitChord-$version.dmg"
+ditto "$app_source" "$stage/payload/Auris.app"
+app="$stage/payload/Auris.app"
+rw_image="$stage/Auris-$version-rw.dmg"
+created_image="$stage/Auris-$version-created.dmg"
+candidate="$stage/Auris-$version.dmg"
 safe_entitlements="$stage/ad-hoc-entitlements.plist"
 widget_entitlements="$stage/widget-ad-hoc-entitlements.plist"
-source_entitlements="$repo_root/AppleApp/BitChord.entitlements"
-source_widget_entitlements="$repo_root/AppleApp/BitChordWidget.entitlements"
+source_entitlements="$repo_root/AppleApp/Auris.entitlements"
+source_widget_entitlements="$repo_root/AppleApp/AurisWidget.entitlements"
 
 printf 'Preparing BitChord %s (build %s) as an unsigned, ad-hoc package…\n' "$version" "$build_version"
 # Save the input signature's entitlement claims before stripping it. The source
@@ -198,12 +198,12 @@ sign_nested "$sparkle/XPCServices/Installer.xpc"
 sign_nested "$sparkle/Autoupdate"
 sign_nested "$sparkle/Updater.app"
 sign_nested "$app/Contents/Frameworks/Sparkle.framework"
-sign_nested "$app/Contents/Frameworks/BitChordShared.framework"
-sign_nested "$app/Contents/Frameworks/NativeCoreFFI.framework"
-sign_nested "$app/Contents/PlugIns/BitChordWidget.appex" "$widget_entitlements"
+sign_nested "$app/Contents/Frameworks/AurisShared.framework"
+sign_nested "$app/Contents/Frameworks/AurisCoreFFI.framework"
+sign_nested "$app/Contents/PlugIns/AurisWidget.appex" "$widget_entitlements"
 while IFS= read -r -d '' code_bundle; do
   case "$code_bundle" in
-    "$app/Contents/Frameworks/Sparkle.framework"|"$app/Contents/Frameworks/BitChordShared.framework"|"$app/Contents/Frameworks/NativeCoreFFI.framework"|"$app/Contents/PlugIns/BitChordWidget.appex"|*/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc|*/Sparkle.framework/Versions/B/XPCServices/Installer.xpc|*/Sparkle.framework/Versions/B/Autoupdate|*/Sparkle.framework/Versions/B/Updater.app) ;;
+    "$app/Contents/Frameworks/Sparkle.framework"|"$app/Contents/Frameworks/AurisShared.framework"|"$app/Contents/Frameworks/AurisCoreFFI.framework"|"$app/Contents/PlugIns/AurisWidget.appex"|*/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc|*/Sparkle.framework/Versions/B/XPCServices/Installer.xpc|*/Sparkle.framework/Versions/B/Autoupdate|*/Sparkle.framework/Versions/B/Updater.app) ;;
     *.appex) sign_nested "$code_bundle" "$widget_entitlements" ;;
     *) sign_nested "$code_bundle" ;;
   esac
@@ -238,24 +238,24 @@ tiffutil -cathidpicheck "$stage/dmg-background-1x.tiff" "$stage/dmg-background-2
 # again from its .DS_Store before making the compressed, read-only distribution.
 create-dmg \
   --overwrite \
-  --volname "BitChord $version" \
+  --volname "Auris $version" \
   --background "$stage/dmg-background.tiff" \
   --volicon "$icon_source" \
   --window-pos 200 120 \
   --window-size 768 540 \
   --text-size 13 \
   --icon-size 128 \
-  --icon "BitChord.app" 192 311 \
-  --hide-extension "BitChord.app" \
+  --icon "Auris.app" 192 311 \
+  --hide-extension "Auris.app" \
   --app-drop-link 576 311 \
   --hdiutil-quiet \
   "$created_image" "$stage/payload"
 
 hdiutil convert "$created_image" -format UDRW -o "$rw_image" >/dev/null
 
-volume_mountpoint="/Volumes/BitChord $version"
+volume_mountpoint="/Volumes/Auris $version"
 if mount | grep -Fq " on $volume_mountpoint ("; then
-  fail "a stale BitChord volume is already mounted at: $volume_mountpoint"
+  fail "a stale Auris volume is already mounted at: $volume_mountpoint"
 fi
 attach_output="$(hdiutil attach -readwrite "$rw_image")"
 mounted_device="$(printf '%s\n' "$attach_output" | awk '/^\/dev\// {print $1; exit}')"
@@ -263,7 +263,7 @@ mountpoint="$(printf '%s\n' "$attach_output" | awk '/\/Volumes\// { sub(/^.*\/Vo
 [[ -n "$mounted_device" && -n "$mountpoint" ]] || fail 'could not find the device and /Volumes mount path for the writable DMG'
 osascript - "$version" "$mountpoint" <<'APPLESCRIPT'
 on run argv
-  set volumeName to "BitChord " & item 1 of argv
+  set volumeName to "Auris " & item 1 of argv
   set mountPath to item 2 of argv
   tell application "Finder"
     set mountedDisk to disk volumeName
@@ -280,7 +280,7 @@ on run argv
     set bounds of targetWindow to {200, 120, 968, 660}
     set icon size of icon view options of targetWindow to 128
     set text size of icon view options of targetWindow to 13
-    set position of item "BitChord.app" of mountedDisk to {192, 311}
+    set position of item "Auris.app" of mountedDisk to {192, 311}
     set position of item "Applications" of mountedDisk to {576, 311}
     close targetWindow
     delay 2
@@ -325,6 +325,6 @@ elif [[ "$create_release" -eq 1 ]]; then
   printf 'This will create and publish GitHub release %s with the DMG and supplied notes.\n' "$tag"
   read -r -p 'Continue? [y/N] ' answer
   [[ "$answer" == "y" || "$answer" == "Y" ]] || fail 'publishing cancelled'
-  gh release create "$tag" "$dmg_path" --repo "$github_repo" --verify-tag --title "BitChord $version" --notes-file "$notes_file"
+  gh release create "$tag" "$dmg_path" --repo "$github_repo" --verify-tag --title "Auris $version" --notes-file "$notes_file"
   printf 'Created GitHub release: %s/releases/tag/%s\n' "$github_repo_url" "$tag"
 fi

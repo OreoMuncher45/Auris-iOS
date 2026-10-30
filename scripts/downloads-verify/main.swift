@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import BitChordShared
+import AurisShared
 
 final class ObservationFlag: @unchecked Sendable {
     private let lock = NSLock()

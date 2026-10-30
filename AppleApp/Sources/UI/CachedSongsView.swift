@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// The playback cache, listed as songs rather than as files.
 ///

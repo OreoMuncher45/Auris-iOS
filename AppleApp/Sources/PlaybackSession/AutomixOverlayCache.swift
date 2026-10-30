@@ -26,7 +26,7 @@ enum AutomixOverlayCache {
 
     private static var directory: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("BitChord", isDirectory: true)
+            .appendingPathComponent("Auris", isDirectory: true)
             .appendingPathComponent(folderName, isDirectory: true)
     }
 
@@ -49,7 +49,7 @@ enum AutomixOverlayCache {
                 systemVersion: ProcessInfo.processInfo.operatingSystemVersionString, overlay: CodableOverlay(overlay)))
             try data.write(to: url, options: .atomic)
         } catch {
-            NSLog("[BitChord] overlay cache write failed: %@", String(describing: error))
+            NSLog("[Auris] overlay cache write failed: %@", String(describing: error))
         }
     }
 

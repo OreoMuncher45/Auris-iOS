@@ -72,7 +72,7 @@ regions="$(cargo test --lib playback_regions::tests 2>&1)" || {
 }
 echo "ok   edge detection trims a relative fade tail and keeps quiet music"
 
-corpus="${AUTOMIX_CORPUS:-$HOME/Library/Caches/BitChord/audio}"
+corpus="${AUTOMIX_CORPUS:-$HOME/Library/Caches/Auris/audio}"
 if [ ! -d "$corpus" ]; then
   echo "automix: plan-order checks passed; no corpus at $corpus"
   exit 0

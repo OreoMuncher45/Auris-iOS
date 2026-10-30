@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Add or edit a source that has an address.
 ///
@@ -147,11 +147,11 @@ struct SourceEditorSheet: View {
     private var urlHelp: String {
         switch config.kind {
         case "MODULE":
-            return "The module index — the JSON document listing plugins. Each plugin ships a JavaScript file that BitChord runs to search and stream."
+            return "The module index — the JSON document listing plugins. Each plugin ships a JavaScript file that Auris runs to search and stream."
         case "CUSTOM_MODULE":
             return "A module index configured by an earlier build. Still works, but new sources should be addons."
         default:
-            return "Paste the addon's URL — either its root or its manifest.json. BitChord reads what it can search and stream, then asks it for tracks over plain HTTP."
+            return "Paste the addon's URL — either its root or its manifest.json. Auris reads what it can search and stream, then asks it for tracks over plain HTTP."
         }
     }
 
@@ -197,7 +197,7 @@ struct SourceEditorSheet: View {
                         detail: detail.isEmpty
                             ? (ok
                                 ? "Reachable"
-                                : "The server answered, but not with something BitChord can use")
+                                : "The server answered, but not with something Auris can use")
                             : detail,
                     )
                 }

@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// The genre lookup needs Last.fm and a cache folder; Replay only asks whether
 /// it is on. Stubbed so this check is the store and nothing else.

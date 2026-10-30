@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // LyricsPlus's mirror rotation, against the real mirrors.
 //

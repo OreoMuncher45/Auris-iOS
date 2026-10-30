@@ -13,7 +13,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
 
 bin="$(mktemp -d)/video-sync-verify"
-xcrun swiftc -O -module-cache-path /tmp/bitchord-swift-module-cache -o "$bin" \
+xcrun swiftc -O -module-cache-path /tmp/auris-swift-module-cache -o "$bin" \
   "$repo/AppleApp/Sources/PlaybackSession/VideoSyncPolicy.swift" \
   "$here/video-sync-verify/main.swift" || exit 2
 

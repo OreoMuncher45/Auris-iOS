@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import BitChordShared
+import AurisShared
 #if os(iOS)
 import UIKit
 #endif

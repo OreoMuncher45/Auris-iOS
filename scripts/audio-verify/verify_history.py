@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare actual production playback around 8e8e44a using the same stereo bytes."""
 import array,hashlib,json,math,pathlib,struct,subprocess,sys
-root=pathlib.Path(__file__).resolve().parents[2];history=pathlib.Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/bitchord-audio-history')
+root=pathlib.Path(__file__).resolve().parents[2];history=pathlib.Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/auris-audio-history')
 rate=48000;frames=rate*3;values=[]
 for i in range(frames):
  s=.2*math.sin(2*math.pi*997*i/rate);values.extend([s,s])

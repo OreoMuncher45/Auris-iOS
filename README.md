@@ -1,20 +1,19 @@
-# BitChord for Apple Platforms
+# Auris for iPhone
 
-![BitChord for Apple platforms on Mac, iPad, and iPhone](artwork/cover-exports/BitChord-Cover-4K-3840x2160.png)
+![Auris](artwork/cover-exports/Auris-Cover-1920x1080.png)
 
-An unofficial Apple-platform port of [BitChord](https://github.com/kushagrasinghx/BitChord), the music client originally created by [Kushagra Singh](https://github.com/kushagrasinghx).
+Auris is an iPhone music client: a SwiftUI interface, shared Kotlin Multiplatform logic, and a Rust audio engine, built on the Apple-platform port of [BitChord](https://github.com/bagumamartin/BitChord) and the [BitChord](https://github.com/kushagrasinghx/BitChord) Android project it descends from.
 
-Derived from [BitChord](https://github.com/kushagrasinghx/BitChord), Copyright © Kushagra Singh and BitChord contributors, licensed under GPLv3. Apple-platform port and additions Copyright © 2026 Martin BAGUMA, also under GPLv3.
+Derived from [BitChord](https://github.com/kushagrasinghx/BitChord), Copyright © Kushagra Singh and BitChord contributors, licensed under GPLv3. Apple-platform port Copyright © 2026 Martin BAGUMA, also under GPLv3. Auris rebrand and additions Copyright © 2026 OreoMuncher45, also under GPLv3.
 
-This project brings BitChord to macOS, iPhone, and iPad with a SwiftUI interface, shared Kotlin Multiplatform logic, and a Rust audio engine. It is an independent port; it is not affiliated with Google or YouTube.
+Auris is an independent project; it is not affiliated with Google or YouTube.
 
 ## Platforms
 
-- **macOS 15 or later**
-- **iOS and iPadOS 18 or later**
-- **Apple Silicon only.** The configured macOS, iOS device, and iOS Simulator targets are arm64; Intel Macs and Intel iOS simulators are not configured.
+- **iPhone, iOS 18 or later**
+- **Apple Silicon only.** The configured iOS device and iOS Simulator targets are arm64; Intel iOS simulators are not configured.
 
-The project is source-first. iPhone and iPad users build and sign the app themselves in Xcode. A signed macOS package may be shared separately as a release.
+The project is source-first. An unsigned IPA is produced by the GitHub Actions workflow (`.github/workflows/ios-ipa.yml`); users sign and install it with their own developer identity.
 
 ## Features
 
@@ -45,8 +44,8 @@ Builds currently require a Mac with Xcode and the Apple SDKs for the deployment 
 Clone the repository:
 
 ```sh
-git clone https://github.com/bagumamartin/BitChord.git
-cd BitChord
+git clone https://github.com/OreoMuncher45/Auris-iOS.git
+cd Auris-iOS
 ```
 
 The pinned upstream submodule is kept for source comparison and attribution; it is not a build dependency. Initialize it if you want the upstream source locally:
@@ -64,10 +63,19 @@ rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
 ./scripts/build-shared-framework.sh
 ./scripts/build-native-core.sh
 xcodegen generate --spec AppleApp/project.yml
-open AppleApp/BitChord.xcodeproj
+open AppleApp/Auris.xcodeproj
 ```
 
-In Xcode, select the `BitChord` scheme, choose a Mac, iPhone, iPad, or Apple Silicon Simulator destination, then select your Apple Developer Team under the app and widget targets' **Signing & Capabilities**. The Team is per-developer and is not stored in the shared project configuration. For device signing, register and enable the App Group entitlement for both targets with your developer account. The current entitlements are configured for development; review them, including the app sandbox setting, before preparing a distributed macOS build. The generated frameworks, Swift bindings, and Xcode project are build outputs and are ignored by Git.
+In Xcode, select the `Auris` scheme, choose an iPhone or Apple Silicon Simulator destination, then select your Apple Developer Team under the app and widget targets' **Signing & Capabilities**. The Team is per-developer and is not stored in the shared project configuration. For device signing, register and enable the App Group entitlement for both targets with your developer account. The generated frameworks, Swift bindings, and Xcode project are build outputs and are ignored by Git.
+
+To build an unsigned IPA the same way CI does:
+
+```sh
+CONFIG=release IOS_SIMULATOR=false ./scripts/build-shared-framework.sh
+NATIVE_TARGETS="aarch64-apple-darwin aarch64-apple-ios" ./scripts/build-native-core.sh
+xcodegen generate --spec AppleApp/project.yml
+./scripts/package-ios-ipa.sh 1.0.4
+```
 
 `build-shared-framework.sh` builds the Debug framework by default. For a Release shared framework, run:
 
@@ -87,19 +95,19 @@ Automix works without downloaded models, using its built-in analysis fallback. T
 
 ## Disclaimer & Legal Notice
 
-BitChord is an independent, unofficial third-party music player and client. It is not affiliated with or endorsed by Google LLC, YouTube Music, or the providers of any configured sources.
+Auris is an independent, unofficial third-party music player and client. It is not affiliated with or endorsed by Google LLC, YouTube Music, or the providers of any configured sources.
 
-- **No Media Hosting:** BitChord does not operate a hosted music catalog. It plays local libraries and accesses configured sources and third-party services; downloads are stored on the listener's device.
-- **Fair Use & API Usage:** BitChord is created for personal, research, educational and fair-use purposes. It does not grant rights to music or other content. You are responsible for ensuring your use complies with applicable copyright law and the terms of the services and APIs you choose to access, including YouTube and YouTube Music.
-- **No Ad-Blocking Guarantee:** BitChord makes no guarantee about the presence, behavior, or availability of advertisements or other platform features. Third-party services can change their access rules and behavior at any time.
+- **No Media Hosting:** Auris does not operate a hosted music catalog. It plays local libraries and accesses configured sources and third-party services; downloads are stored on the listener's device.
+- **Fair Use & API Usage:** Auris is created for personal, research, educational and fair-use purposes. It does not grant rights to music or other content. You are responsible for ensuring your use complies with applicable copyright law and the terms of the services and APIs you choose to access, including YouTube and YouTube Music.
+- **No Ad-Blocking Guarantee:** Auris makes no guarantee about the presence, behavior, or availability of advertisements or other platform features. Third-party services can change their access rules and behavior at any time.
 - **No warranty and limitation of liability:** For GPLv3-covered portions, the software is provided without warranty and liability is limited as stated in Sections 15 and 16 of [`LICENSE`](LICENSE), except where applicable law requires otherwise or the parties agree in writing. This summary does not replace the license; separately licensed components remain subject to their own terms.
 - **Copyleft:** GPLv3 allows redistribution, including for a fee, subject to its terms. Distributors of GPLv3-covered binaries must meet the corresponding-source and notice requirements. Components with additional terms are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Credits and licenses
 
-This is an unofficial port of [BitChord by Kushagra Singh](https://github.com/kushagrasinghx/BitChord). The upstream source is pinned as a Git submodule at [`fe198ac`](https://github.com/kushagrasinghx/BitChord/tree/fe198ac); its source, per-file notices, and license are available in `vendor/bitchord-upstream` when the submodule is initialized. See the upstream repository's [maintainers and contributors](https://github.com/kushagrasinghx/BitChord/blob/fe198ac/MAINTAINERS.md) for upstream attribution.
+Auris descends from the Apple-platform port of [BitChord by Martin Baguma](https://github.com/bagumamartin/BitChord) (Apple-platform port Copyright © 2026 Martin BAGUMA, GPLv3), which in turn descends from [BitChord by Kushagra Singh](https://github.com/kushagrasinghx/BitChord) (Copyright © Kushagra Singh and BitChord contributors, GPLv3). The Android upstream source is pinned as a Git submodule at [`fe198ac`](https://github.com/kushagrasinghx/BitChord/tree/fe198ac); its source, per-file notices, and license are available in `vendor/bitchord-upstream` when the submodule is initialized. See the upstream repository's [maintainers and contributors](https://github.com/kushagrasinghx/BitChord/blob/fe198ac/MAINTAINERS.md) for upstream attribution.
 
-YouTube stream extraction uses [InnerTubeX](https://github.com/MetrolistGroup/innertubex), the maintained resolver used by current Android upstream. Its source is vendored at revision `a6ca8cb76e9c347d4f21824ca9f19b9db2e5aebd` in `vendor/innertubex`, with its GPLv3 license and notices retained. The Apple adapter adds macOS alongside its iOS targets.
+YouTube stream extraction uses [InnerTubeX](https://github.com/MetrolistGroup/innertubex), the maintained resolver used by current Android upstream. Its source is vendored at revision `a6ca8cb76e9c347d4f21824ca9f19b9db2e5aebd` in `vendor/innertubex`, with its GPLv3 license and notices retained. The Apple adapter targets iOS.
 
 Some analyzer code was ported from [Orchard](https://github.com/SFG5453/Orchard), by SFG545, through BitChord's Android implementation. The relevant files identify SFG545 and Kushagra Singh and retain their AGPLv3-or-later terms. The audio clarity contour also credits the [LastWave-native](https://github.com/Clash-Projects/LastWave-native) reference in its source and notices. The upstream README credits [binimum/am-lyrics](https://github.com/binimum/am-lyrics) for the Apple-like lyrics animation; that credit is preserved here.
 

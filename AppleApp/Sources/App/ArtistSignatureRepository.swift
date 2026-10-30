@@ -33,7 +33,7 @@ actor ArtistSignatureRepository {
         }
 
         var request = URLRequest(url: url)
-        request.setValue("BitChord/1.0 (artist signature lookup)", forHTTPHeaderField: "User-Agent")
+        request.setValue("Auris/1.0 (artist signature lookup)", forHTTPHeaderField: "User-Agent")
         guard case let (data, response)? = try? await URLSession.shared.data(for: request),
               (response as? HTTPURLResponse)?.statusCode == 200 else { return .failed }
         let result = Self.parseResponse(data, requestedArtist: name)

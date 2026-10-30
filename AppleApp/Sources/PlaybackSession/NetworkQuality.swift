@@ -1,7 +1,7 @@
 import Foundation
 import Network
 import Observation
-import BitChordShared
+import AurisShared
 
 /// Wi-Fi vs cellular (metered) for per-network quality ceilings.
 @MainActor

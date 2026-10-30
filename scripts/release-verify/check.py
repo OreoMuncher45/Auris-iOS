@@ -12,13 +12,13 @@ with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
     ipa, dmg = root / 'BitChord-build13.ipa', root / 'BitChord-build13.dmg'
     ipa.write_bytes(b'ios fixture'); dmg.write_bytes(b'mac fixture')
-    plist = dict(CFBundleIdentifier='app.bitchord.BitChord', CFBundleShortVersionString='1.0.4', CFBundleVersion='13', BitChordRevision='abc1234')
+    plist = dict(CFBundleIdentifier='app.auris.Auris', CFBundleShortVersionString='1.0.4', CFBundleVersion='13', AurisRevision='abc1234')
     output = root / 'release'
     manifest = module.prepare(ipa, dmg, plist, plist, output)
     assert manifest['build'] == 13 and len(manifest['artifacts']) == 2
     assert manifest['artifacts'][0]['sha256'] == module.digest(ipa)
     old = (output / 'release.json').read_bytes()
-    for change in [dict(CFBundleVersion='12'), dict(CFBundleShortVersionString='1.0.3'), dict(CFBundleIdentifier='other.app'), dict(BitChordRevision='def5678'), dict(BitChordRevision='unknown'), dict(BitChordRevision='abc1234-dirty')]:
+    for change in [dict(CFBundleVersion='12'), dict(CFBundleShortVersionString='1.0.3'), dict(CFBundleIdentifier='other.app'), dict(AurisRevision='def5678'), dict(AurisRevision='unknown'), dict(AurisRevision='abc1234-dirty')]:
         try:
             module.prepare(ipa, dmg, plist, dict(plist, **change), output)
             raise AssertionError('Mismatched package accepted')

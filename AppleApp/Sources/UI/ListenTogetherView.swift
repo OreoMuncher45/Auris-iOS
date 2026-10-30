@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 #if os(iOS)
 import UIKit
 #else
@@ -248,7 +248,7 @@ struct ListenTogetherView: View {
             ShareLink(
                 item: shareText,
                 subject: Text("Listen together"),
-                message: Text("Listen with me on BitChord — party code \(party.code)")
+                message: Text("Listen with me on Auris — party code \(party.code)")
             ) {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
@@ -266,7 +266,7 @@ struct ListenTogetherView: View {
     /// server's address is not repeated here beyond what the link needs to carry.
     private var shareText: String {
         guard let link = party.inviteLink else { return party.code }
-        return "\(link)\n\nListen with me on BitChord — party code \(party.code)"
+        return "\(link)\n\nListen with me on Auris — party code \(party.code)"
     }
 
     private func copyCode() {
@@ -1047,7 +1047,7 @@ enum PartyCopy {
     static let createSizeSubtitle = "Choose 2–10 listeners"
     static let joinCodeHint = "Six letters or digits"
     static let joinPreviewFooter = "People in the party will see your name and profile picture."
-    static let inviteFooter = "Anyone with BitChord can open this link. The party server travels with it, so they do not need to have set one up."
+    static let inviteFooter = "Anyone with Auris can open this link. The party server travels with it, so they do not need to have set one up."
 
     /// The question the confirm sheet asks.
     ///

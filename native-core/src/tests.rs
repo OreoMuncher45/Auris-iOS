@@ -21,10 +21,10 @@ fn automix_corpus_scorecard() {
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
             PathBuf::from(std::env::var("HOME").unwrap_or_default())
-                .join("Library/Caches/BitChord/audio")
+                .join("Library/Caches/Auris/audio")
         });
     let models = PathBuf::from(std::env::var("HOME").unwrap_or_default())
-        .join("Library/Application Support/BitChord/Models");
+        .join("Library/Application Support/Auris/Models");
     // A model comparison is a different graph on the same corpus, so the
     // test can be pointed at one without touching the owner's install.
     let beat = std::env::var("AUTOMIX_BEAT_MODEL")

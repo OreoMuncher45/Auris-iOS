@@ -74,7 +74,7 @@ actor VideoVersionAlignment {
 
     private let directory: URL = {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let url = caches.appendingPathComponent("BitChord/VersionAlignment", isDirectory: true)
+        let url = caches.appendingPathComponent("Auris/VersionAlignment", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }()
@@ -103,7 +103,7 @@ actor VideoVersionAlignment {
             // the picture off screen for most of the track.
             // Different candidate pairs may share a song. Private work files
             // prevent one pair's download/cleanup from corrupting another's.
-            let work = FileManager.default.temporaryDirectory.appendingPathComponent("BitChordVideoAlignment-\(UUID().uuidString)")
+            let work = FileManager.default.temporaryDirectory.appendingPathComponent("AurisVideoAlignment-\(UUID().uuidString)")
             do { try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true) }
             catch { return nil }
             let songAudio = work.appendingPathComponent("song.audio")

@@ -266,7 +266,7 @@ struct IPadSidebarView: View {
                 .scaledToFit()
                 .frame(width: 28, height: 18)
                 .accessibilityHidden(true)
-            Text("BitChord")
+            Text("Auris")
                 .font(.title3.weight(.semibold))
             Spacer(minLength: 0)
         }

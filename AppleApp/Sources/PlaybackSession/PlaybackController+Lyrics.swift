@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -199,7 +199,7 @@ extension PlaybackController {
             // badly-synced line knows whom to tell.
             self.lyricsAlignedLocally = aligned
             self.lyricsAlignmentTask = nil
-            NSLog("[BitChord] local lyric alignment %@ for %@",
+            NSLog("[Auris] local lyric alignment %@ for %@",
                   aligned ? "added word timings" : "found no confident word matches",
                   entry.title)
         }

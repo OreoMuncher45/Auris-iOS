@@ -15,7 +15,7 @@ AppleApp/*.xcodeproj
 AppleApp/Frameworks/
 AppleApp/Generated/
 AppleApp/BitChord-Info.plist
-AppleApp/BitChordWidget-Info.plist
+AppleApp/AurisWidget-Info.plist
 AppleApp/*.entitlements
 xcuserdata/
 DerivedData/

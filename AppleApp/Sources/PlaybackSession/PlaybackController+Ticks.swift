@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -60,7 +60,7 @@ extension PlaybackController {
     }
 
     func pollWidgetCommands() {
-        guard let defaults = UserDefaults(suiteName: "group.app.bitchord.BitChord"),
+        guard let defaults = UserDefaults(suiteName: "group.app.auris.Auris"),
               let cmd = defaults.string(forKey: "widget.command") else { return }
         defaults.removeObject(forKey: "widget.command")
         switch cmd {

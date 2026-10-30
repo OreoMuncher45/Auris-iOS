@@ -43,9 +43,9 @@ final class AppServices {
 ///
 /// `LocalizedError` rather than a bare error carrying a message: Shortcuts speaks
 /// the error's `localizedDescription`, and an ordinary struct reads "The operation
-/// couldn't be completed. (BitChordIntentError error 1.)" — the same trap the
+/// couldn't be completed. (AurisIntentError error 1.)" — the same trap the
 /// session-expiry matcher hit in I10a-1.
-enum BitChordIntentError: LocalizedError {
+enum AurisIntentError: LocalizedError {
     case emptyQuery
     case nothingPlaying
     case signedOut
@@ -55,13 +55,13 @@ enum BitChordIntentError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .emptyQuery:
-            "What should BitChord look for?"
+            "What should Auris look for?"
         case .nothingPlaying:
-            "Nothing is playing in BitChord."
+            "Nothing is playing in Auris."
         case .signedOut:
-            "Sign in to BitChord to like songs."
+            "Sign in to Auris to like songs."
         case .noResults(let query):
-            "BitChord couldn't find a song for “\(query)”."
+            "Auris couldn't find a song for “\(query)”."
         case .refused(let message):
             message
         }
@@ -183,7 +183,7 @@ enum AppIntentActions {
     /// Play or pause, and say which happened.
     static func togglePlayback() async throws -> String {
         let controller = AppServices.shared.controller
-        guard let current = controller.current else { throw BitChordIntentError.nothingPlaying }
+        guard let current = controller.current else { throw AurisIntentError.nothingPlaying }
         // The state is read *before* the toggle: `togglePlayPause` starts (or
         // keeps) an asynchronous load, so what it leaves behind is not always the
         // outcome this call asked for, and reading it after named the wrong one.
@@ -218,7 +218,7 @@ enum AppIntentActions {
     }
 
     /// Open Search with the term already in the field — the same request shape a
-    /// `bitchord://search` link makes, so both roads end in the same place.
+    /// `auris://search` link makes, so both roads end in the same place.
     static func search(query: String) throws -> String {
         let term = try cleaned(query)
         let appModel = AppServices.shared.appModel
@@ -231,12 +231,12 @@ enum AppIntentActions {
     /// Like or unlike what is playing.
     static func likeCurrent() async throws -> String {
         let services = AppServices.shared
-        guard services.auth.signedIn else { throw BitChordIntentError.signedOut }
+        guard services.auth.signedIn else { throw AurisIntentError.signedOut }
         guard let current = services.controller.current, let videoId = current.videoId else {
-            throw BitChordIntentError.nothingPlaying
+            throw AurisIntentError.nothingPlaying
         }
         if let failure = await services.controller.toggleLikeAndWait(videoId: videoId) {
-            throw BitChordIntentError.refused(failure)
+            throw AurisIntentError.refused(failure)
         }
         return services.controller.isLiked
             ? "Liked \(current.title)"
@@ -273,7 +273,7 @@ enum AppIntentActions {
 
     private static func cleaned(_ query: String) throws -> String {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !term.isEmpty else { throw BitChordIntentError.emptyQuery }
+        guard !term.isEmpty else { throw AurisIntentError.emptyQuery }
         return term
     }
 }
@@ -284,7 +284,7 @@ enum AppIntentActions {
 /// "pause" is not asking for a window.
 struct PlayPauseIntent: AppIntent {
     static var title: LocalizedStringResource = "Play or Pause"
-    static var description = IntentDescription("Play or pause what BitChord is playing.")
+    static var description = IntentDescription("Play or pause what Auris is playing.")
     static var openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -298,7 +298,7 @@ struct PlayPauseIntent: AppIntent {
 /// stream wiring settles behind the first window.
 struct PlaySongIntent: AppIntent {
     static var title: LocalizedStringResource = "Play a Song"
-    static var description = IntentDescription("Search BitChord for a song and start playing it.")
+    static var description = IntentDescription("Search Auris for a song and start playing it.")
     static var openAppWhenRun = true
 
     @Parameter(title: "Song", requestValueDialog: "Which song?")
@@ -312,7 +312,7 @@ struct PlaySongIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let title = try await AppIntentActions.play(song: song)
-        return .result(dialog: "Playing \(title) in BitChord")
+        return .result(dialog: "Playing \(title) in Auris")
     }
 }
 
@@ -320,10 +320,10 @@ struct PlaySongIntent: AppIntent {
 /// result is the screen.
 struct SearchIntent: AppIntent {
     static var title: LocalizedStringResource = "Search"
-    static var description = IntentDescription("Open BitChord's search with a query.")
+    static var description = IntentDescription("Open Auris's search with a query.")
     static var openAppWhenRun = true
 
-    @Parameter(title: "Search For", requestValueDialog: "What should BitChord search for?")
+    @Parameter(title: "Search For", requestValueDialog: "What should Auris search for?")
     var query: String
 
     init() {}
@@ -338,7 +338,7 @@ struct SearchIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let term = try await AppIntentActions.search(query: query)
-        return .result(dialog: "Searching BitChord for \(term)")
+        return .result(dialog: "Searching Auris for \(term)")
     }
 }
 
@@ -347,7 +347,7 @@ struct SearchIntent: AppIntent {
 /// already alive in the audio session.
 struct LikeCurrentSongIntent: AppIntent {
     static var title: LocalizedStringResource = "Like the Current Song"
-    static var description = IntentDescription("Like or unlike what is playing in BitChord.")
+    static var description = IntentDescription("Like or unlike what is playing in Auris.")
     static var openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -359,7 +359,7 @@ struct LikeCurrentSongIntent: AppIntent {
 /// Add a song by name to the end of the queue.
 struct AddToQueueIntent: AppIntent {
     static var title: LocalizedStringResource = "Add to the Queue"
-    static var description = IntentDescription("Find a song and add it to the end of BitChord's queue.")
+    static var description = IntentDescription("Find a song and add it to the end of Auris's queue.")
     static var openAppWhenRun = true
 
     @Parameter(title: "Song", requestValueDialog: "Which song?")
@@ -384,7 +384,7 @@ struct AddToQueueIntent: AppIntent {
 /// Shortcuts does not need this: every intent above is already a Shortcuts action
 /// by existing. These phrases are what make them reachable by voice and from a
 /// Spotlight search for the app.
-struct BitChordShortcuts: AppShortcutsProvider {
+struct AurisShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: PlaySongIntent(),
@@ -440,6 +440,6 @@ enum AppShortcutRefresh {
         let now = Date()
         guard now.timeIntervalSince(lastUpdate) >= interval else { return }
         lastUpdate = now
-        BitChordShortcuts.updateAppShortcutParameters()
+        AurisShortcuts.updateAppShortcutParameters()
     }
 }

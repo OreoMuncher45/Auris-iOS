@@ -1,6 +1,6 @@
 import Foundation
 import JavaScriptCore
-import BitChordShared
+import AurisShared
 
 /// JavaScriptCore engine for the legacy module protocol, registered as
 /// `ModuleEngine.Impl` at launch.
@@ -82,7 +82,7 @@ final class ModuleJsEngine: NSObject, ModuleEngineImpl {
 
         init(moduleId: String, script: String, fetchBase: String) {
             queue = DispatchQueue(
-                label: "app.bitchord.BitChord.module.\(moduleId).\(UUID().uuidString)"
+                label: "app.auris.Auris.module.\(moduleId).\(UUID().uuidString)"
             )
             guard let context = JSContext() else {
                 // `JSContext()` has no failure path on Apple platforms, but the

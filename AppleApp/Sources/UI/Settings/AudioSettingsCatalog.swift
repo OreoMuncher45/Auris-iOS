@@ -44,7 +44,7 @@ enum AudioSettingsItem: String, CaseIterable, Identifiable {
         case .clarityPreset: return "Clarity Preset"
         case .clarityMix: return "Clarity Mix"
         case .normalization: return "Loudness Normalization"
-        case .spatial: return "BitChord spatial effect"
+        case .spatial: return "Auris spatial effect"
         case .equalizer: return "Equalizer"
         case .dolby: return "Dolby Atmos"
         case .requested: return "Requested Quality"
@@ -98,8 +98,8 @@ struct AudioSettingsReadout {
     var activeStages: [String] = []
 
     var processingBypass: String? {
-        if appleRenderer { return "Apple’s Dolby renderer handles this track; BitChord’s PCM effects are bypassed." }
-        if loaded && outputStarted && bitPerfectActive { return "Exclusive bit-perfect output bypasses BitChord’s volume, effects and transitions." }
+        if appleRenderer { return "Apple’s Dolby renderer handles this track; Auris’s PCM effects are bypassed." }
+        if loaded && outputStarted && bitPerfectActive { return "Exclusive bit-perfect output bypasses Auris’s volume, effects and transitions." }
         return nil
     }
     func bitPerfectStatus(requested: Bool) -> String {

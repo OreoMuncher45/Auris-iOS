@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 #if os(iOS)
 import UIKit
@@ -123,7 +123,7 @@ extension SettingsView {
             SettingsToggleLine(
                 glyph: .video,
                 title: "Stop When Backgrounded",
-                subtitle: "Pauses playback when BitChord is hidden or deactivated on Mac; closing a window uses its own setting",
+                subtitle: "Pauses playback when Auris is hidden or deactivated on Mac; closing a window uses its own setting",
                 isOn: $stopBackground
             )
         }
@@ -214,10 +214,16 @@ extension SettingsView {
         }
         buildUpdateRows(&rows)
         rows.row("GitHub", "github", "source", "code", "repository") {
-            Link("GitHub", destination: URL(string: "https://github.com/bagumamartin/BitChord")!)
+            Link("GitHub", destination: URL(string: "https://github.com/OreoMuncher45/Auris-iOS")!)
         }
         rows.row("Developer", "developer", "author", "github") {
-            Link("Developer", destination: URL(string: "https://github.com/bagumamartin")!)
+            Link("Developer", destination: URL(string: "https://github.com/OreoMuncher45")!)
+        }
+        rows.row("Upstream projects", "upstream", "credits", "attribution") {
+            Link("BitChord by Kushagra Singh", destination: URL(string: "https://github.com/kushagrasinghx/BitChord")!)
+        }
+        rows.row("Apple port by Martin Baguma", "apple port", "upstream", "credits") {
+            Link("Apple port by Martin Baguma", destination: URL(string: "https://github.com/bagumamartin/BitChord")!)
         }
         rows.row("Open-source licenses", "open source", "licenses", "license", "acknowledgements", "third party") {
             PushLink {

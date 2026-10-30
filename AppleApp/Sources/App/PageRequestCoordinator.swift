@@ -48,7 +48,7 @@ actor PageRequestCoordinator {
     /// One-time removal of the retired page cache, outside the main actor.
     func removeLegacyCache() {
         let folder = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("BitChord/pages-v1", isDirectory: true)
+            .appendingPathComponent("Auris/pages-v1", isDirectory: true)
         try? FileManager.default.removeItem(at: folder)
     }
 }

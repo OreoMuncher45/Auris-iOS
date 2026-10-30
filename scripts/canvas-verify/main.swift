@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import BitChordShared
+import AurisShared
 
 // The canvas cache's logging dependency; errors are printed with host/status only.
 final class PlaybackDebugLog: @unchecked Sendable {

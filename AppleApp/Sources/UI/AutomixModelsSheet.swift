@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Whether an Automix model download may use the connection in hand.
 @MainActor
@@ -417,7 +417,7 @@ struct AutomixModelsSheet: View {
                                     .font(.title2.weight(.bold))
                                     .multilineTextAlignment(.center)
 
-                                Text("BitChord analyzes your tracks on-device to match beats, time crossfades, and prevent vocal clashes between songs.")
+                                Text("Auris analyzes your tracks on-device to match beats, time crossfades, and prevent vocal clashes between songs.")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
@@ -635,7 +635,7 @@ struct AutomixModelsPage: View {
             } header: {
                 Text("Models")
             } footer: {
-                Text("Downloaded once and kept in BitChord's storage. Removing the beat model takes effect immediately: Automix falls back to tempo analysis. Vocal detection is built in and always runs.")
+                Text("Downloaded once and kept in Auris's storage. Removing the beat model takes effect immediately: Automix falls back to tempo analysis. Vocal detection is built in and always runs.")
             }
             Section {
                 if store.totalBytesOnDisk > 0 {

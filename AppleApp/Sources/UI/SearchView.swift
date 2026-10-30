@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 
 /// One recent search, stored as an entity rather than a raw query string:
 /// the exact identity (id, artwork, type) of what was tapped, so recents

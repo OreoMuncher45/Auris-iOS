@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// First run (upstream v1.8 onboarding, plus a page upstream does not have):
 /// what makes the app worth choosing, a name for Listen Together, and the

@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // The account store and the channel override, through the real Swift→Kotlin seam.
 //

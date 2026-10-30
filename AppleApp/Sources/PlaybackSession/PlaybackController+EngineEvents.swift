@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -70,7 +70,7 @@ extension PlaybackController {
                 // A stale voice from a superseded arm (e.g. a blend abandoned
                 // by a manual skip). Acting on it would move or stop the wrong
                 // track.
-                NSLog("[BitChord] ignoring handoff for untracked voice %@ — %@", info.title, info.artist)
+                NSLog("[Auris] ignoring handoff for untracked voice %@ — %@", info.title, info.artist)
                 return
             }
         }

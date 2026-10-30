@@ -14,11 +14,11 @@ set -uo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
 
-fw="$repo/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+fw="$repo/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 bin="$(mktemp -d)/versions-verify"
 xcrun swiftc -O -o "$bin" \
-  -F "$fw" -framework BitChordShared \
-  -Xlinker -rpath -Xlinker "$fw/BitChordShared.framework/Versions/A" \
+  -F "$fw" -framework AurisShared \
+  -Xlinker -rpath -Xlinker "$fw/AurisShared.framework/Versions/A" \
   "$here/versions-verify/main.swift" || exit 2
 
 exec "$bin"

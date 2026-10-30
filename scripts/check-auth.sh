@@ -19,11 +19,11 @@ grep -Fq 'kSecAttrSynchronizable as String: true' "$repo/AppleApp/Sources/App/Ke
 grep -Fq 'Devices that already adopted it may remain signed in.' "$repo/AppleApp/Sources/UI/Settings/AccountIntegrationsView.swift" || exit 2
 grep -Fq 'Devices that already adopted it may remain signed in.' "$repo/AppleApp/Sources/UI/AccountProfileSheet.swift" || exit 2
 
-fw="$repo/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+fw="$repo/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 bin="$(mktemp -d)/auth-verify"
 xcrun swiftc -O -o "$bin" \
-  -F "$fw" -framework BitChordShared \
-  -Xlinker -rpath -Xlinker "$fw/BitChordShared.framework/Versions/A" \
+  -F "$fw" -framework AurisShared \
+  -Xlinker -rpath -Xlinker "$fw/AurisShared.framework/Versions/A" \
   "$repo/AppleApp/Sources/PlaybackSession/QueueEntry.swift" \
   "$repo/AppleApp/Sources/App/InnertubeSearch.swift" \
   "$repo/AppleApp/Sources/UI/SignInNavigation.swift" \

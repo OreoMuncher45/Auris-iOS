@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// The offline stand-in for a collection saved to this device: the download
 /// store's entries under the title the download recorded, so a page opened

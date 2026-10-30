@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// One shelf of the signed-out Home/Explore feeds, decoded from the shared
 /// module's serialized `HomeFeed` (the bridge crosses FFI as JSON, same

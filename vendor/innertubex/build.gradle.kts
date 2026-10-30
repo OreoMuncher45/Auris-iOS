@@ -44,7 +44,9 @@ val generateYtEjsNativeScripts =
     }
 
 kotlin {
-    iosArm64(); iosSimulatorArm64(); macosArm64()
+    val withSimulator = (providers.gradleProperty("iosSimulator").orNull ?: "true").toBoolean()
+    iosArm64()
+    if (withSimulator) iosSimulatorArm64()
     sourceSets {
         all { languageSettings.optIn("kotlin.RequiresOptIn"); languageSettings.optIn("kotlin.ExperimentalStdlibApi") }
         commonMain.dependencies {

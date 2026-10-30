@@ -29,7 +29,7 @@ install” setting.
 
    ```sh
    scripts/generate-mac-appcast.sh v0.1.2 \
-     "/path/to/BitChord-0.1.2.dmg" \
+     "/path/to/Auris-0.1.2.dmg" \
      "/path/to/0.1.2-release-notes.md"
    ```
 
@@ -37,7 +37,7 @@ install” setting.
    the login Keychain, embeds the notes, and writes the signed enclosure entry to
    `appcast.xml`. Resolve the Xcode package once if that tool is not present yet.
 4. Commit and push the updated `appcast.xml` to `main`. Confirm the raw feed is
-   reachable at `https://raw.githubusercontent.com/bagumamartin/BitChord/main/appcast.xml`.
+   reachable at `https://raw.githubusercontent.com/OreoMuncher45/Auris-iOS/main/appcast.xml`.
 
 The private EdDSA key stays in the login Keychain under the `BitChord` account.
 Only the corresponding `SUPublicEDKey` is in `AppleApp/project.yml`. Never commit

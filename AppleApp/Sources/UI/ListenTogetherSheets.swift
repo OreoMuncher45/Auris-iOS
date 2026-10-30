@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import CoreImage
 import CoreImage.CIFilterBuiltins
 #if os(iOS)
@@ -351,7 +351,7 @@ struct InviteSheet: View {
                         ShareLink(
                             item: link,
                             subject: Text("Listen together"),
-                            message: Text("Listen with me on BitChord — party code \(party.code)")
+                            message: Text("Listen with me on Auris — party code \(party.code)")
                         ) {
                             Label("Share invite", systemImage: "link")
                         }
@@ -365,7 +365,7 @@ struct InviteSheet: View {
                     // The link opens the app directly. It also carries the party
                     // server, so the people it reaches do not have to have configured
                     // a server of their own to find the party — which is the whole
-                    // reason it is a `bitchord://` link rather than just the code.
+                    // reason it is a `auris://` link rather than just the code.
                     Text(PartyCopy.inviteFooter)
                 }
             }

@@ -16,7 +16,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-FW="$ROOT/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+FW="$ROOT/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 CHECK_DIR="${TMPDIR:-/tmp}/bitchord-signin-live-check"
 
 rm -rf "$CHECK_DIR"

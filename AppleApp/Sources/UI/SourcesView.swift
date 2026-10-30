@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Where the app is allowed to get audio from.
 ///
@@ -116,7 +116,7 @@ struct SourcesView: View {
             Button("Remove addon", role: .destructive) { removeAddon(config.id) }
             Button("Cancel", role: .cancel) {}
         } message: { config in
-            Text("Remove \(config.displayName) from BitChord's sources?")
+            Text("Remove \(config.displayName) from Auris's sources?")
         }
         .confirmationDialog(
             jioSaavnWarning,
@@ -126,7 +126,7 @@ struct SourcesView: View {
             Button("Enable JioSaavn", role: .destructive) { setEnabled(jioSaavnId, true) }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("BitChord will still prefer its copy when the match is the same recording. It will not when it is not.")
+            Text("Auris will still prefer its copy when the match is the same recording. It will not when it is not.")
         }
     }
 
@@ -228,7 +228,7 @@ struct SourcesView: View {
     private var orderFooter: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Reachable means the provider answered its checks. Audio quality is verified separately for each track.")
-            Text("If a source does not have a track or cannot be reached, BitChord tries the next one. Sources above YouTube can replace its recording when they return a better version.")
+            Text("If a source does not have a track or cannot be reached, Auris tries the next one. Sources above YouTube can replace its recording when they return a better version.")
             if !AudioRouteState.shared.carriesLossless {
                 Text("Bluetooth compresses the output. Choosing Lossless still allows lossless sources; addons that require a lossless output need a speaker or wired connection.")
             }

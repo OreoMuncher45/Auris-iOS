@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -76,7 +76,7 @@ extension PlaybackController {
         @MainActor
         static func current() -> ResolvePrefs {
             let streamQuality = AppSettings.shared.effectiveAudioQuality(metered: NetworkQuality.shared.metered).name
-            NSLog("[BitChord] playback quality requested=\(streamQuality) network=\(NetworkQuality.shared.metered ? "metered" : "unmetered")")
+            NSLog("[Auris] playback quality requested=\(streamQuality) network=\(NetworkQuality.shared.metered ? "metered" : "unmetered")")
             return ResolvePrefs(
                 maxKbps: Int(NetworkQuality.shared.maxKbps),
                 wantLossless: streamQuality == "LOSSLESS",

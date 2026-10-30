@@ -101,7 +101,7 @@
     "+%lld": {},
     "1": {},
     "123.5 MB total · Runs 100% on-device · Private": {},
-    "A BitChord update is available": {},
+    "A Auris update is available": {},
     "A library you host yourself, played from the server rather than from a catalogue. It takes no part in the ranking above — it holds your own files, so it is not standing in for anything.": {},
     "A party server is a deployment somebody has to run. This app does not ship one.": {},
     "A version switch resumes where you left off. With this off it restarts from the top, since no alignment is attempted.": {},
@@ -864,7 +864,7 @@
         }
       }
     },
-    "Apple’s Headphone Accommodations, Adaptive Audio and Conversation Awareness are managed in system Accessibility, AirPods settings and Control Center. BitChord keeps your manual EQ choices.": {},
+    "Apple’s Headphone Accommodations, Adaptive Audio and Conversation Awareness are managed in system Accessibility, AirPods settings and Control Center. Auris keeps your manual EQ choices.": {},
     "Apply to all %lld conflicts": {},
     "Artists": {
       "localizations": {
@@ -1124,14 +1124,14 @@
       }
     },
     "Beat This! (beat and downbeat detection) and open-unmix UMX-L (vocal detection). Both are verified against a pinned checksum after download.": {},
-    "BitChord %@": {},
-    "BitChord %@ is available. Update using the same method you used to install BitChord. The release page has the change notes.": {},
-    "BitChord %@ is out": {},
-    "BitChord analyzes your tracks on-device to match beats, time crossfades, and prevent vocal clashes between songs.": {},
-    "BitChord audio priority": {},
-    "BitChord installs from its releases page, so this opens it in your browser.": {},
-    "BitChord watches the folder you choose for music files. Filtering keeps everything that is not a song out of the list.": {},
-    "BitChord will still prefer its copy when the match is the same recording. It will not when it is not.": {},
+    "Auris %@": {},
+    "Auris %@ is available. Update using the same method you used to install Auris. The release page has the change notes.": {},
+    "Auris %@ is out": {},
+    "Auris analyzes your tracks on-device to match beats, time crossfades, and prevent vocal clashes between songs.": {},
+    "Auris audio priority": {},
+    "Auris installs from its releases page, so this opens it in your browser.": {},
+    "Auris watches the folder you choose for music files. Filtering keeps everything that is not a song out of the list.": {},
+    "Auris will still prefer its copy when the match is the same recording. It will not when it is not.": {},
     "Bluetooth": {},
     "Bring your library, playlists and mixes with you, and start a Listen Together party with friends.": {
       "localizations": {
@@ -1820,7 +1820,7 @@
     "Confirm": {},
     "Confirm your profile": {},
     "Connect your YouTube Music account": {},
-    "Connect your YouTube Music profile to BitChord.": {},
+    "Connect your YouTube Music profile to Auris.": {},
     "Continue in Background": {},
     "Contour %@": {},
     "Controls": {},
@@ -2684,7 +2684,7 @@
     "Download and install updates automatically": {},
     "Download anyway": {},
     "Downloaded collections": {},
-    "Downloaded once and kept in BitChord's storage. Removing a model takes effect immediately: Automix falls back to tempo analysis without the beat model, and stops watching for vocal clashes without the vocal one.": {},
+    "Downloaded once and kept in Auris's storage. Removing a model takes effect immediately: Automix falls back to tempo analysis without the beat model, and stops watching for vocal clashes without the vocal one.": {},
     "Downloading in Background — Done": {},
     "Downloads": {
       "localizations": {
@@ -3088,13 +3088,13 @@
         }
       }
     },
-    "Exported downloads live in the shared Music folder. Private ones stay inside BitChord's own storage.": {},
+    "Exported downloads live in the shared Music folder. Private ones stay inside Auris's own storage.": {},
     "Fill search with %@": {},
     "Filter %@": {},
     "Filter downloads": {},
     "Filter this library": {},
     "Finish signing in": {},
-    "Finishing sign-in to BitChord.": {},
+    "Finishing sign-in to Auris.": {},
     "First button": {
       "localizations": {
         "de": {
@@ -3714,7 +3714,7 @@
       }
     },
     "History couldn't load": {},
-    "Holding a high refresh rate keeps the display working harder the whole time BitChord is open, and the battery drains faster for it. Turn it on anyway?": {},
+    "Holding a high refresh rate keeps the display working harder the whole time Auris is open, and the battery drains faster for it. Turn it on anyway?": {},
     "Home": {
       "localizations": {
         "de": {
@@ -3921,108 +3921,108 @@
         }
       }
     },
-    "If a source does not have a track or cannot be reached, BitChord tries the next one. Sources above YouTube can replace its recording when they return a better version.": {
+    "If a source does not have a track or cannot be reached, Auris tries the next one. Sources above YouTube can replace its recording when they return a better version.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wenn eine Quelle einen Titel nicht hat oder nicht erreichbar ist, versucht BitChord die nächste. Quellen über YouTube können dessen Aufnahme ersetzen, wenn sie eine bessere Version liefern."
+            "value": "Wenn eine Quelle einen Titel nicht hat oder nicht erreichbar ist, versucht Auris die nächste. Quellen über YouTube können dessen Aufnahme ersetzen, wenn sie eine bessere Version liefern."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Si una fuente no tiene una canción o no responde, BitChord prueba la siguiente. Las fuentes situadas antes de YouTube pueden reemplazar su grabación si devuelven una versión mejor."
+            "value": "Si una fuente no tiene una canción o no responde, Auris prueba la siguiente. Las fuentes situadas antes de YouTube pueden reemplazar su grabación si devuelven una versión mejor."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Si une source n'a pas un titre ou est inaccessible, BitChord essaie la suivante. Les sources situées au-dessus de YouTube peuvent remplacer son enregistrement lorsqu'elles renvoient une meilleure version."
+            "value": "Si une source n'a pas un titre ou est inaccessible, Auris essaie la suivante. Les sources situées au-dessus de YouTube peuvent remplacer son enregistrement lorsqu'elles renvoient une meilleure version."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "אם למקור אין רצועה, BitChord מנסה את הבא. מקורות מעל YouTube יכולים להחליפו כשהם מוצאים גרסה טובה יותר."
+            "value": "אם למקור אין רצועה, Auris מנסה את הבא. מקורות מעל YouTube יכולים להחליפו כשהם מוצאים גרסה טובה יותר."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "अगर किसी स्रोत के पास कोई ट्रैक नहीं है या उस तक पहुंचा नहीं जा सकता, तो BitChord अगला स्रोत आज़माता है। YouTube से ऊपर के स्रोत बेहतर वर्शन मिलने पर उसकी रिकॉर्डिंग बदल सकते हैं।"
+            "value": "अगर किसी स्रोत के पास कोई ट्रैक नहीं है या उस तक पहुंचा नहीं जा सकता, तो Auris अगला स्रोत आज़माता है। YouTube से ऊपर के स्रोत बेहतर वर्शन मिलने पर उसकी रिकॉर्डिंग बदल सकते हैं।"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jika suatu sumber tidak memiliki trek atau tidak dapat dijangkau, BitChord mencoba sumber berikutnya. Sumber di atas YouTube dapat menggantikan rekamannya saat menghasilkan versi yang lebih baik."
+            "value": "Jika suatu sumber tidak memiliki trek atau tidak dapat dijangkau, Auris mencoba sumber berikutnya. Sumber di atas YouTube dapat menggantikan rekamannya saat menghasilkan versi yang lebih baik."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se una sorgente non ha un brano o non è raggiungibile, BitChord prova la successiva. Le sorgenti sopra YouTube possono sostituire la sua registrazione quando restituiscono una versione migliore."
+            "value": "Se una sorgente non ha un brano o non è raggiungibile, Auris prova la successiva. Le sorgenti sopra YouTube possono sostituire la sua registrazione quando restituiscono una versione migliore."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ソースにトラックがない、またはアクセスできない場合、BitChordは次のソースを試します。YouTubeより上のソースは、より良いバージョンが見つかった場合にその録音を置き換えられます。"
+            "value": "ソースにトラックがない、またはアクセスできない場合、Aurisは次のソースを試します。YouTubeより上のソースは、より良いバージョンが見つかった場合にその録音を置き換えられます。"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jeśli źródło nie ma utworu lub jest niedostępne, BitChord próbuje następne. Źródła przed YouTube mogą je zastąpić, gdy znajdą lepszą wersję."
+            "value": "Jeśli źródło nie ma utworu lub jest niedostępne, Auris próbuje następne. Źródła przed YouTube mogą je zastąpić, gdy znajdą lepszą wersję."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se uma fonte não tiver a faixa, o BitChord tenta a próxima. Fontes acima do YouTube podem substituí-lo quando encontram uma versão melhor."
+            "value": "Se uma fonte não tiver a faixa, o Auris tenta a próxima. Fontes acima do YouTube podem substituí-lo quando encontram uma versão melhor."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Если у источника нет трека или он недоступен, BitChord пробует следующий. Источники выше YouTube могут заменить его запись, если предоставляют более качественную версию."
+            "value": "Если у источника нет трека или он недоступен, Auris пробует следующий. Источники выше YouTube могут заменить его запись, если предоставляют более качественную версию."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "หากแหล่งข้อมูลหนึ่งไม่มีแทร็กหรือเชื่อมต่อไม่ได้ BitChord จะลองแหล่งถัดไป แหล่งข้อมูลที่อยู่เหนือ YouTube สามารถแทนที่การบันทึกของ YouTube ได้เมื่อให้เวอร์ชันที่ดีกว่า"
+            "value": "หากแหล่งข้อมูลหนึ่งไม่มีแทร็กหรือเชื่อมต่อไม่ได้ Auris จะลองแหล่งถัดไป แหล่งข้อมูลที่อยู่เหนือ YouTube สามารถแทนที่การบันทึกของ YouTube ได้เมื่อให้เวอร์ชันที่ดีกว่า"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bir kaynakta parça yoksa veya ulaşılamıyorsa BitChord bir sonrakini dener. YouTube üzerindeki kaynaklar daha iyi bir sürüm döndürdüklerinde onun kaydının yerini alabilir."
+            "value": "Bir kaynakta parça yoksa veya ulaşılamıyorsa Auris bir sonrakini dener. YouTube üzerindeki kaynaklar daha iyi bir sürüm döndürdüklerinde onun kaydının yerini alabilir."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nếu một nguồn không có bản nhạc hoặc không thể kết nối, BitChord sẽ thử nguồn tiếp theo. Các nguồn nằm trên YouTube có thể thay thế bản ghi âm của YouTube khi tìm được phiên bản tốt hơn."
+            "value": "Nếu một nguồn không có bản nhạc hoặc không thể kết nối, Auris sẽ thử nguồn tiếp theo. Các nguồn nằm trên YouTube có thể thay thế bản ghi âm của YouTube khi tìm được phiên bản tốt hơn."
           }
         },
         "zh-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "如果某個來源沒有該曲目或無法訪問，BitChord 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。"
+            "value": "如果某個來源沒有該曲目或無法訪問，Auris 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "如果某个来源没有该曲目或无法访问，BitChord 会尝试下一个来源。排在 YouTube 之前的来源如果返回更好的版本，可以替换其录音。"
+            "value": "如果某个来源没有该曲目或无法访问，Auris 会尝试下一个来源。排在 YouTube 之前的来源如果返回更好的版本，可以替换其录音。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "如果某個來源沒有該曲目或無法訪問，BitChord 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。"
+            "value": "如果某個來源沒有該曲目或無法訪問，Auris 會嘗試下一個來源。排在 YouTube 之前的來源如果返回更好的版本，可以替換其錄音。"
           }
         }
       }
@@ -4030,7 +4030,7 @@
     "Import Playlist File": {},
     "Import a CSV or TSV playlist export from Spotify or Apple Music, or drop an .m3u file in your music folder.": {},
     "Import a CSV or TSV playlist export from Spotify or Apple Music, save a playlist on YouTube Music, or drop an .m3u file in your music folder.": {},
-    "Imported to BitChord": {},
+    "Imported to Auris": {},
     "Importing a backup replaces the settings and listening history on this device. This cannot be undone.": {},
     "In progress": {},
     "Installed": {},
@@ -5507,7 +5507,7 @@
         }
       }
     },
-    "Listen with me on BitChord — party code %@": {},
+    "Listen with me on Auris — party code %@": {},
     "Listening": {
       "localizations": {
         "de": {
@@ -7502,102 +7502,102 @@
     },
     "Open Album": {},
     "Open Artist": {},
-    "Open BitChord": {
+    "Open Auris": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "BitChord öffnen"
+            "value": "Auris öffnen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abrir BitChord"
+            "value": "Abrir Auris"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ouvrir BitChord"
+            "value": "Ouvrir Auris"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "פתיחת BitChord"
+            "value": "פתיחת Auris"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "BitChord खोलें"
+            "value": "Auris खोलें"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Buka BitChord"
+            "value": "Buka Auris"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apri BitChord"
+            "value": "Apri Auris"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "BitChordを開く"
+            "value": "Aurisを開く"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abrir BitChord"
+            "value": "Abrir Auris"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Открыть BitChord"
+            "value": "Открыть Auris"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "เปิด BitChord"
+            "value": "เปิด Auris"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "BitChord'u Aç"
+            "value": "Auris'u Aç"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mở BitChord"
+            "value": "Mở Auris"
           }
         },
         "zh-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "開啟 BitChord"
+            "value": "開啟 Auris"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打开 BitChord"
+            "value": "打开 Auris"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "開啟 BitChord"
+            "value": "開啟 Auris"
           }
         }
       }
@@ -7911,7 +7911,7 @@
         }
       }
     },
-    "Paste the sp_dc cookie from an open Spotify web session. BitChord uses it only to look up looping motion art. Leave blank to skip.": {},
+    "Paste the sp_dc cookie from an open Spotify web session. Auris uses it only to look up looping motion art. Leave blank to skip.": {},
     "Pause": {
       "localizations": {
         "es": {
@@ -8112,7 +8112,7 @@
       }
     },
     "Personalized recommendations and your library, on every device.": {},
-    "Pick a folder — BitChord reads its tags, artwork and plays it with gapless and crossfade.": {},
+    "Pick a folder — Auris reads its tags, artwork and plays it with gapless and crossfade.": {},
     "Pin": {
       "localizations": {
         "de": {
@@ -8750,7 +8750,7 @@
     "Plays this track": {},
     "Podcasts": {},
     "Podcasts you follow show up here.": {},
-    "Point BitChord at a WebDAV share in Sources and it will appear here.": {},
+    "Point Auris at a WebDAV share in Sources and it will appear here.": {},
     "Portuguese": {
       "localizations": {
         "de": {
@@ -9773,7 +9773,7 @@
     },
     "Save %lld": {},
     "Save Diagnostic Report": {},
-    "Save a track from Now Playing — BitChord tags it and keeps it here.": {},
+    "Save a track from Now Playing — Auris tags it and keeps it here.": {},
     "Save albums on YouTube Music — or scan a folder on this device.": {},
     "Save to Library": {},
     "Saved Artists": {},
@@ -13259,7 +13259,7 @@
     },
     "Try again": {},
     "Turn On": {},
-    "Turn off to give BitChord audio priority. Other apps may pause.": {},
+    "Turn off to give Auris audio priority. Other apps may pause.": {},
     "Turn on to keep other apps audible.": {},
     "USB Audio": {},
     "Unlike": {},
@@ -14004,7 +14004,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "BitChord Replay của bạn"
+            "value": "Auris Replay của bạn"
           }
         },
         "zh-HK": {
