@@ -1,13 +1,7 @@
 package com.music.auris.data.innertube
 import com.music.auris.data.DebugLog
 import com.music.auris.data.http.ProbeResult
-import com.music.auris.data.http.Http
 import com.music.auris.data.http.RawHttpBytes
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
 import kotlin.concurrent.atomics.AtomicReference
@@ -95,32 +89,14 @@ object StreamResolver {
         "YouTube asks this network to sign in to confirm it is not a bot"
     )
     private val botCheckedUntil = AtomicReference<TimeMark?>(null)
-    private val BOT_CHECK_BACKOFF = 120.seconds
+    private val BOT_CHECK_BACKOFF = 60.seconds
 
     private suspend fun isBotChecked(videoId: String): Boolean {
-        val reason = try {
-            val body = Http.client.post("https://www.youtube.com/youtubei/v1/player?prettyPrint=false") {
-                contentType(ContentType.Application.Json)
-                setBody(buildJsonObject {
-                    put("videoId", videoId)
-                    putJsonObject("context") {
-                        putJsonObject("client") {
-                            put("clientName", "ANDROID_VR")
-                            put("clientVersion", "1.65.10")
-                            put("androidSdkVersion", 32)
-                            put("hl", "en")
-                        }
-                    }
-                }.toString())
-            }.bodyAsText()
-            (Json.parseToJsonElement(body).jsonObject["playabilityStatus"] as? JsonObject)
-                ?.get("reason")?.jsonPrimitive?.contentOrNull.orEmpty()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-            return false
-        }
-        if (!reason.contains("not a bot", ignoreCase = true)) return false
+        // The verdict comes from a probe that asks with the session's visitor
+        // id, so it is about the client that just failed. The earlier probe
+        // asked anonymously and could return a verdict of its own making.
+        val verdict = UpstreamPlaybackExtractor.botVerdict(videoId)
+        if (!verdict) return false
         botCheckedUntil.store(TimeSource.Monotonic.markNow() + BOT_CHECK_BACKOFF)
         DebugLog.w("YouTube is bot-checking this network; not asking again for ${BOT_CHECK_BACKOFF.inWholeSeconds}s")
         return true

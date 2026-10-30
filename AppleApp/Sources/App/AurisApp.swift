@@ -160,6 +160,15 @@ struct AurisApp: App {
                         LocalLibrary.shared.restore()
                         DownloadStore.shared.refresh()
                         Task { await StreamFileCache.shared.trim() }
+                    // The upstream extraction stack is cold on launch: the
+                    // player config, the cipher solve and the BotGuard page
+                    // behind the web clients' PoToken are all paid for on the
+                    // play path, which is why a first tap waits on them. Paid
+                    // here instead, the first tap finds them done.
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
+                        PlayerBridge.shared.warmUpstream()
+                    }
                         let token = PlatformSettings.shared.getSecret(key: "discord_token") ?? ""
                         if !token.isEmpty { DiscordGateway.shared.connect(token: token) }
                     }

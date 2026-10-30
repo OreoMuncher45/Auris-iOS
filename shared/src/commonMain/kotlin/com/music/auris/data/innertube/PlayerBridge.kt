@@ -43,6 +43,17 @@ object PlayerBridge {
     private val bridgeScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val json = Json { ignoreUnknownKeys = true }
 
+    /**
+     * Warms the upstream extraction stack: player config, cipher solve, and
+     * the BotGuard page behind the web clients' PoToken.
+     *
+     * Fire and forget. A track that arrives while the warm-up is still
+     * running waits for the same work rather than starting a second copy.
+     */
+    fun warmUpstream() {
+        bridgeScope.launch { UpstreamPlaybackExtractor.warm() }
+    }
+
     fun interface ResolveCallback {
         fun onResult(json: String?, message: String?)
     }

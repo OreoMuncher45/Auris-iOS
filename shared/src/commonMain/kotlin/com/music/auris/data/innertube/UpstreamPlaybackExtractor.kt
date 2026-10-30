@@ -113,6 +113,66 @@ internal object UpstreamPlaybackExtractor {
         }
         PlaybackTokenBridge.invalidate()
     }
+
+    /**
+     * Pays the cold costs before a track needs them: the player config, the
+     * cipher solve, the BotGuard page behind the web clients' PoToken.
+     *
+     * Cold, those put the first track a long way from first sound; paid at
+     * launch, the first tap finds them done. Nothing here is on the play
+     * path — it is a warm-up, and a track that arrives while it is still
+     * running waits for the same work rather than a second copy of it.
+     */
+    suspend fun warm() {
+        try {
+            val session = current()
+            val visitor = Innertube.ensureVisitorData()
+            if (!visitor.isNullOrBlank()) session.innerTube.visitorData = visitor
+            session.extractor.prewarm()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            DebugLog.d("upstream prewarm failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Asks YouTube once, with the identity the extraction just used, whether
+     * the refusal was a bot verdict.
+     *
+     * The probe used to be an anonymous request with a 2022 device client and
+     * no visitor id — the request shape YouTube answers with a bot verdict on
+     * its own. A track that failed for any other reason could therefore turn
+     * into a verdict about the network, and a verdict stands the whole app
+     * down for minutes. This one asks with a current device client and the
+     * session's visitor id, so its answer is about the client that just
+     * failed rather than about the probe.
+     *
+     * The web clients are deliberately not used here: without their signature
+     * timestamp and PoToken they are refused in their own right, and that
+     * refusal reads as a bot verdict.
+     */
+    suspend fun botVerdict(videoId: String): Boolean {
+        return try {
+            val session = current()
+            val visitor = Innertube.ensureVisitorData()
+            if (!visitor.isNullOrBlank()) session.innerTube.visitorData = visitor
+            val body = session.innerTube.player(
+                YouTubeClient.IOS, videoId, requestVisitorData = visitor,
+            ).bodyAsText()
+            val status = Json.parseToJsonElement(body).jsonObject["playabilityStatus"]?.jsonObject
+            val reason = status?.get("reason")?.jsonPrimitive?.contentOrNull.orEmpty()
+            val state = status?.get("status")?.jsonPrimitive?.contentOrNull.orEmpty()
+            reason.contains("not a bot", ignoreCase = true) ||
+                (state.equals("LOGIN_REQUIRED", ignoreCase = true) && reason.contains("bot", ignoreCase = true))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            DebugLog.d("bot verdict probe failed: ${e.message}")
+            false
+        }
+    }
+
     private val lock = Mutex()
     private var session: Session? = null
     private val logger = InnerTubeLogger { event ->
@@ -178,6 +238,7 @@ internal object UpstreamPlaybackExtractor {
     suspend fun videoSide(videoId: String): VideoSide? {
         val session = current()
         val visitor = Innertube.ensureVisitorData()
+        if (!visitor.isNullOrBlank()) session.innerTube.visitorData = visitor
         val response = try {
             session.innerTube.player(VIDEO_CLIENT, videoId, requestVisitorData = visitor)
         } catch (e: CancellationException) {
@@ -259,6 +320,16 @@ internal object UpstreamPlaybackExtractor {
 
     private suspend fun extractStream(videoId: String, maxKbps: Int): ExtractedStream? {
         val session = current()
+        // The player request has to carry a visitor id. A request without one
+        // is a request from a client with no session at all, and Google's
+        // answer to that is "sign in to confirm you're not a bot" — for a
+        // signed-in session included, because the account cookie and the
+        // visitor id are separate things and only the cookie is sent by
+        // default. The id is minted here rather than at browse time because
+        // the extraction session is built once and would otherwise keep
+        // whatever it had when it was built, including nothing at all.
+        val visitor = Innertube.ensureVisitorData()
+        if (!visitor.isNullOrBlank()) session.innerTube.visitorData = visitor
         val stream = session.extractor.extract(
             videoId = videoId,
             hints = ContentHints(wantVideo = false)
