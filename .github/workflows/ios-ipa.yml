@@ -52,11 +52,35 @@ jobs:
         with:
           submodules: false
 
-      - name: Select Xcode 26
+      - name: Select an Xcode with the iOS platform installed
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.app 2>/dev/null || \
-          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | head -1)"
+          set -euo pipefail
+          # Pick the newest Xcode whose SDK set actually contains an iOS
+          # platform. A runner image can carry an Xcode whose iOS platform was
+          # never downloaded, and xcodebuild then fails with
+          # "iOS 26.0 is not installed" instead of saying which Xcode is wrong.
+          best=""
+          best_ver=0
+          for xc in /Applications/Xcode*.app; do
+            [ -x "$xc/Contents/Developer/usr/bin/xcodebuild" ] || continue
+            sdks="$("$xc/Contents/Developer/usr/bin/xcodebuild" -showsdks 2>/dev/null || true)"
+            ios_ver="$(printf '%s\n' "$sdks" | sed -n 's/.*-sdk iphoneos\([0-9.]*\).*/\1/p' | sort -V | tail -1)"
+            [ -n "$ios_ver" ] || continue
+            major="${ios_ver%%.*}"
+            if [ "$major" -ge 26 ]; then
+              echo "candidate: $xc (iOS SDK $ios_ver)"
+              if [ "$major" -gt "$best_ver" ]; then best="$xc"; best_ver="$major"; fi
+            fi
+          done
+          if [ -z "$best" ]; then
+            echo "No Xcode with an iOS 26 SDK found; downloading the platform."
+            sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | tail -1)"
+            sudo xcodebuild -downloadPlatform iOS
+            best="$(ls -d /Applications/Xcode*.app | tail -1)"
+          fi
+          sudo xcode-select -s "$best"
           xcodebuild -version
+          xcodebuild -showsdks | grep -E 'iphoneos|iphonesimulator' || true
           swift --version
 
       - name: Set up JDK 21
