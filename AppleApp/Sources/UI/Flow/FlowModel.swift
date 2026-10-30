@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import AurisShared
 
 /// The Flow mix as the app sees it: the shared engine's snapshot plus the
@@ -186,17 +187,15 @@ final class FlowModel {
     /// Read the stored mix and tuner state without touching the network.
     func loadStored() {
         FlowBridge.shared.status(callback: Callback { [weak self] json, message in
-            guard let self else { return }
-            if let message {
-                self.error = message
-                return
+            Task { @MainActor in
+                guard let self else { return }
+                if let message {
+                    self.error = message
+                    return
+                }
+                guard let snapshot = self.decode(json) else { return }
+                self.apply(snapshot)
             }
-            guard let snapshot = self.decode(json) else { return }
-            self.snapshot = snapshot
-            self.mood = FlowMoodOption(rawValue: snapshot.mood) ?? .flow
-            self.discovery = Double(snapshot.discovery)
-            self.memory = Double(snapshot.memory)
-            self.excludedGenres = Set(snapshot.excludedGenres)
         })
     }
 
@@ -206,18 +205,16 @@ final class FlowModel {
         loading = true
         error = nil
         FlowBridge.shared.build(limit: FlowLimits.initialTracks) { [weak self] json, message in
-            guard let self else { return }
-            self.loading = false
-            if let message {
-                self.error = message
-                return
+            Task { @MainActor in
+                guard let self else { return }
+                self.loading = false
+                if let message {
+                    self.error = message
+                    return
+                }
+                guard let snapshot = self.decode(json) else { return }
+                self.apply(snapshot)
             }
-            guard let snapshot = self.decode(json) else { return }
-            self.snapshot = snapshot
-            self.mood = FlowMoodOption(rawValue: snapshot.mood) ?? .flow
-            self.discovery = Double(snapshot.discovery)
-            self.memory = Double(snapshot.memory)
-            self.excludedGenres = Set(snapshot.excludedGenres)
         }
     }
 
@@ -232,13 +229,15 @@ final class FlowModel {
             memory: Float(memory),
             excludedGenres: Array(excludedGenres)
         ) { [weak self] json, message in
-            guard let self else { return }
-            self.loading = false
-            if let message {
-                self.error = message
-                return
+            Task { @MainActor in
+                guard let self else { return }
+                self.loading = false
+                if let message {
+                    self.error = message
+                    return
+                }
+                if let snapshot = self.decode(json) { self.apply(snapshot) }
             }
-            if let snapshot = self.decode(json) { self.snapshot = snapshot }
         }
     }
 
@@ -248,28 +247,39 @@ final class FlowModel {
         growing = true
         let currentJson = FlowLimits.encodeSongs(snapshot.songs)
         FlowBridge.shared.grow(currentJson: currentJson, limit: FlowLimits.topUpTracks) { [weak self] json, message in
-            guard let self else { return }
-            self.growing = false
-            if let message {
-                self.error = message
-                return
+            Task { @MainActor in
+                guard let self else { return }
+                self.growing = false
+                if let message {
+                    self.error = message
+                    return
+                }
+                guard let json, let data = json.data(using: .utf8),
+                      let songs = try? JSONDecoder().decode([FlowSnapshot.Song].self, from: data) else { return }
+                self.snapshot = FlowSnapshot(
+                    songs: songs,
+                    mood: self.snapshot.mood,
+                    discovery: self.snapshot.discovery,
+                    memory: self.snapshot.memory,
+                    excludedGenres: self.snapshot.excludedGenres,
+                    unlocked: self.snapshot.unlocked,
+                    favTrackCount: self.snapshot.favTrackCount,
+                    favArtistCount: self.snapshot.favArtistCount,
+                    neededMore: self.snapshot.neededMore,
+                    radioName: self.snapshot.radioName,
+                    browseId: self.snapshot.browseId
+                )
             }
-            guard let json, let data = json.data(using: .utf8),
-                  let songs = try? JSONDecoder().decode([FlowSnapshot.Song].self, from: data) else { return }
-            self.snapshot = FlowSnapshot(
-                songs: songs,
-                mood: self.snapshot.mood,
-                discovery: self.snapshot.discovery,
-                memory: self.snapshot.memory,
-                excludedGenres: self.snapshot.excludedGenres,
-                unlocked: self.snapshot.unlocked,
-                favTrackCount: self.snapshot.favTrackCount,
-                favArtistCount: self.snapshot.favArtistCount,
-                neededMore: self.snapshot.neededMore,
-                radioName: self.snapshot.radioName,
-                browseId: self.snapshot.browseId
-            )
         }
+    }
+
+    /// Adopt a snapshot from the shared module, tuner state included.
+    private func apply(_ snapshot: FlowSnapshot) {
+        self.snapshot = snapshot
+        mood = FlowMoodOption(rawValue: snapshot.mood) ?? .flow
+        discovery = Double(snapshot.discovery)
+        memory = Double(snapshot.memory)
+        excludedGenres = Set(snapshot.excludedGenres)
     }
 
     func ban(_ song: FlowSnapshot.Song) {

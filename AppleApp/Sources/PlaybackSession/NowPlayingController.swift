@@ -8,7 +8,9 @@ import UIKit
 import MediaPlayer
 import AurisShared
 #if os(iOS)
+#if canImport(NowPlaying)
 import NowPlaying
+#endif
 import AVFoundation
 #if DEBUG
 import Synchronization
@@ -32,6 +34,7 @@ final class NowPlayingController {
     init() {
 #if os(iOS)
         NowPlayingActivityController.endLegacyActivities()
+#if canImport(NowPlaying)
         if #available(iOS 27, *) {
             resetModernModel()
             // iOS 27+: metadata and commands live EXCLUSIVELY on the
@@ -42,6 +45,7 @@ final class NowPlayingController {
             // MPRemoteCommandCenter ... for local playback"). No MP handlers here.
             return
         }
+#endif
         DispatchQueue.main.async {
             UIApplication.shared.beginReceivingRemoteControlEvents()
         }
@@ -93,7 +97,7 @@ final class NowPlayingController {
     var onPrevious: (() -> Void)?
     var onSeek: ((Double) -> Void)?
 
-#if os(iOS)
+#if os(iOS) && canImport(NowPlaying)
     @available(iOS 27, *)
     private func resetModernModel() {
         let model = ModernNowPlaying()
@@ -114,11 +118,13 @@ final class NowPlayingController {
                             artworkData: Data?, thumbnailUrl: String?, position: Double,
                             canNext: Bool, canPrevious: Bool, canSeek: Bool) {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.prepare(id: id, title: title, artist: artist, duration: duration,
                           artworkData: artworkData, thumbnailUrl: thumbnailUrl, position: position,
                           canNext: canNext, canPrevious: canPrevious, canSeek: canSeek)
         }
+#endif
 #endif
     }
 
@@ -128,12 +134,14 @@ final class NowPlayingController {
         // iOS 27 publishes exclusively through the MediaSession (see init:
         // mixing in MPNowPlayingInfoCenter yields undefined behavior).
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.update(id: id, title: title, artist: artist, duration: duration,
                          artworkData: artworkData, thumbnailUrl: thumbnailUrl,
                          isPlaying: isPlaying, position: position)
             return
         }
+#endif
 #endif
         let key = id
         if metadataKey != key {
@@ -177,12 +185,14 @@ final class NowPlayingController {
 
     func updateCommands(canNext: Bool, canPrevious: Bool, canSeek: Bool) {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.canNext = canNext
             model.canPrevious = canPrevious
             model.canSeek = canSeek
             return
         }
+#endif
 #endif
         let commands = MPRemoteCommandCenter.shared()
         commands.nextTrackCommand.isEnabled = canNext
@@ -192,10 +202,12 @@ final class NowPlayingController {
 
     func update(position: Double) {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.updatePosition(position)
             return
         }
+#endif
 #endif
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
@@ -205,10 +217,12 @@ final class NowPlayingController {
 
     func updateRate(_ rate: Double, position: Double? = nil) {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.updateRate(rate, position: position)
             return
         }
+#endif
 #endif
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
         info[MPNowPlayingInfoPropertyPlaybackRate] = rate
@@ -225,31 +239,38 @@ final class NowPlayingController {
     /// Called after audio activation and engine playback have succeeded.
     func playbackDidStart() {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.playbackDidStart()
         }
+#endif
 #endif
         requestPrimaryIfPossible(reason: "playback")
     }
 
     func requestPrimaryIfPossible(reason: String = "foreground") {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.requestPrimaryIfPossible(reason: reason)
         }
+#endif
 #endif
     }
 
     func audioSessionUnavailable() {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.suspendClaims()
         }
+#endif
 #endif
     }
 
     func stop() {
 #if os(iOS)
+#if canImport(NowPlaying)
         if #available(iOS 27, *), let model = modern as? ModernNowPlaying {
             model.stop()
             // A suspended framework call can retain the old representation.
@@ -257,6 +278,7 @@ final class NowPlayingController {
             resetModernModel()
             return
         }
+#endif
 #endif
         lastRequestedURL = nil
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
@@ -312,7 +334,7 @@ final class NowPlayingController {
     }
 }
 
-#if os(iOS)
+#if os(iOS) && canImport(NowPlaying)
 /// iOS 27 publishes an explicit media session, including its playback state.
 /// Keep it separate from the legacy MediaPlayer path: Apple says not to publish
 /// the same local playback through both APIs.
