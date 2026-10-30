@@ -1,0 +1,8 @@
+name: probeA
+on:
+  workflow_dispatch:
+jobs:
+  a:
+    runs-on: macos-15
+    steps:
+      - run: echo a
