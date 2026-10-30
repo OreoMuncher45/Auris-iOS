@@ -137,10 +137,19 @@ object FlowBridge {
         }
     }
 
-    /** Append fresh recommendations to an existing mix. */
-    fun grow(current: List<Song>, limit: Int = FlowEngine.TOPUP_TRACKS, callback: FlowCallback) {
+    /**
+     * Append fresh recommendations to an existing mix.
+     *
+     * The current mix arrives as JSON rather than as `[Song]`: Swift cannot
+     * build a Kotlin `Song` cheaply, and the list is only ever the mix this
+     * bridge itself produced.
+     */
+    fun grow(currentJson: String, limit: Int = FlowEngine.TOPUP_TRACKS, callback: FlowCallback) {
         bridgeScope.launch {
             try {
+                val current = runCatching {
+                    json.decodeFromString(songListSerializer, currentJson)
+                }.getOrDefault(emptyList())
                 val songs = FlowEngine.grow(
                     radio = FlowEngine.FlowRadio { videoId -> fetchRadio(videoId) },
                     current = current,

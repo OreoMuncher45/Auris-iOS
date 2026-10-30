@@ -84,6 +84,7 @@ struct HomeView: View {
                     if !auth.signedIn {
                         SignInBanner { auth.loginPresented = true }
                     }
+                    FlowEntryCard()
                     ForEach(Array(shelves.enumerated()), id: \.element.id) { index, shelf in
                         if index == 0, isRecentsShelf(shelf) {
                             RecentShelf(shelf: shelf)

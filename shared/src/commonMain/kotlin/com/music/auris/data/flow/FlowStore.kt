@@ -169,7 +169,7 @@ object FlowStore {
     }
 
     /** Wall clock, isolated so the codec stays testable. */
-    internal var nowMillis: () -> Long = { kotlin.system.getTimeMillis() }
+    internal var nowMillis: () -> Long = { kotlin.time.Clock.System.now().toEpochMilliseconds() }
 
     // ---- Codecs ------------------------------------------------------------
 
