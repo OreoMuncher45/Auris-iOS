@@ -204,7 +204,7 @@ final class FlowModel {
         guard !loading else { return }
         loading = true
         error = nil
-        FlowBridge.shared.build(limit: FlowLimits.initialTracks) { [weak self] json, message in
+        FlowBridge.shared.build(limit: FlowLimits.initialTracks, callback: Callback { [weak self] json, message in
             Task { @MainActor in
                 guard let self else { return }
                 self.loading = false
@@ -215,7 +215,7 @@ final class FlowModel {
                 guard let snapshot = self.decode(json) else { return }
                 self.apply(snapshot)
             }
-        }
+        })
     }
 
     /// Apply the tuner and rebuild in one step.
@@ -227,18 +227,19 @@ final class FlowModel {
             mood: mood.rawValue,
             discovery: Float(discovery),
             memory: Float(memory),
-            excludedGenres: Array(excludedGenres)
-        ) { [weak self] json, message in
-            Task { @MainActor in
-                guard let self else { return }
-                self.loading = false
-                if let message {
-                    self.error = message
-                    return
+            excludedGenres: Array(excludedGenres),
+            callback: Callback { [weak self] json, message in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.loading = false
+                    if let message {
+                        self.error = message
+                        return
+                    }
+                    if let snapshot = self.decode(json) { self.apply(snapshot) }
                 }
-                if let snapshot = self.decode(json) { self.apply(snapshot) }
             }
-        }
+        )
     }
 
     /// Append more recommendations to the current mix.
@@ -246,7 +247,7 @@ final class FlowModel {
         guard !growing, !snapshot.songs.isEmpty else { return }
         growing = true
         let currentJson = FlowLimits.encodeSongs(snapshot.songs)
-        FlowBridge.shared.grow(currentJson: currentJson, limit: FlowLimits.topUpTracks) { [weak self] json, message in
+        FlowBridge.shared.grow(currentJson: currentJson, limit: FlowLimits.topUpTracks, callback: Callback { [weak self] json, message in
             Task { @MainActor in
                 guard let self else { return }
                 self.growing = false
@@ -270,7 +271,7 @@ final class FlowModel {
                     browseId: self.snapshot.browseId
                 )
             }
-        }
+        })
     }
 
     /// Adopt a snapshot from the shared module, tuner state included.
