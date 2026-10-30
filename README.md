@@ -15,6 +15,16 @@ Auris is an independent project; it is not affiliated with Google or YouTube.
 
 The project is source-first. An unsigned IPA is produced by the GitHub Actions workflow (`.github/workflows/ios-ipa.yml`); users sign and install it with their own developer identity.
 
+## Install the unsigned IPA
+
+Every release attaches an unsigned IPA named `Auris-<version>-build<build>-ios-unsigned.ipa`. An unsigned build does not install on its own — sign it with your own Apple Developer identity first, then install it.
+
+- Sideload with a tool that re-signs for you (Sideloadly, AltStore, or a signing service): point it at the downloaded IPA and your Apple ID or developer certificate.
+- Or sign it yourself in Xcode: open `AppleApp/Auris.xcodeproj`, set your Team on the app and widget targets, connect the iPhone, and run the `Auris` scheme. Register and enable the App Group `group.app.auris.Auris` for both targets.
+- A free Apple ID signs for seven days; a paid developer account signs for a year.
+
+Auris is an iPhone app (device family 1) and needs iOS 18 or later.
+
 ## Features
 
 The current codebase includes:
@@ -24,10 +34,11 @@ The current codebase includes:
 - Optional [automatic addon renewal](ADDON_REFRESH.md) using a renewal link supplied by the listener; no addon providers are bundled.
 - A native playback engine with downloads, queue management, gapless playback, crossfade, equalizer, and audio-route information.
 - Lyrics from multiple providers, including word-synced lyrics where a source supplies them.
+- Flow, an endless personal mix: it seeds itself from favourites, listening history and fresh recommendations, and a tuner sets the mood, how much discovery versus memory the mix carries, and which genres to leave out.
 - Automix transitions with beat analysis. Optional analysis models can be downloaded in the app; Automix retains a fallback when they are not installed.
 - Listen Together, which requires a compatible server address supplied by the listener.
 - Widgets, Discord Rich Presence, and Last.fm or ListenBrainz scrobbling.
-- Apple-platform audio options, including Dolby Atmos through Apple's renderer for supported source streams, spatial processing, and, on macOS, conditional bit-perfect output when the selected DAC and source format allow it.
+- Apple-platform audio options, including Dolby Atmos through Apple's renderer for supported source streams, and spatial processing.
 
 Features that depend on external services, sources, audio routes, or optional models may behave differently as those dependencies change.
 
