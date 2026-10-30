@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // The session-expiry matcher, through the same types the screens report with.
 //
@@ -72,7 +72,7 @@ check("the shared matcher accepts the raw text",
 
 // 3. An ordinary failure is not a refusal.
 let network = NSError(
-    domain: "BitChordTests", code: -1009,
+    domain: "AurisTests", code: -1009,
     userInfo: [NSLocalizedDescriptionKey: "Couldn't reach the music service. Check your connection and try again."]
 )
 check("a network failure does not match",

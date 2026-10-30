@@ -22,12 +22,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 APP="$ROOT/AppleApp"
-FW="$APP/Frameworks/BitChordShared.xcframework/macos-arm64"
+FW="$APP/Frameworks/AurisShared.xcframework/macos-arm64"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CHECK_DIR="${TMPDIR:-/tmp}/bitchord-party-ui-check"
 
 if [ ! -d "$FW" ]; then
-  echo "BitChordShared.xcframework is missing — run ./scripts/build-shared-framework.sh first." >&2
+  echo "AurisShared.xcframework is missing — run ./scripts/build-shared-framework.sh first." >&2
   exit 1
 fi
 
@@ -65,7 +65,7 @@ cat > "$CHECK_DIR/Stubs.swift" <<'STUBS'
 import Foundation
 import SwiftUI
 import Observation
-import BitChordShared
+import AurisShared
 
 /// The queue entry, as the party screen needs it: an id, some labels, and a
 /// duration. The real one lives with the player and carries far more than a party
@@ -107,14 +107,14 @@ struct ArtworkView: View {
 
 /// The app's navigation flags, as far as the party screens reach them.
 ///
-/// The real `AppModel` lives in `BitChordApp.swift` next to the whole app, and the
+/// The real `AppModel` lives in `AurisApp.swift` next to the whole app, and the
 /// party screens use four of its fields. Declaring the ones they need is better than
 /// compiling the entire app to check a screen: a screen cannot read a flag that is not
 /// here, so a rename on either side is still a compile error.
 @Observable
 final class AppModel {
     var scenePhase: ScenePhase = .active
-    /// Set by a `bitchord://party/…` link arriving from outside the app.
+    /// Set by a `auris://party/…` link arriving from outside the app.
     var pendingPartyInvite: String?
     /// The Listen Together screen, presented over whatever the listener was doing.
     var listenTogetherPresented = false
@@ -202,8 +202,8 @@ xcrun swiftc \
   -target arm64-apple-macos15.0 \
   -swift-version 5 \
   -F "$FW" \
-  -framework BitChordShared \
-  -Xlinker -rpath -Xlinker "$FW/BitChordShared.framework/Versions/A" \
+  -framework AurisShared \
+  -Xlinker -rpath -Xlinker "$FW/AurisShared.framework/Versions/A" \
   -o "$CHECK_DIR/check" \
   "${SOURCES[@]}" "$CHECK_DIR/Stubs.swift"
 

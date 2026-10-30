@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Upstream's `LyricsProviderSheet` (LyricsProviderSheet.kt): the per-track
 /// provider picker. Every enabled source with its live state — a found source

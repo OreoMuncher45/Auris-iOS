@@ -12,11 +12,11 @@ state = (root / "AppleApp/Sources/PlaybackSession/AudioRouteState.swift").read_t
 upgrade = (root / "AppleApp/Sources/PlaybackSession/PlaybackController+QualityUpgrade.swift").read_text()
 source = (root / "AppleApp/Sources/PlaybackSession/PlaybackController+SourceResolution.swift").read_text()
 session = (root / "AppleApp/Sources/PlaybackSession/AudioSessionManager.swift").read_text()
-kotlin = (root / "shared/src/commonMain/kotlin/com/music/bitchord/data/sources/SourceResolver.kt").read_text()
+kotlin = (root / "shared/src/commonMain/kotlin/com/music/auris/data/sources/SourceResolver.kt").read_text()
 preferences = (root / "AppleApp/Sources/PlaybackSession/PlaybackController+Preferences.swift").read_text()
 checks = {
     "unknown Bluetooth codec is conservatively capped": "guard let codec = bluetoothCodec?.lowercased() else { return false }" in route,
-    "source quality can remain lossless independently of the physical Bluetooth output": "PlaybackCodecCapabilities.allowLosslessSources" in kotlin and "StreamRequest.Best" in kotlin and "val allowLosslessSources" in (root / "shared/src/commonMain/kotlin/com/music/bitchord/data/sources/PlaybackCodecCapabilities.kt").read_text(),
+    "source quality can remain lossless independently of the physical Bluetooth output": "PlaybackCodecCapabilities.allowLosslessSources" in kotlin and "StreamRequest.Best" in kotlin and "val allowLosslessSources" in (root / "shared/src/commonMain/kotlin/com/music/auris/data/sources/PlaybackCodecCapabilities.kt").read_text(),
     "direct wired routes can carry lossless": "guard route.contains(\"bluetooth\") else { return true }" in route,
     "bit-perfect requires lossless integer PCM and a direct route": "guard sourceIsLossless, integerPcm else { return false }" in route and "!route.contains(\"airplay\")" in route,
     "the route policy drives codec capability": "LosslessRoute.permitsLossless(routeKind: kind)" in state,

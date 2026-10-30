@@ -247,7 +247,7 @@ check("carries the WebKit build", agent.contains("AppleWebKit/605.1.15"))
 check("names a Safari version", agent.contains("Version/") && agent.contains("Safari/605.1.15"))
 check("does not say it is a phone", !agent.contains("iPhone"))
 check("does not say it is Android", !agent.contains("Android"))
-check("identifies the app", agent.contains("bitchord"))
+check("identifies the app", agent.contains("auris"))
 check("one line, no newline", !agent.contains("\n") && !agent.contains("\r"))
 
 // A UA with nothing after Safari/ is not a real one, and neither is one with a

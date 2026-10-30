@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Last.fm genre tags for Replay — port of upstream `ArtistFacts`.
 /// Sends only the artist name; nothing else. Off when Settings “Work out genres”

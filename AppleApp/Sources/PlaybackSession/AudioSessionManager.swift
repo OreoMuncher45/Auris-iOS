@@ -1,5 +1,5 @@
 import AVFoundation
-import BitChordShared
+import AurisShared
 
 /// Background audio session (spec §3.2). iOS needs `.playback` + activation
 /// for lock-screen / Control Center continuity; macOS has no AVAudioSession.
@@ -27,7 +27,7 @@ import BitChordShared
 /// fail to start without an error worth reading. Handing the engine the
 /// session's own numbers makes the two agree by construction.
 enum AudioSessionManager {
-    private static let sessionQueue = DispatchQueue(label: "app.bitchord.BitChord.audio-session")
+    private static let sessionQueue = DispatchQueue(label: "app.auris.Auris.audio-session")
     private static let readiness = AudioSessionReadiness()
 
     /// Successful activation, invalidated on deactivation/interruption/reset.
@@ -48,7 +48,7 @@ enum AudioSessionManager {
             + "policy=\(session.routeSharingPolicy.rawValue) "
             + "active=\(isActive) otherAudio=\(session.isOtherAudioPlaying)"
         PlaybackDebugLog.shared.record(message)
-        NSLog("[BitChord] %@", message)
+        NSLog("[Auris] %@", message)
         #endif
     }
 
@@ -160,7 +160,7 @@ enum AudioSessionManager {
         // counters cannot show: the output ring can be full and the callback
         // punctual while the system takes the audio away underneath both.
         let output = session.currentRoute.outputs.first
-        NSLog("[BitChord] audio session %@",
+        NSLog("[Auris] audio session %@",
               "category=\(session.category.rawValue) mode=\(session.mode.rawValue) "
               + "options=\(session.categoryOptions.rawValue) volume=\(session.outputVolume) "
               + "policy=\(session.routeSharingPolicy.rawValue) "
@@ -233,12 +233,12 @@ enum AudioSessionManager {
             else { return }
             switch reason {
             case .oldDeviceUnavailable:
-                NSLog("[BitChord] audio route device unavailable (e.g. headphones unplugged)")
+                NSLog("[Auris] audio route device unavailable (e.g. headphones unplugged)")
                 onOldDeviceUnavailable?()
                 handler()
             case .newDeviceAvailable,
                  .routeConfigurationChange, .categoryChange, .override:
-                NSLog("[BitChord] audio route changed (reason %d)", raw)
+                NSLog("[Auris] audio route changed (reason %d)", raw)
                 handler()
             default:
                 break

@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 
 /// Dedicated Downloads destination with Songs, Albums, and Artists tabs,
@@ -100,7 +100,7 @@ struct DownloadsView: View {
                 EmptyStateView(
                     icon: Image(.bchLibrary),
                     title: "No downloads yet",
-                    subtitle: "Save a track from Now Playing — BitChord tags it and keeps it here.",
+                    subtitle: "Save a track from Now Playing — Auris tags it and keeps it here.",
                     buttonTitle: nil, action: nil
                 )
             } else {

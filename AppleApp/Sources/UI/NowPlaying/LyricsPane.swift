@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 import AVKit
 import CoreImage
@@ -540,7 +540,7 @@ struct LyricsPane: View {
         Task { @MainActor in
             let authorization = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
             guard authorization == .authorized else {
-                photoSaveMessage = "Allow BitChord to add photos in Settings to save this card."
+                photoSaveMessage = "Allow Auris to add photos in Settings to save this card."
                 showPhotoSaveAlert = true
                 return
             }
@@ -561,7 +561,7 @@ struct LyricsPane: View {
     private var attribution: String? {
         guard let sourceLabel, !sourceLabel.isEmpty else { return nil }
         if alignmentInProgress { return "Lyrics by \(sourceLabel) · aligning locally…" }
-        if alignedLocally { return "Lyrics by \(sourceLabel) · Synced by BitChord" }
+        if alignedLocally { return "Lyrics by \(sourceLabel) · Synced by Auris" }
         guard hasSyncedTimings else { return "Lyrics by \(sourceLabel) · unsynced" }
         let lyricRows = lines.filter { !$0.isGap }
         let timedRows = lyricRows.enumerated().filter { lineHasSyncedTimings($0.element, at: $0.offset) }

@@ -266,13 +266,13 @@ final class CanvasVideoView: PlatformCanvasView {
 
     private func useFallback() {
         let error = player.currentItem?.error?.localizedDescription ?? "unknown playback error"
-        NSLog("[BitChord] animated artwork video failed at %@: %@",
+        NSLog("[Auris] animated artwork video failed at %@: %@",
               currentURL?.host ?? "local cache", error)
         configuration?.onRendered(false)
         playerLayer.opacity = 0
         if !triedCachedRemoteRetry, let remote = cachedRemoteRetryURL {
             triedCachedRemoteRetry = true
-            NSLog("[BitChord] downloading animated artwork again from %@ after cached playback failed",
+            NSLog("[Auris] downloading animated artwork again from %@ after cached playback failed",
                   remote.host ?? "remote host")
             // Some clip hosts ignore Range requests. AVPlayer cannot stream
             // their MP4s, but it can decode a complete cached download.

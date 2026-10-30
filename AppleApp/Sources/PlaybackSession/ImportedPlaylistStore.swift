@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 struct ImportedPlaylistTrack: Codable, Identifiable, Hashable {
     var id: String
@@ -47,7 +47,7 @@ final class ImportedPlaylistStore {
 
     private init() {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("BitChord", isDirectory: true)
+            .appendingPathComponent("Auris", isDirectory: true)
         fileURL = support.appendingPathComponent("imported-playlists.json")
         load()
     }

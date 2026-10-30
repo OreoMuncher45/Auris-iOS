@@ -1,15 +1,15 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
-import BitChordShared
+import AurisShared
 
 /// Stable identifiers for the window toolbar's own controls, so toolbar
 /// customisation and SwiftUI's own diffing keep track of them.
 enum MacToolbarItemID {
-    static let searchField = "bitchord.searchField"
-    static let searchSource = "bitchord.searchSource"
-    static let account = "bitchord.account"
-    static let downloads = "bitchord.downloads"
+    static let searchField = "auris.searchField"
+    static let searchSource = "auris.searchSource"
+    static let account = "auris.account"
+    static let downloads = "auris.downloads"
 }
 
 /// Which panel is open beside the library.
@@ -79,7 +79,7 @@ struct MacPillInset: ViewModifier {
 /// to show its leading column. The playback pill remains directly below them.
 private struct MacCompactNavigationBar: View {
     @Environment(AppModel.self) private var appModel
-    @SceneStorage("bitchord.selectedTab") private var selectedTab = AppModel.Tab.home.rawValue
+    @SceneStorage("auris.selectedTab") private var selectedTab = AppModel.Tab.home.rawValue
 
     private let tabs: [(AppModel.Tab, String, String)] = [
         (.home, "Home", "house"),

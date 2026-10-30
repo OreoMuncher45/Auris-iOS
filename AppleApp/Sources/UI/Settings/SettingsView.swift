@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 #if os(iOS)
 import UIKit
@@ -153,7 +153,7 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) {}
             Button("Turn On") { highPerf = true }
         } message: {
-            Text("Holding a high refresh rate keeps the display working harder the whole time BitChord is open, and the battery drains faster for it. Turn it on anyway?")
+            Text("Holding a high refresh rate keeps the display working harder the whole time Auris is open, and the battery drains faster for it. Turn it on anyway?")
         }
         .fileImporter(isPresented: $pickingFolder, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result {
@@ -270,9 +270,9 @@ struct SettingsView: View {
         }
         .fileExporter(
             isPresented: $exportPresented,
-            document: SettingsBackupFile(text: BitChordBackup.exportText()),
+            document: SettingsBackupFile(text: AurisBackup.exportText()),
             contentType: .json,
-            defaultFilename: BitChordBackup.suggestedName()
+            defaultFilename: AurisBackup.suggestedName()
         ) { result in
             if case .success = result { backupNote = "Settings exported" }
         }
@@ -281,7 +281,7 @@ struct SettingsView: View {
             let access = url.startAccessingSecurityScopedResource()
             defer { if access { url.stopAccessingSecurityScopedResource() } }
             if let data = try? Data(contentsOf: url), let text = String(data: data, encoding: .utf8) {
-                BitChordBackup.importText(text)
+                AurisBackup.importText(text)
                 backupNote = "Imported — reopen Settings to see them"
             }
         }
@@ -459,13 +459,13 @@ struct SettingsView: View {
         case .audioQuality:
             Text("Source Quality is the request. Current Output shows the decoded audio, device format and processing actually in use. Technical Audio & DAC contains output-specific options.")
         case .downloads:
-            Text("Exported downloads live in the shared Music folder. Private ones stay inside BitChord's own storage.")
+            Text("Exported downloads live in the shared Music folder. Private ones stay inside Auris's own storage.")
         case .playback:
             Text("Gapless stays on at 0s. Automix picks timing per track; crossfade sets the manual blend length.")
         case .advanced:
             Text("Analysis and display performance options can increase CPU use and battery consumption. Version alignment controls how a source switch resumes the recording.")
         case .about:
-            Text("BitChord \(update.currentVersion)")
+            Text("Auris \(update.currentVersion)")
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
         case .sources, .account, .appearance, .yourData:

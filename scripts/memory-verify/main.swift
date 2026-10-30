@@ -3,7 +3,7 @@ import AppKit
 import JavaScriptCore
 import ImageIO
 import UniformTypeIdentifiers
-import BitChordShared
+import AurisShared
 
 private func expect(_ value: @autoclosure () -> Bool, _ message: String) {
     guard value() else { fatalError(message) }

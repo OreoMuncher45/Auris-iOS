@@ -167,7 +167,7 @@ private func until(_ check: () async -> Bool) async throws {
     }
 
     static func overlayChecks() throws {
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("BitChordOverlayCheck-\(UUID().uuidString)")
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("AurisOverlayCheck-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let audio = directory.appendingPathComponent("track.audio")
@@ -191,7 +191,7 @@ private func until(_ check: () async -> Bool) async throws {
     }
 
     static func downloadChecks() async throws {
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("BitChordVideoDownloadCheck-\(UUID().uuidString)")
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("AurisVideoDownloadCheck-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let url = URL(string: "https://example.invalid/audio")!

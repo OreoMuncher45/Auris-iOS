@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import BitChordShared
+import AurisShared
 
 // Two checks on the Listen Together UI, because they are two different failures and
 // only one of them is awkward to do.

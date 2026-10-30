@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // The revert-to-original pin, through the real Swift→Kotlin seam.
 //

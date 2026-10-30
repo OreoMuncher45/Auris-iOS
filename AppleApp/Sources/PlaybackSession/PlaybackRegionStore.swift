@@ -12,7 +12,7 @@ actor SponsorBlockStore {
     private var inFlight: [String: Task<[NonMusicSegment], Never>] = [:]
     private let file: URL
     init(directory: URL? = nil) {
-        let base = directory ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("BitChord", isDirectory: true)
+        let base = directory ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("Auris", isDirectory: true)
         file = base.appendingPathComponent("sponsorblock.json")
         if let data = try? Data(contentsOf: file), let saved = try? JSONDecoder().decode([String: Cached].self, from: data) { known = saved }
     }
@@ -66,7 +66,7 @@ actor PlaybackRegionStore {
         if trimEdges, !path.hasPrefix("http") {
             let complete = !FileManager.default.fileExists(atPath: path + ".grow") || FileManager.default.fileExists(atPath: path + ".complete")
             let hash = complete ? DownloadStore.hashFile(path) : nil
-            let directory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("BitChord/Boundaries", isDirectory: true)
+            let directory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("Auris/Boundaries", isDirectory: true)
             let file = hash.map { directory.appendingPathComponent($0 + "-v2.json") }
             if let file, let data = try? Data(contentsOf: file), let cached = try? JSONDecoder().decode(Edges.self, from: data), cached.version == 2 {
                 result.audibleStartSeconds = cached.start; result.audibleEndSeconds = cached.end

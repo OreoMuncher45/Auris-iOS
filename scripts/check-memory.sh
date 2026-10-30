@@ -13,13 +13,13 @@ source = (repo / 'AppleApp/Sources/PlaybackSession/ModuleJsEngine.swift').read_t
 assert 'private final class Engine {' in source
 (work / 'ModuleJsEngine.swift').write_text(source.replace('private final class Engine {', 'final class Engine {', 1))
 PY
-native="$repo/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
-shared="$repo/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+native="$repo/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
+shared="$repo/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 xcrun swiftc -O -disable-sandbox -parse-as-library -module-cache-path "$work/modules" -o "$work/verify" \
- -F "$native" -framework NativeCoreFFI -F "$shared" -framework BitChordShared \
+ -F "$native" -framework AurisCoreFFI -F "$shared" -framework AurisShared \
  -framework CoreAudio -framework AudioToolbox -framework JavaScriptCore \
- -Xlinker -rpath -Xlinker "$shared/BitChordShared.framework/Versions/A" \
- "$repo/AppleApp/Generated/NativeCore.swift" "$work/ModuleJsEngine.swift" \
+ -Xlinker -rpath -Xlinker "$shared/AurisShared.framework/Versions/A" \
+ "$repo/AppleApp/Generated/AurisCore.swift" "$work/ModuleJsEngine.swift" \
  "$repo/AppleApp/Sources/PlaybackSession/LocalArtwork.swift" \
  "$repo/AppleApp/Sources/PlaybackSession/LocalLibrary.swift" \
  "$repo/AppleApp/Sources/PlaybackSession/LocalTrackOrder.swift" \

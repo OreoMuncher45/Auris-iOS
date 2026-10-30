@@ -83,7 +83,7 @@ fn main() {
         cc::Build::new()
             .file("src/decode/apple_aac.c")
             .flag("-fvisibility=hidden")
-            .compile("bitchord_apple_aac");
+            .compile("auris_apple_aac");
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
     }
     let revision = std::process::Command::new("git")
@@ -117,7 +117,7 @@ fn main() {
     }
     let digest = format!("{:x}", hash.finalize());
     println!(
-        "cargo:rustc-env=BITCHORD_CORE_REVISION={revision}+{}",
+        "cargo:rustc-env=AURIS_CORE_REVISION={revision}+{}",
         &digest[..12]
     );
 }

@@ -10,13 +10,13 @@ from pathlib import Path
 root, work = map(Path, sys.argv[1:])
 (work/'QueueEntry.swift').write_text((root/'AppleApp/Sources/PlaybackSession/QueueEntry.swift').read_text())
 PY
-NATIVE="$ROOT/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
-SHARED="$ROOT/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
+NATIVE="$ROOT/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
+SHARED="$ROOT/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
 xcrun swiftc -module-cache-path "$WORK/modules" -parse-as-library -o "$WORK/verify" \
- -F "$NATIVE" -framework NativeCoreFFI -F "$SHARED" -framework BitChordShared \
+ -F "$NATIVE" -framework AurisCoreFFI -F "$SHARED" -framework AurisShared \
  -framework CoreAudio -framework AudioToolbox \
- -Xlinker -rpath -Xlinker "$SHARED/BitChordShared.framework/Versions/A" \
- "$ROOT/AppleApp/Generated/NativeCore.swift" "$WORK/QueueEntry.swift" \
+ -Xlinker -rpath -Xlinker "$SHARED/AurisShared.framework/Versions/A" \
+ "$ROOT/AppleApp/Generated/AurisCore.swift" "$WORK/QueueEntry.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/DownloadStore.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/LocalArtwork.swift" \
  "$ROOT/AppleApp/Sources/PlaybackSession/PlaybackDebugLog.swift" \

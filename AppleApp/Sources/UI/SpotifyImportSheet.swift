@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Import a Spotify playlist, matched track by track to YouTube Music.
 ///

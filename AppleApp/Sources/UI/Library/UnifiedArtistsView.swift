@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 
 /// The Artists row: saved artists from the signed-in library, then this

@@ -1,7 +1,7 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
-import BitChordShared
+import AurisShared
 
 /// The Mac's small players: a floating Mini Player window (⌥⌘M, as in Music)
 /// and the same controls in a menu bar extra. Both are the ordinary transport
@@ -75,7 +75,7 @@ struct MiniPlayerView: View {
             if compact {
                 Divider()
                 HStack {
-                    Button("Open BitChord") {
+                    Button("Open Auris") {
                         NSApp.activate()
                         NSApp.windows.first { $0.canBecomeMain }?.makeKeyAndOrderFront(nil)
                     }
@@ -85,7 +85,7 @@ struct MiniPlayerView: View {
                 .buttonStyle(.borderless)
                 .font(.callout)
                 Menu {
-                    Toggle("Keep BitChord open when windows close", isOn: $closeToTray)
+                    Toggle("Keep Auris open when windows close", isOn: $closeToTray)
                 } label: {
                     Label("Window Behavior", systemImage: "macwindow")
                 }

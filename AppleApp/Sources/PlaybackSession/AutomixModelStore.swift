@@ -18,7 +18,7 @@ import Observation
 /// hash is recomputed on this device, so neither a moved tag nor a truncated
 /// transfer can put a bad graph in the analyzer.
 ///
-/// Deliberately free of `BitChordShared` and SwiftUI:
+/// Deliberately free of `AurisShared` and SwiftUI:
 /// `scripts/check-models.sh` compiles this file alone with the real network and
 /// real hashing, and a file that can only be exercised from inside the app is a
 /// file whose download logic is only ever tested by hand. Policy that belongs to
@@ -62,7 +62,7 @@ final class AutomixModelStore {
             byteCount: 23_478_460,
             sha256: "9f10e5efa37d3e120da2121141825fe54b23b487b32dd25a54f89039fd8f85cb",
             // The owner's release asset; the tag is the pin, not a branch.
-            url: URL(string: "https://github.com/bagumamartin/BitChord/releases/download/model-beat-this-final0-v1/beat_this_full_int8.onnx")!
+            url: URL(string: "https://github.com/OreoMuncher45/Auris-iOS/releases/download/model-beat-this-final0-v1/beat_this_full_int8.onnx")!
         )
     }
 
@@ -138,7 +138,7 @@ final class AutomixModelStore {
     static var defaultDirectory: URL {
         let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
-        return root.appendingPathComponent("BitChord/Models", isDirectory: true)
+        return root.appendingPathComponent("Auris/Models", isDirectory: true)
     }
 
     /// One session per transfer, because a `URLSessionDataTask` takes its delegate

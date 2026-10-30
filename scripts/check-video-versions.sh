@@ -6,30 +6,30 @@ set -uo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
-fw="$repo/AppleApp/Frameworks/BitChordShared.xcframework/macos-arm64"
-native_fw="$repo/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
+fw="$repo/AppleApp/Frameworks/AurisShared.xcframework/macos-arm64"
+native_fw="$repo/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
 verification_dir="$(mktemp -d)"
 bin="$verification_dir/video-versions-verify"
 mkdir -p "$verification_dir/home"
 trap 'rm -rf "$verification_dir"' EXIT
 
 if [ ! -d "$native_fw" ]; then
-  echo "no NativeCoreFFI for macos-arm64 — run scripts/build-native-core.sh first" >&2
+  echo "no AurisCoreFFI for macos-arm64 — run scripts/build-native-core.sh first" >&2
   exit 2
 fi
 
-xcrun swiftc -O -module-cache-path /tmp/bitchord-swift-module-cache -o "$bin" \
-  -F "$native_fw" -framework NativeCoreFFI \
+xcrun swiftc -O -module-cache-path /tmp/auris-swift-module-cache -o "$bin" \
+  -F "$native_fw" -framework AurisCoreFFI \
   -framework CoreAudio -framework AudioToolbox -framework CoreFoundation \
-  -Xlinker -rpath -Xlinker "$native_fw/NativeCoreFFI.framework/Versions/A" \
-  -F "$fw" -framework BitChordShared -framework WebKit -framework JavaScriptCore \
-  -Xlinker -rpath -Xlinker "$fw/BitChordShared.framework/Versions/A" \
+  -Xlinker -rpath -Xlinker "$native_fw/AurisCoreFFI.framework/Versions/A" \
+  -F "$fw" -framework AurisShared -framework WebKit -framework JavaScriptCore \
+  -Xlinker -rpath -Xlinker "$fw/AurisShared.framework/Versions/A" \
   "$repo/AppleApp/Sources/App/YouTubeChallengeSolver.swift" \
   "$repo/AppleApp/Sources/App/YouTubePlayerJs.swift" \
   "$repo/AppleApp/Sources/App/ApplePoTokenProvider.swift" \
   "$repo/AppleApp/Sources/App/InnertubeStreamResolver.swift" \
   "$repo/AppleApp/Sources/App/ResolvedVideoSide.swift" \
-  "$repo/AppleApp/Generated/NativeCore.swift" \
+  "$repo/AppleApp/Generated/AurisCore.swift" \
   "$repo/AppleApp/Sources/PlaybackSession/PlaybackDebugLog.swift" \
   "$repo/AppleApp/Sources/PlaybackSession/VideoVersionAlignment.swift" \
   "$here/video-versions-verify/main.swift" || exit 2

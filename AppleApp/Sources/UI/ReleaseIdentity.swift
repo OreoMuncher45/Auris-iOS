@@ -36,7 +36,7 @@ struct ReleaseAsset: Decodable {
     var url: URL? {
         guard let url = URL(string: browser_download_url), url.scheme == "https",
               url.host == "github.com", url.user == nil, url.password == nil,
-              url.path.hasPrefix("/bagumamartin/BitChord/releases/download/"), !url.path.contains("..") else { return nil }
+              url.path.hasPrefix("/OreoMuncher45/Auris-iOS/releases/download/"), !url.path.contains("..") else { return nil }
         return url
     }
 }
@@ -100,10 +100,10 @@ struct AppReleaseUpdate: Identifiable {
         let matches = assets.filter { asset in
             let name = asset.name.lowercased()
             if let version {
-                let prefix = "bitchord-" + version.lowercased()
+                let prefix = "auris-" + version.lowercased()
                 guard name == prefix + suffix || name.hasPrefix(prefix + "-") else { return false }
             }
-            return name.hasPrefix("bitchord-") && name.hasSuffix(suffix) && asset.size > 0 && asset.url != nil
+            return name.hasPrefix("auris-") && name.hasSuffix(suffix) && asset.size > 0 && asset.url != nil
                 && !name.contains("x64") && !name.contains("x86") && !name.contains("intel")
                 && !name.contains("debug") && !name.contains("simulator")
         }

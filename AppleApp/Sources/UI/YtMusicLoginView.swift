@@ -1,6 +1,6 @@
 import SwiftUI
 import WebKit
-import BitChordShared
+import AurisShared
 
 /// Google's login stays in an isolated WebKit cookie store. Reaching Music
 /// presents a native completion step; the listener still explicitly confirms
@@ -82,7 +82,7 @@ struct YtMusicLoginView: View {
             Image(systemName: "key.icloud")
                 .font(.system(size: 38, weight: .medium))
                 .foregroundStyle(.tint)
-            Text("Use \(offer.accountName.isEmpty ? offer.email : offer.accountName)’s BitChord session from \(offer.deviceName)?")
+            Text("Use \(offer.accountName.isEmpty ? offer.email : offer.accountName)’s Auris session from \(offer.deviceName)?")
                 .font(.headline)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -151,7 +151,7 @@ struct SignInCompletionStep: View {
                     VStack(spacing: 8) {
                         Text(flow.taking ? "Signing you in" : "Confirm your profile")
                             .font(.title2.weight(.semibold))
-                        Text("Connect your YouTube Music profile to BitChord.")
+                        Text("Connect your YouTube Music profile to Auris.")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }
@@ -187,7 +187,7 @@ struct SignInCompletionStep: View {
                     }
                     if flow.taking {
                         ProgressView("Verifying your profile…")
-                        Text("Finishing sign-in to BitChord.")
+                        Text("Finishing sign-in to Auris.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     } else if flow.profile != nil || flow.checkingPage || flow.loadingProfile {
@@ -519,7 +519,7 @@ final class LoginWebCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, W
             // app and lost the sign-in, and the only way to be sure that cannot
             // happen again is for the capability not to exist on this screen.
             decisionHandler(.cancel)
-            NSLog("[BitChord] sign-in refused scheme: \(url?.scheme ?? "unknown")")
+            NSLog("[Auris] sign-in refused scheme: \(url?.scheme ?? "unknown")")
             flow.refusal = why
         }
     }
@@ -539,7 +539,7 @@ final class LoginWebCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, W
             if let url { webView.load(URLRequest(url: url)) }
             noteMainFrame(url, isMainFrame: true)
         case .refuse(let why):
-            NSLog("[BitChord] sign-in refused popup scheme: \(url?.scheme ?? "unknown")")
+            NSLog("[Auris] sign-in refused popup scheme: \(url?.scheme ?? "unknown")")
             flow.refusal = why
         }
         return nil

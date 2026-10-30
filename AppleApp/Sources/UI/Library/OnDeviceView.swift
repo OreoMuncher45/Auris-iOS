@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 
 /// The On Device row: everything that lives on this hardware — downloads,

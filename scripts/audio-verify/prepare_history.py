@@ -6,7 +6,7 @@ with Cargo, then copy its executable before building the next revision.
 from pathlib import Path
 import subprocess,tarfile,io,sys
 repo=Path(__file__).resolve().parents[2]
-root=Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/bitchord-audio-history');root.mkdir(exist_ok=True)
+root=Path(sys.argv[1] if len(sys.argv)>1 else '/private/tmp/auris-audio-history');root.mkdir(exist_ok=True)
 src=(repo/'native-core/examples/playback_render.rs').read_text()
 src=src.replace('    ClarityPreset, ClarityTuning, PlaybackState, SoundMode, TrackEndReason,','    PlaybackState, TrackEndReason,')
 src=src.replace('fn track_ended(&self, _: TrackEndReason, _: String)', 'fn track_ended(&self, _: TrackEndReason)')

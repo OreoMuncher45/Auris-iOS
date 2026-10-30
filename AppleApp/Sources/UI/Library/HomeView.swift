@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 
 /// Home tab — upstream's "Play" tab: signed out it leads with the sign-in
@@ -84,6 +84,7 @@ struct HomeView: View {
                     if !auth.signedIn {
                         SignInBanner { auth.loginPresented = true }
                     }
+                    FlowEntryCard()
                     ForEach(Array(shelves.enumerated()), id: \.element.id) { index, shelf in
                         if index == 0, isRecentsShelf(shelf) {
                             RecentShelf(shelf: shelf)

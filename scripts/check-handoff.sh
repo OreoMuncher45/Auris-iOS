@@ -36,7 +36,7 @@ xcrun swiftc \
 status=0
 "$CHECK_DIR/check" || status=1
 
-if grep -q -- "- app.bitchord.playback" "$ROOT/AppleApp/project.yml"; then
+if grep -q -- "- app.auris.playback" "$ROOT/AppleApp/project.yml"; then
   echo "  ok   the activity type is declared in NSUserActivityTypes"
 else
   echo "  FAIL the activity type is not declared in AppleApp/project.yml"

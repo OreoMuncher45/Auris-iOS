@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 // Every lyrics source, against the real thing.
 //

@@ -2,7 +2,7 @@
 import AppKit
 #endif
 import Observation
-import BitChordShared
+import AurisShared
 
 /// One scanned local audio file.
 struct LocalTrack: Identifiable, Hashable {

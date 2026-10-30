@@ -4,7 +4,7 @@ import AppKit
 #else
 import UIKit
 #endif
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 
 /// A saved-collections grid straight from one signed-in library shelf
@@ -212,7 +212,7 @@ struct SavedPlaylistsView: View {
         }
         .sheet(item: $importDraft) { draft in
             PlaylistImportReviewView(draft: draft) { importError in
-                importMessage = importError ?? "Playlist saved to BitChord. Reimporting this file will update the same playlist."
+                importMessage = importError ?? "Playlist saved to Auris. Reimporting this file will update the same playlist."
                 showImportMessage = true
             }
         }

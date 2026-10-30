@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// Detail page for an album / artist / playlist browseId.
 ///

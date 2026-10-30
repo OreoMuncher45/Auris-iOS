@@ -21,11 +21,11 @@ enum Keychain {
         #if DEBUG
         // The muted CLI diagnostic has its own container and credentials.
         if let identifier = Bundle.main.bundleIdentifier,
-           identifier.hasPrefix("app.bitchord.BitChord.queuevalidation") {
+           identifier.hasPrefix("app.auris.Auris.queuevalidation") {
             return identifier
         }
         #endif
-        return "app.bitchord.BitChord"
+        return "app.auris.Auris"
     }()
     private static let service = namespace + ".credentials"
     private static let synchronizableService = namespace
@@ -66,7 +66,7 @@ enum Keychain {
         let update = SecItemUpdate(baseQuery(account) as CFDictionary, attributes as CFDictionary)
         if update == errSecSuccess { return true }
         guard update == errSecItemNotFound else {
-            NSLog("[BitChord] Keychain update failed for %@: %d", account, update)
+            NSLog("[Auris] Keychain update failed for %@: %d", account, update)
             return false
         }
         var item = baseQuery(account)
@@ -75,7 +75,7 @@ enum Keychain {
         item[kSecAttrSynchronizable as String] = false
         let added = SecItemAdd(item as CFDictionary, nil)
         if added == errSecSuccess { return true }
-        NSLog("[BitChord] Keychain add failed for %@: %d", account, added)
+        NSLog("[Auris] Keychain add failed for %@: %d", account, added)
         return false
     }
 
@@ -83,7 +83,7 @@ enum Keychain {
     static func clear(_ account: String) -> Bool {
         let status = SecItemDelete(baseQuery(account) as CFDictionary)
         if status == errSecSuccess || status == errSecItemNotFound { return true }
-        NSLog("[BitChord] Keychain delete failed for %@: %d", account, status)
+        NSLog("[Auris] Keychain delete failed for %@: %d", account, status)
         return false
     }
 

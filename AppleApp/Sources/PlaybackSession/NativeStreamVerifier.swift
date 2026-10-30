@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Bounded worker admission: slow providers cannot create an unbounded probe queue.
 final class NativeStreamVerifier: StreamVerificationVerifier, @unchecked Sendable {

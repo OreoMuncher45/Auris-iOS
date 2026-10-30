@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// `URLSessionWebSocketTask` for a Listen Together party, registered as
 /// `PartySocketBridge.Impl` at launch.
@@ -67,7 +67,7 @@ final class PartySocket: NSObject, PartySocketBridgeImpl, @unchecked Sendable {
     private var attempt = 0
     private var stopped = false
 
-    /// Registered at launch. See `BitChordApp`.
+    /// Registered at launch. See `AurisApp`.
     static func register() {
         PartySocketBridge.shared.setImpl(value: shared)
     }

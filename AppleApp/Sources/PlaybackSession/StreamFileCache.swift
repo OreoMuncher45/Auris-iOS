@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Disk LRU of completed stream files — Apple stand-in for upstream `AudioCache`
 /// + `DynamicLruCacheEvictor`. Keyed by video id, ceiling from Settings
@@ -372,7 +372,7 @@ actor CanvasFileCache {
 enum DiskCache {
     static func cachesSubfolder(_ name: String) -> URL {
         let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("BitChord/\(name)", isDirectory: true)
+            .appendingPathComponent("Auris/\(name)", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }

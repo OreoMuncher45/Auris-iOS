@@ -19,8 +19,8 @@ enum LastPlayed {
         var contextBaseIndex: Int
     }
 
-    private static let key = "bitchord_last_played"
-    private static let backupKey = "bitchord_last_played_previous"
+    private static let key = "auris_last_played"
+    private static let backupKey = "auris_last_played_previous"
     private static let keepBehind = 10
     private static let maxTracks = 60
 

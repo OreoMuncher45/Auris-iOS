@@ -2,7 +2,7 @@ import AVFoundation
 import AVKit
 import Observation
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// App-wide owner of the O9 video side.
 ///

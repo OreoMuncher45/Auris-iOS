@@ -30,7 +30,7 @@ struct UpdatesSettingsPage: View {
                 }
             } else {
                 Section("Installation") {
-                    Text("The latest release page is the single place to find the published iOS IPA and Mac DMG.")
+                    Text("The latest release page is the single place to find the published iOS IPA.")
                     Link("Open Latest Release", destination: UpdateChecker.latestReleaseURL)
                 }
             }

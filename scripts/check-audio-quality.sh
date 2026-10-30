@@ -14,10 +14,10 @@ with wave.open(sys.argv[1], 'wb') as wav:
     wav.writeframes(frames)
 PY
 /usr/bin/afconvert -f m4af -d alac "$scratch/hires.wav" "$scratch/hires.m4a"
-fw="$repo/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
-xcrun swiftc -O -module-cache-path /tmp/bitchord-swift-module-cache -o "$scratch/verify" \
-  -F "$fw" -framework NativeCoreFFI \
+fw="$repo/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
+xcrun swiftc -O -module-cache-path /tmp/auris-swift-module-cache -o "$scratch/verify" \
+  -F "$fw" -framework AurisCoreFFI \
   -framework CoreAudio -framework AudioToolbox -framework CoreFoundation \
-  -Xlinker -rpath -Xlinker "$fw/NativeCoreFFI.framework/Versions/A" \
-  "$repo/AppleApp/Generated/NativeCore.swift" "$repo/scripts/quality-verify/main.swift"
+  -Xlinker -rpath -Xlinker "$fw/AurisCoreFFI.framework/Versions/A" \
+  "$repo/AppleApp/Generated/AurisCore.swift" "$repo/scripts/quality-verify/main.swift"
 "$scratch/verify" "$scratch/hires.wav" "$scratch/hires.m4a"

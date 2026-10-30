@@ -5,13 +5,13 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>BitChord</title>
-        <link>https://github.com/bagumamartin/BitChord</link>
+        <link>https://github.com/OreoMuncher45/Auris-iOS</link>
         <description>BitChord for macOS updates</description>
         <language>en</language>
         <item>
             <title>1.0.3</title>
             <pubDate>Sun, 25 Oct 2026 21:27:37 +0100</pubDate>
-            <sparkle:fullReleaseNotesLink>https://github.com/bagumamartin/BitChord/releases/tag/v1.0.3</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/OreoMuncher45/Auris-iOS/releases/tag/v1.0.3</sparkle:fullReleaseNotesLink>
             <sparkle:version>7</sparkle:version>
             <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
@@ -25,12 +25,12 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
 - Tempo matching during a blend is smoother on dense, bass-heavy records, uses about half the processing power, and lets go of the tempo sooner after the blend. Tempo differences too small to hear are no longer matched at all.
 
 ]]></description>
-            <enclosure url="https://github.com/bagumamartin/BitChord/releases/download/v1.0.3/BitChord-1.0.3.dmg" length="37237661" type="application/octet-stream" sparkle:edSignature="Nz0MVmkgHaAXkcolpEiWktGlyhduyeduITMZz/Q1Y/SDDhCZRR1KSeOFdbvYGjQ/mfD1MdZtcirtwhDaJ2YFDQ=="/>
+            <enclosure url="https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.0.3/Auris-1.0.3.dmg" length="37237661" type="application/octet-stream" sparkle:edSignature="Nz0MVmkgHaAXkcolpEiWktGlyhduyeduITMZz/Q1Y/SDDhCZRR1KSeOFdbvYGjQ/mfD1MdZtcirtwhDaJ2YFDQ=="/>
         </item>
         <item>
             <title>1.0.2</title>
             <pubDate>Sun, 25 Oct 2026 20:04:37 +0100</pubDate>
-            <sparkle:fullReleaseNotesLink>https://github.com/bagumamartin/BitChord/releases/tag/v1.0.2</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/OreoMuncher45/Auris-iOS/releases/tag/v1.0.2</sparkle:fullReleaseNotesLink>
             <sparkle:version>6</sparkle:version>
             <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
@@ -60,7 +60,7 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
 - On iOS, you can now remove an addon by swiping it, with a confirmation step.
 - Better compatibility with addons: resource manifests, extra metadata field names, and streams that can't be played are declined cleanly.
 
-Thanks to [@Daltonganger](https://github.com/Daltonganger) for the addon fixes in [#2](https://github.com/bagumamartin/BitChord/pull/2), [#3](https://github.com/bagumamartin/BitChord/pull/3) and [#4](https://github.com/bagumamartin/BitChord/pull/4).
+Thanks to [@Daltonganger](https://github.com/Daltonganger) for the addon fixes in [#2](https://github.com/OreoMuncher45/Auris-iOS/pull/2), [#3](https://github.com/OreoMuncher45/Auris-iOS/pull/3) and [#4](https://github.com/OreoMuncher45/Auris-iOS/pull/4).
 
 ## Requirements
 
@@ -80,8 +80,8 @@ Drag BitChord to Applications, then open it. If Gatekeeper blocks the first laun
 - **Terminal:** After moving BitChord to Applications, run:
 
   ```sh
-  xattr -dr com.apple.quarantine "/Applications/BitChord.app"
-  open "/Applications/BitChord.app"
+  xattr -dr com.apple.quarantine "/Applications/Auris.app"
+  open "/Applications/Auris.app"
   ```
 
 ### Sideload on iPhone or iPad
@@ -94,9 +94,9 @@ To use iCloud lyrics-choice or sign-in sharing, sign the app with your own team 
 
 ## Legal
 
-BitChord does not host or provide media. Playback uses configured third-party services and their APIs; availability and terms are controlled by those services. See the [README Disclaimer & Legal Notice](https://github.com/bagumamartin/BitChord/blob/v1.0.2/README.md#disclaimer--legal-notice).
+BitChord does not host or provide media. Playback uses configured third-party services and their APIs; availability and terms are controlled by those services. See the [README Disclaimer & Legal Notice](https://github.com/OreoMuncher45/Auris-iOS/blob/v1.0.2/README.md#disclaimer--legal-notice).
 
-Every GitHub release is built from its tagged commit, and that tag's source archive is the Corresponding Source under GPLv3 §6. The source for this release is the [v1.0.2 tag](https://github.com/bagumamartin/BitChord/tree/v1.0.2).
+Every GitHub release is built from its tagged commit, and that tag's source archive is the Corresponding Source under GPLv3 §6. The source for this release is the [v1.0.2 tag](https://github.com/OreoMuncher45/Auris-iOS/tree/v1.0.2).
 
 ## Checksums (SHA-256)
 
@@ -105,12 +105,12 @@ Every GitHub release is built from its tagged commit, and that tag's source arch
 b96c690b24a491db88a8f7af9272a75c42c39220a15699607d05f1d0df56968b  BitChord-1.0.2-unsigned.ipa
 ```
 ]]></description>
-            <enclosure url="https://github.com/bagumamartin/BitChord/releases/download/v1.0.2/BitChord-1.0.2.dmg" length="37237019" type="application/octet-stream" sparkle:edSignature="/h9iTJfKy+6dIaOPE0Z6F444BhADFZDacgXkoWQZgs0huvmnztycKF/DUIMZwBBLy1w+L7MIbTlBEpJJuFO0Cg=="/>
+            <enclosure url="https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.0.2/Auris-1.0.2.dmg" length="37237019" type="application/octet-stream" sparkle:edSignature="/h9iTJfKy+6dIaOPE0Z6F444BhADFZDacgXkoWQZgs0huvmnztycKF/DUIMZwBBLy1w+L7MIbTlBEpJJuFO0Cg=="/>
         </item>
         <item>
             <title>1.0.1</title>
             <pubDate>Sun, 25 Oct 2026 14:36:47 +0100</pubDate>
-            <sparkle:fullReleaseNotesLink>https://github.com/bagumamartin/BitChord/releases/tag/v1.0.1</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/OreoMuncher45/Auris-iOS/releases/tag/v1.0.1</sparkle:fullReleaseNotesLink>
             <sparkle:version>5</sparkle:version>
             <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
@@ -139,8 +139,8 @@ Drag BitChord to Applications, then open it. If Gatekeeper blocks the first laun
 - **Terminal:** After moving BitChord to Applications, run:
 
   ```sh
-  xattr -dr com.apple.quarantine "/Applications/BitChord.app"
-  open "/Applications/BitChord.app"
+  xattr -dr com.apple.quarantine "/Applications/Auris.app"
+  open "/Applications/Auris.app"
   ```
 
 ### Sideload on iPhone or iPad
@@ -153,11 +153,11 @@ To use iCloud lyrics-choice or sign-in sharing, sign the app with your own team 
 
 ## Legal
 
-BitChord does not host or provide media. Playback uses configured third-party services and their APIs; availability and terms are controlled by those services. See the [README Disclaimer & Legal Notice](https://github.com/bagumamartin/BitChord/blob/v1.0.1/README.md#disclaimer--legal-notice).
+BitChord does not host or provide media. Playback uses configured third-party services and their APIs; availability and terms are controlled by those services. See the [README Disclaimer & Legal Notice](https://github.com/OreoMuncher45/Auris-iOS/blob/v1.0.1/README.md#disclaimer--legal-notice).
 
-Every GitHub release is built from its tagged commit, and that tag's source archive is the Corresponding Source under GPLv3 §6. The source for this release is the [v1.0.1 tag](https://github.com/bagumamartin/BitChord/tree/v1.0.1).
+Every GitHub release is built from its tagged commit, and that tag's source archive is the Corresponding Source under GPLv3 §6. The source for this release is the [v1.0.1 tag](https://github.com/OreoMuncher45/Auris-iOS/tree/v1.0.1).
 ]]></description>
-            <enclosure url="https://github.com/bagumamartin/BitChord/releases/download/v1.0.1/BitChord-1.0.1.dmg" length="41904837" type="application/octet-stream" sparkle:edSignature="xHD0Il14ymnYAkpiqtnIcYPyvEX1Il1GlaYifU5rL34Az1N3Bbcb7SGj1Vr7EVJ7Ub9aC1j2Lx0d9AIKh/E3Bw=="/>
+            <enclosure url="https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.0.1/Auris-1.0.1.dmg" length="41904837" type="application/octet-stream" sparkle:edSignature="xHD0Il14ymnYAkpiqtnIcYPyvEX1Il1GlaYifU5rL34Az1N3Bbcb7SGj1Vr7EVJ7Ub9aC1j2Lx0d9AIKh/E3Bw=="/>
         </item>
     </channel>
 </rss>

@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 /// A track's cover when it lives inside the file rather than beside it.
 ///

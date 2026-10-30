@@ -1,6 +1,6 @@
 import SwiftUI
 import Observation
-import BitChordShared
+import AurisShared
 import Foundation
 
 /// The remote file library, as one observable value.

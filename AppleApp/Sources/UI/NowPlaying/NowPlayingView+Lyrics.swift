@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 import UniformTypeIdentifiers
 import AVKit
 import CoreImage

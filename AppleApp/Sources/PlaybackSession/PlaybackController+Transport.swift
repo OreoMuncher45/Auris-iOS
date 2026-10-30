@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -123,7 +123,7 @@ extension PlaybackController {
                            output.started, formatAgrees {
                             let message = "resume retained output \(output.sampleRate) Hz / \(output.channels) ch"
                             PlaybackDebugLog.shared.record(message)
-                            NSLog("[BitChord] %@", message)
+                            NSLog("[Auris] %@", message)
                             return
                         }
                         try engine.prepareTrackOutput(
@@ -138,7 +138,7 @@ extension PlaybackController {
                         )
                     }
                 } catch {
-                    NSLog("[BitChord] resume output preparation failed; continuing with current output: \(error)")
+                    NSLog("[Auris] resume output preparation failed; continuing with current output: \(error)")
                 }
                 await MainActor.run { [weak self] in
                     guard let self,

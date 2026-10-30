@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 
 enum ReplayStoryPage: Int, CaseIterable, Identifiable {
     case intro, minutes, artists, songs, albums, genres, habits, summary
@@ -961,7 +961,7 @@ private struct ReplayShareSheet: View {
             .frame(width: 1080, height: 1920)
         let renderer = ImageRenderer(content: poster)
         renderer.scale = 1
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("bitchord-replay.png")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("auris-replay.png")
         #if os(iOS)
         guard let img = renderer.uiImage, let data = img.pngData() else { return nil }
         try? data.write(to: url)

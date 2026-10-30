@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 let mode = CommandLine.arguments[1]
 let keys = ["autoplay", "smart_fade_enabled"]
 for key in keys {

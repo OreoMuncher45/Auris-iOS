@@ -20,11 +20,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 APP="$ROOT/AppleApp"
-FW="$APP/Frameworks/BitChordShared.xcframework/macos-arm64"
+FW="$APP/Frameworks/AurisShared.xcframework/macos-arm64"
 CHECK_DIR="${TMPDIR:-/tmp}/bitchord-listening-check"
 
 if [ ! -d "$FW" ]; then
-  echo "BitChordShared.xcframework is missing — run ./scripts/build-shared-framework.sh first." >&2
+  echo "AurisShared.xcframework is missing — run ./scripts/build-shared-framework.sh first." >&2
   exit 1
 fi
 
@@ -36,10 +36,10 @@ xcrun swiftc \
   -sdk "$(xcrun --show-sdk-path --sdk macosx)" \
   -target arm64-apple-macos15.0 \
   -swift-version 5 \
-  -module-cache-path /tmp/bitchord-swift-module-cache \
+  -module-cache-path /tmp/auris-swift-module-cache \
   -F "$FW" \
-  -framework BitChordShared \
-  -Xlinker -rpath -Xlinker "$FW/BitChordShared.framework/Versions/A" \
+  -framework AurisShared \
+  -Xlinker -rpath -Xlinker "$FW/AurisShared.framework/Versions/A" \
   -o "$CHECK_DIR/check" \
   "$APP/Sources/PlaybackSession/ListeningStore.swift" \
   "$ROOT/scripts/listening-verify/main.swift"

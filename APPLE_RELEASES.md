@@ -2,7 +2,7 @@
 
 The installed version is always the marketing version **and build number**. `AppleApp/project.yml` is the shared source for both platforms. The next candidate is 1.0.4 (build 13); this does not mean it has been published.
 
-Both files belong to one immutable GitHub release. Use the same source revision, version and build for iOS and Mac. Build from a clean commit and pass `BITCHORD_BUILD_REVISION=$(git rev-parse --short=12 HEAD)` to Xcode; the iOS packaging script stamps this automatically and marks an uncommitted tree `-dirty`.
+Both files belong to one immutable GitHub release. Use the same source revision, version and build for iOS and Mac. Build from a clean commit and pass `AURIS_BUILD_REVISION=$(git rev-parse --short=12 HEAD)` to Xcode; the iOS packaging script stamps this automatically and marks an uncommitted tree `-dirty`.
 
 1. Generate the project and frameworks as usual. Archive the unsigned IPA with `scripts/package-ios-ipa.sh 1.0.4 --output-dir build/release`.
 2. Export the Mac Release app with the same build identity and revision, then run `scripts/package-mac-dmg.sh 1.0.4 EXPORT_FOLDER --output-dir build/release`.
@@ -12,6 +12,6 @@ Both files belong to one immutable GitHub release. Use the same source revision,
 
 The app reads the latest release and its `release.json` to select the right installer. A malformed manifest cannot cause a fallback to an arbitrary file. Legacy releases without a manifest still show their notes and a unique platform installer, but cannot assert equality or offer a same-version update when the published build number is unknown.
 
-Mac updates use Sparkle's download/signature/replace flow. A manual DMG install is the first-install/recovery path. On iOS the user signs the IPA with their existing signing app and identity; downloading an IPA is not an installation. Preserve `app.bitchord.BitChord` and its data rather than uninstalling first.
+Mac updates use Sparkle's download/signature/replace flow. A manual DMG install is the first-install/recovery path. On iOS the user signs the IPA with their existing signing app and identity; downloading an IPA is not an installation. Preserve `app.auris.Auris` and its data rather than uninstalling first.
 
 The existing private build 12 IPA/DMG are not regenerated or relabelled by this change. No release is published by the scripts above unless the separate, explicit publishing options/workflow are invoked.

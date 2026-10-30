@@ -1,6 +1,6 @@
 import Foundation
 import CommonCrypto
-import BitChordShared
+import AurisShared
 
 /// JioSaavn search + stream — same unofficial catalogue API as upstream
 /// `JioSaavnService`. DES decrypt uses Apple CommonCrypto.

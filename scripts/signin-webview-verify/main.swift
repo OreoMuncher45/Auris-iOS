@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import WebKit
-import BitChordShared
+import AurisShared
 
 /// Exercises the app's actual coordinator, WebKit cookie store, and page probe.
 /// HTML and credentials are synthetic; no saved account or Keychain is touched.
@@ -162,7 +162,7 @@ import BitChordShared
         if let bitmap = hosted.bitmapImageRepForCachingDisplay(in: hosted.bounds) {
             hosted.cacheDisplay(in: hosted.bounds, to: bitmap)
             let png = bitmap.representation(using: .png, properties: [:])!
-            try? png.write(to: URL(fileURLWithPath: "/tmp/bitchord-auth-mac-preview.png"))
+            try? png.write(to: URL(fileURLWithPath: "/tmp/auris-auth-mac-preview.png"))
             check("the polished review card renders at the Mac sheet size", true)
         } else { check("the polished review card renders at the Mac sheet size", false) }
         window.orderOut(nil)

@@ -228,7 +228,7 @@ final class LoginFlow {
         if let refusal { return refusal.summary }
         if reachedMusicOrigin {
             return signedInProfileAvailable
-                ? "Choose your profile using the avatar, then tap Use This Profile to finish signing in to BitChord."
+                ? "Choose your profile using the avatar, then tap Use This Profile to finish signing in to Auris."
                 : "Finish signing in and selecting your profile, then tap Use This Profile."
         }
         if let offOriginHost { return SignInNavigation.offSignInHostAdvice(host: offOriginHost) }

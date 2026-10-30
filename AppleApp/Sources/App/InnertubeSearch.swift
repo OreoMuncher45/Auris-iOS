@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 struct SearchHitDTO: Codable, Identifiable, Hashable {
     let kind: String

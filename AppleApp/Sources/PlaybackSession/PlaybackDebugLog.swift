@@ -7,7 +7,7 @@ final class PlaybackDebugLog: @unchecked Sendable {
     private let lock = NSLock()
     private var lines: [String] = []
     private let capacity: Int
-    private let writer = DispatchQueue(label: "app.bitchord.BitChord.diagnostics", qos: .utility)
+    private let writer = DispatchQueue(label: "app.auris.Auris.diagnostics", qos: .utility)
     private let directory: URL
     private let runFile: URL
     private let limit = 2 * 1024 * 1024
@@ -16,7 +16,7 @@ final class PlaybackDebugLog: @unchecked Sendable {
     init(capacity: Int = 80, directory: URL? = nil) {
         self.capacity = capacity
         self.directory = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("BitChord/Diagnostics", isDirectory: true)
+            .appendingPathComponent("Auris/Diagnostics", isDirectory: true)
         self.runFile = self.directory.appendingPathComponent(String(format: "%.6f", Date().timeIntervalSince1970) + "-" + UUID().uuidString + ".log")
         writer.async { [self] in
             try? FileManager.default.createDirectory(at: self.directory, withIntermediateDirectories: true)
@@ -85,13 +85,13 @@ final class PlaybackDebugLog: @unchecked Sendable {
     }
     func saveReport(snapshot: String) throws -> URL {
         try writer.sync {
-            var report = "BitChord diagnostic report\n\(Date().ISO8601Format())\n\nENGINE SNAPSHOT\n\(Self.sanitize(snapshot))\n"
+            var report = "Auris diagnostic report\n\(Date().ISO8601Format())\n\nENGINE SNAPSHOT\n\(Self.sanitize(snapshot))\n"
             for file in runFiles() {
                 let text = (try? String(contentsOf: file, encoding: .utf8)) ?? "unavailable"
                 let state = file == runFile ? "current" : (text.contains("RUN CLEAN EXIT") ? "clean exit" : "interrupted; no clean-exit marker")
                 report += "\nRUN \(file.lastPathComponent) (\(state))\n" + Self.sanitize(text, limit: nil)
             }
-            let target = FileManager.default.temporaryDirectory.appendingPathComponent("BitChord-Diagnostics-\(UUID().uuidString).txt")
+            let target = FileManager.default.temporaryDirectory.appendingPathComponent("Auris-Diagnostics-\(UUID().uuidString).txt")
             try Data(report.utf8).write(to: target, options: .atomic)
             return target
         }

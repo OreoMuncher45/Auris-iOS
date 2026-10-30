@@ -1,5 +1,5 @@
 import SwiftUI
-import BitChordShared
+import AurisShared
 #if os(iOS)
 import UIKit
 #elseif os(macOS)
@@ -11,7 +11,7 @@ import AppKit
 /// single declaration. Exactly four canonical tabs, upstream icons, search
 /// role pinned trailing. `@SceneStorage` keeps the last tab across launches.
 struct RootView: View {
-    @SceneStorage("bitchord.selectedTab") private var selection: Int = AppModel.Tab.home.rawValue
+    @SceneStorage("auris.selectedTab") private var selection: Int = AppModel.Tab.home.rawValue
     @Environment(PlaybackController.self) private var controller
     @Environment(AppModel.self) private var appModel
     @Environment(AuthController.self) private var auth
@@ -48,7 +48,7 @@ struct RootView: View {
     @State private var sidebarPlaylist: UserPlaylistDTO?
     /// The library section the iPad's Library tab shows: the sidebar picks it,
     /// and the tab bar's Library returns to it.
-    @SceneStorage("bitchord.iPadLibrary") private var iPadLibraryTab: Int = AppModel.Tab.libraryYouTube.rawValue
+    @SceneStorage("auris.iPadLibrary") private var iPadLibraryTab: Int = AppModel.Tab.libraryYouTube.rawValue
     #endif
     @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
     @State private var onboardingPresented = false
@@ -179,7 +179,7 @@ struct RootView: View {
             RenamePlaylistAlert()
         }
         #if os(iOS)
-        .alert("A BitChord update is available", isPresented: Binding(
+        .alert("A Auris update is available", isPresented: Binding(
             get: { updateChecker.available != nil },
             set: { if !$0 { updateChecker.dismiss() } }
         )) {
@@ -189,7 +189,7 @@ struct RootView: View {
             }
             Button("Later", role: .cancel) { updateChecker.dismiss() }
         } message: {
-            Text("BitChord \(updateChecker.available?.identity.label ?? "") is available. Update using the same method you used to install BitChord. The release page has the change notes.")
+            Text("Auris \(updateChecker.available?.identity.label ?? "") is available. Update using the same method you used to install Auris. The release page has the change notes.")
         }
         .sheet(item: $updateDetails) { release in UpdateSheet(release: release) }
         #endif
@@ -494,7 +494,7 @@ struct RootView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("BitChord")
+        .navigationTitle("Auris")
     }
 
     private func sideRow(_ side: MacSide, _ title: LocalizedStringKey, _ icon: String) -> some View {

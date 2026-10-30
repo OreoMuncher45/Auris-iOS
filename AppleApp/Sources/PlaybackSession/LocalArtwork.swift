@@ -6,8 +6,8 @@ import UniformTypeIdentifiers
 /// every embedded cover. Extraction is serial, off-main, and byte-budgeted.
 final class LocalArtwork: @unchecked Sendable {
     static let shared = LocalArtwork()
-    private static let scheme = "bitchord-local-artwork"
-    private let queue = DispatchQueue(label: "app.bitchord.BitChord.local-artwork", qos: .utility)
+    private static let scheme = "auris-local-artwork"
+    private let queue = DispatchQueue(label: "app.auris.Auris.local-artwork", qos: .utility)
     private let memory = NSCache<NSString, NSData>()
 
     init() {

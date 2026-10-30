@@ -22,7 +22,7 @@ repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 derived_data="$HOME/Library/Developer/Xcode/DerivedData"
 generate_appcast="$(find "$derived_data" -path '*/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_appcast' -type f -print -quit 2>/dev/null || true)"
 if [[ -z "$generate_appcast" ]]; then
-  echo "Sparkle's generate_appcast was not found. Open/resolve AppleApp/BitChord.xcodeproj once in Xcode first." >&2
+  echo "Sparkle's generate_appcast was not found. Open/resolve AppleApp/Auris.xcodeproj once in Xcode first." >&2
   exit 1
 fi
 

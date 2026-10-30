@@ -136,7 +136,7 @@ final class NowPlayingLifecycle {
                     try await perform(.publication, on: driver)
                     guard current(intent, driver) else { return }
                     if !driver.isApplicationPrimary {
-                        publicationError = NSError(domain: "BitChord.NowPlaying", code: 1,
+                        publicationError = NSError(domain: "Auris.NowPlaying", code: 1,
                             userInfo: [NSLocalizedDescriptionKey: "Publication completed without application-primary status"])
                     }
                 } catch {

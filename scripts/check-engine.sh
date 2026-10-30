@@ -16,9 +16,9 @@ set -uo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
 
-fw="$repo/AppleApp/Frameworks/NativeCoreFFI.xcframework/macos-arm64"
+fw="$repo/AppleApp/Frameworks/AurisCoreFFI.xcframework/macos-arm64"
 if [ ! -d "$fw" ]; then
-  echo "no NativeCoreFFI for macos-arm64 — run scripts/build-native-core.sh first" >&2
+  echo "no AurisCoreFFI for macos-arm64 — run scripts/build-native-core.sh first" >&2
   exit 2
 fi
 
@@ -27,10 +27,10 @@ bin="$(mktemp -d)/engine-verify"
 # a module, so the harness does the same: the generated Swift alongside it, with
 # the framework linked for the C symbols it calls.
 xcrun swiftc -O -o "$bin" \
-  -F "$fw" -framework NativeCoreFFI \
+  -F "$fw" -framework AurisCoreFFI \
   -framework CoreAudio -framework AudioToolbox -framework CoreFoundation \
-  -Xlinker -rpath -Xlinker "$fw/NativeCoreFFI.framework/Versions/A" \
-  "$repo/AppleApp/Generated/NativeCore.swift" \
+  -Xlinker -rpath -Xlinker "$fw/AurisCoreFFI.framework/Versions/A" \
+  "$repo/AppleApp/Generated/AurisCore.swift" \
   "$here/engine-verify/main.swift" || exit 2
 
 # The engine reads RUST_LOG for its own diagnostics; info keeps the voice open

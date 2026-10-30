@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 import os
 #if os(iOS)
 import UIKit
@@ -606,14 +606,14 @@ final class PlaybackController {
             began: { [weak self] in
                 Task { @MainActor in
                     guard let self else { return }
-                    NSLog("[BitChord] Audio interruption began")
+                    NSLog("[Auris] Audio interruption began")
                     self.audioInterruptionBegan()
                 }
             },
             ended: { [weak self] shouldResume in
                 Task { @MainActor in
                     guard let self else { return }
-                    NSLog("[BitChord] Audio interruption ended, shouldResume=\(shouldResume)")
+                    NSLog("[Auris] Audio interruption ended, shouldResume=\(shouldResume)")
                     self.audioInterruptionEnded(shouldResume: shouldResume)
                 }
             }
@@ -621,7 +621,7 @@ final class PlaybackController {
         // Log secondary audio events and media reset notifications
         routeObservers += AudioSessionManager.observeSessionEvents { [weak self] event in
             PlaybackDebugLog.shared.record(event)
-            NSLog("[BitChord] %@", event)
+            NSLog("[Auris] %@", event)
             if event == "audio media services were reset" {
                 Task { @MainActor in
                     self?.nowPlaying.audioSessionUnavailable()
@@ -907,7 +907,7 @@ final class PlaybackController {
                     }
                     self.nowPlaying.requestPrimaryIfPossible(reason: "route activation")
                 } catch {
-                    NSLog("[BitChord] output rebuild after route change failed: \(error)")
+                    NSLog("[Auris] output rebuild after route change failed: \(error)")
                 }
             }
         }

@@ -1,6 +1,6 @@
 import Foundation
 import WebKit
-import BitChordShared
+import AurisShared
 
 /// Upstream's BotGuard fallback, isolated from the signed-in browser and cookies.
 @MainActor
@@ -60,7 +60,7 @@ final class ApplePoTokenProvider: NSObject, PlaybackTokenBridgeProvider, WKNavig
             let config = WKWebViewConfiguration()
             config.websiteDataStore = .nonPersistent()
             let rule = try await WKContentRuleListStore.default().compileContentRuleList(
-                forIdentifier: "BitChord-Playback-Verification-No-Network",
+                forIdentifier: "Auris-Playback-Verification-No-Network",
                 encodedContentRuleList: "[{\"trigger\":{\"url-filter\":\".*\"},\"action\":{\"type\":\"block\"}}]")
             if let rule { config.userContentController.add(rule) }
             let view = WKWebView(frame: .zero, configuration: config)
@@ -74,12 +74,12 @@ final class ApplePoTokenProvider: NSObject, PlaybackTokenBridgeProvider, WKNavig
                 view.loadHTMLString(html, baseURL: URL(string: "https://www.youtube.com"))
             }
             let challenge = try Self.parseChallenge(await self.challenge(nil))
-            let answer = try await self.js("window.bitChordSignal = await runBotGuard(challenge); return window.bitChordSignal.botguardResponse;", arguments: ["challenge": challenge], view: view)
+            let answer = try await self.js("window.aurisSignal = await runBotGuard(challenge); return window.aurisSignal.botguardResponse;", arguments: ["challenge": challenge], view: view)
             guard let response = answer as? String else { throw Failure.unavailable }
             let integrity = try await self.challenge(response)
             guard let values = try JSONSerialization.jsonObject(with: Data(integrity.utf8)) as? [Any], values.count >= 2,
                   let encoded = values[0] as? String, let bytes = Self.decodeBase64(encoded), let ttl = values[1] as? NSNumber else { throw Failure.unavailable }
-            _ = try await self.js("await createPoTokenMinter(window.bitChordSignal.webPoSignalOutput, new Uint8Array(bytes)); return true;", arguments: ["bytes": Array(bytes)], view: view)
+            _ = try await self.js("await createPoTokenMinter(window.aurisSignal.webPoSignalOutput, new Uint8Array(bytes)); return true;", arguments: ["bytes": Array(bytes)], view: view)
             guard self.context == key else { throw CancellationError() }
             self.expires = Date().addingTimeInterval(max(0, ttl.doubleValue - 600))
             return try await self.mint(visitor, view: view)

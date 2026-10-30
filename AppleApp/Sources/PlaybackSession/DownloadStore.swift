@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 import CryptoKit
-import BitChordShared
+import AurisShared
 
 struct DownloadedTrack: Identifiable, Hashable {
     let path: String
@@ -123,7 +123,7 @@ final class DownloadStore {
         if let legacyDirectoryOverride { return legacyDirectoryOverride }
         let base = FileManager.default.urls(for: .musicDirectory, in: .userDomainMask).first
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("BitChord", isDirectory: true)
+        return base.appendingPathComponent("Auris", isDirectory: true)
     }
 
     init(directory: URL? = nil, startWorker: Bool = true, legacyDirectory: URL? = nil, backend: (any DownloadBackend)? = nil) {
@@ -131,7 +131,7 @@ final class DownloadStore {
         self.workersEnabled = startWorker
         self.legacyDirectoryOverride = legacyDirectory
         self.directory = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("BitChord/Downloads", isDirectory: true)
+            .appendingPathComponent("Auris/Downloads", isDirectory: true)
         if startWorker {
             restoring = true; writable = false
             let root = self.directory

@@ -1,5 +1,5 @@
 import Foundation
-import BitChordShared
+import AurisShared
 
 /// Discord user gateway — IDENTIFY + OP 3 presence, heartbeat from HELLO.
 ///

@@ -19,7 +19,7 @@ import Foundation
   precondition(ReleaseIdentity(version: "1.0.3", build: nil).compared(to: .init(version:"1.0.3",build:12)) == .unknownBuild)
   precondition(ReleaseIdentity(version: "1.0.10", build: 1).compared(to: .init(version:"1.0.3",build:12)) == .newer)
   precondition(ReleaseIdentity(version: "nightly", build: nil).compared(to: .init(version:"1.0.3",build:12)) == nil)
-  let good = ReleaseAsset(name: "BitChord-1.0.4-build13-ios-unsigned.ipa", browser_download_url: "https://github.com/bagumamartin/BitChord/releases/download/v1.0.4/app.ipa", size: 10)
+  let good = ReleaseAsset(name: "Auris-1.0.4-build13-ios-unsigned.ipa", browser_download_url: "https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.0.4/app.ipa", size: 10)
   let bad = ReleaseAsset(name: good.name, browser_download_url: "https://example.invalid/app.ipa", size: 10)
   precondition(bad.url == nil)
   precondition(AppReleaseUpdate.legacyAsset(platform: "ios", assets: [good])?.name == good.name)
@@ -33,7 +33,7 @@ import Foundation
   precondition(ReleaseManifest(schema: 2, version: "1.0.4", build: 13, revision: "abc1234", artifacts: [artifact]).artifact(for: "ios", assets: [good]) == nil)
   precondition(ReleaseIdentity(version: "1.0.4-rc1", build: 13).compared(to: .init(version:"1.0.3",build:12)) == nil)
   precondition(ReleaseIdentity(version: "1.0.4", build: 13).key != ReleaseIdentity(version: "1.0.4", build: 14).key)
-  let release = AppReleaseUpdate(identity: .init(version: "1.0.4", build: 13), releaseUrl: URL(string: "https://github.com/bagumamartin/BitChord/releases/tag/v1.0.4")!, notes: "![banner](https://example.invalid/image.png)\n\nPlayback fixes", publishedAt: nil, download: good, artifact: artifact, revision: "abc1234")
+  let release = AppReleaseUpdate(identity: .init(version: "1.0.4", build: 13), releaseUrl: URL(string: "https://github.com/OreoMuncher45/Auris-iOS/releases/tag/v1.0.4")!, notes: "![banner](https://example.invalid/image.png)\n\nPlayback fixes", publishedAt: nil, download: good, artifact: artifact, revision: "abc1234")
   precondition(release.displayNotes == "Playback fixes")
   print("PASS audio request/actual distinctions, bypass states, unknown formats and version/build comparison")
  }
