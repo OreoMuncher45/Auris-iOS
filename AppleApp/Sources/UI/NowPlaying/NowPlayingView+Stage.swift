@@ -77,12 +77,14 @@ extension NowPlayingView {
                     if isIPad {
                         artworkStage(side: full, collapsed: false)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                            .offset(x: sleeveOffset)
                     } else {
                         artworkStage(
                             side: hero ? geo.size.width : full,
                             collapsed: false,
                             hero: hero
                         )
+                        .offset(x: sleeveOffset)
                     }
                 }
                 if collapsed {
@@ -107,9 +109,23 @@ extension NowPlayingView {
             // own scroll wins the touch first.
             .gesture(
                 DragGesture(minimumDistance: 30)
+                    .onChanged { value in
+                        // The sleeve follows the finger, damped: a hint that a
+                        // sideways pull skips, not a drag to position. A
+                        // vertical pull is the sleeve's own gesture and leaves
+                        // the artwork where it is.
+                        let dx = value.translation.width
+                        let dy = value.translation.height
+                        guard pane == .main, abs(dx) > abs(dy) else {
+                            sleeveOffset = 0
+                            return
+                        }
+                        sleeveOffset = dx * 0.35
+                    }
                     .onEnded { value in
                         let dy = value.translation.height
                         let dx = value.translation.width
+                        withAnimation(.snappy(duration: 0.28)) { sleeveOffset = 0 }
                         // Horizontal first: a sideways pull is a skip, and the
                         // vertical sleeve drag only claims a clearly vertical
                         // one.

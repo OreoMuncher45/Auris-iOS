@@ -55,6 +55,9 @@ struct NowPlayingView: View {
     /// The offset, held here so a change re-renders the lyrics without the sheet
     /// being open. The notification is the signal; this is the value it carries.
     @State var lyricsOffsetMs: Int32 = LyricsOffsetBridge.offsetMs()
+    /// How far the sleeve has followed a sideways pull, damped. The pull is a
+    /// hint that a swipe skips, not a drag to position.
+    @State var sleeveOffset: CGFloat = 0
 
     var body: some View {
         // The platform split has to close *inside* a `Group`: a `#if` in a view

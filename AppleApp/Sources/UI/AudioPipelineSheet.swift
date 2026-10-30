@@ -430,6 +430,7 @@ struct OutputDeviceSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showPipeline = false
     @State private var routeRevision = 0
+    @State private var spatialOn = PlatformSettings.shared.getBoolean(key: "spatial_audio", default: false)
 
     var body: some View {
         NavigationStack {
@@ -480,6 +481,31 @@ struct OutputDeviceSheet: View {
                     Text("Volume")
                 }
                 Section {
+                    // Upstream puts the spatial switch in the output drawer,
+                    // where the listener is already thinking about how the
+                    // music sounds, rather than in a settings page.
+                    Button { toggleSpatial() } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "airpodspro")
+                                .foregroundStyle(.secondary)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Spatial audio")
+                                    .foregroundStyle(.primary)
+                                Text(spatialOn ? "Stereo widening is on" : "Widen stereo tracks for a more immersive feel")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if spatialOn {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!AudioRouteState.shared.permitsCustomSpatial)
                     Button { showPipeline = true } label: {
                         HStack(spacing: 12) {
                             Image(systemName: "slider.horizontal.3")
@@ -551,6 +577,15 @@ struct OutputDeviceSheet: View {
             Spacer(minLength: 12)
             Text(value).monospacedDigit().multilineTextAlignment(.trailing)
         }
+    }
+
+    /// The spatial switch writes the preference and tells the engine, so the
+    /// change is heard on the track that is already playing.
+    private func toggleSpatial() {
+        let next = !spatialOn
+        PlatformSettings.shared.putBoolean(key: "spatial_audio", value: next)
+        controller.applySpatialPreference(enabled: next)
+        spatialOn = next
     }
 
     private var device: OutputDeviceRec { controller.outputDevice }

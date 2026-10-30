@@ -179,7 +179,7 @@ struct SongActionButtons: View {
                         toast.show(error?.localizedDescription ?? "Couldn't save the cover", kind: .failure)
                     }
                 }
-            }
+            })
         }
     }
 

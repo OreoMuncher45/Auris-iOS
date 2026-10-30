@@ -112,11 +112,21 @@ extension NowPlayingView {
             .frame(height: 44)
 
             if !outputCaption.isEmpty {
-                Text(outputCaption)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.62))
-                    .lineLimit(1)
-                    .accessibilityLabel(outputCaption)
+                // The caption is the way into the output drawer, as upstream's
+                // is: the name of where the sound is going is the thing one
+                // taps to change it.
+                Button {
+                    Haptics.play(.tap)
+                    showOutputDevice = true
+                } label: {
+                    Text(outputCaption)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.62))
+                        .lineLimit(1)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(outputCaption)
+                .accessibilityHint("Shows the audio output")
             }
         }
         .frame(maxWidth: .infinity)
