@@ -33,12 +33,37 @@ extension NowPlayingView {
             HStack {
                 Text(Self.timestamp(controller.position))
                 Spacer()
+                if let badge = qualityBadge {
+                    Text(badge)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
+                        .lineLimit(1)
+                }
+                Spacer()
                 Text(remainingLabel)
             }
             .font(.caption.monospacedDigit().weight(.medium))
             .foregroundStyle(.white.opacity(0.7))
             .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
         }
+    }
+
+    /// The badge between the timestamps: what the stream is, or what is still
+    /// being looked for. Upstream's `PlaybackQualityLabel`, which the port left
+    /// out — the most visible thing on the Android player was an empty gap here.
+    private var qualityBadge: String? {
+        // A blend says what it is doing; the quality underneath it is a
+        // separate line.
+        if controller.smartMixInProgress { return "Mixing" }
+        if controller.racingLossless { return "Upgrading quality" }
+        guard let nerd = controller.nerd else { return nil }
+        if nerd.codec.localizedCaseInsensitiveContains("atmos") { return "Dolby Atmos" }
+        if QualityUpgrade.Format.isLosslessCodec(nerd.codec) {
+            return nerd.sampleRate > 48_000 ? "Hi-Res Lossless" : "Lossless"
+        }
+        if nerd.kbps >= 320 { return "High quality" }
+        return nil
     }
 
     private var remainingLabel: String {

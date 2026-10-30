@@ -181,6 +181,18 @@ struct LyricsPane: View {
                     if let translator {
                         LyricsTranslationNote(outcome: translator.outcome)
                             .padding(.horizontal, 12)
+                        // The translate and romanise discs, as upstream floats
+                        // them under the words. The control existed and was
+                        // never placed, so the only way to translate a lyric was
+                        // to leave the player for the settings.
+                        LyricsTranslateControl(
+                            translator: translator,
+                            trackId: trackId,
+                            lines: originalLines ?? lines,
+                            onShowOriginal: { translator.reset() },
+                            onShowTranslated: { _ in }
+                        )
+                        .padding(.horizontal, 12)
                     }
                     ScrollViewReader { proxy in
                         ScrollView {

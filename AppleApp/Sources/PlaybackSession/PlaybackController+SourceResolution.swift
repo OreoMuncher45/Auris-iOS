@@ -352,11 +352,12 @@ extension PlaybackController {
             return ResolveOutcome(source: source, leftover: nil, decisionNote: source.lossless
                 ? "A preferred source supplied verified lossless audio." : report.explanation)
         case .fallback(let source):
-            // Preserve the slower substitute lookup for the in-playback quality
-            // upgrade path instead of making it delay the first audible sample.
+            // Preserve the slower substitute lookup for the quality upgrade
+            // path instead of making it delay the first audible sample.
             await latencyResolved?(source.resolutionAt ?? ProcessInfo.processInfo.systemUptime,
                                    "cold", source.clientName ?? "unknown")
-            return ResolveOutcome(source: source, leftover: lookup, decisionNote: report.explanation ?? (prefs.canSubstitute
+            let leftover = Task<QualityUpgrade.Candidate?, Never> { await lookup.value?.candidate }
+            return ResolveOutcome(source: source, leftover: leftover, decisionNote: report.explanation ?? (prefs.canSubstitute
                 ? "Preferred sources did not provide a verified stream before the playback deadline."
                 : "YouTube is the selected source."))
         case .timedOut:

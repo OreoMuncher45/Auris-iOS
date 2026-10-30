@@ -186,11 +186,19 @@ extension NowPlayingView {
             .frame(width: side, height: side)
             .overlay(alignment: .top) {
                 if let caption = playbackOriginCaption {
-                    Text(caption)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.92))
-                        .shadow(color: .black.opacity(0.55), radius: 5, y: 1)
-                        .padding(.top, 22)
+                    // Tappable, as upstream's is: the caption says where the
+                    // track came from, and tapping it takes you there — the
+                    // album it is on, or the queue it is in.
+                    Button {
+                        openPlaybackOrigin()
+                    } label: {
+                        Text(caption)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.92))
+                            .shadow(color: .black.opacity(0.55), radius: 5, y: 1)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 22)
                 }
             }
             .accessibilityLabel(controller.current?.title ?? "Nothing playing")
@@ -210,6 +218,18 @@ extension NowPlayingView {
             .padding(.bottom, 20)
             .accessibilityLabel(controller.current?.title ?? "Nothing playing")
         }
+    }
+
+    /// Where the playing track came from, opened from the caption that says so.
+    ///
+    /// The album when the track is on one, the queue otherwise: upstream's
+    /// `openPlaybackOrigin`, narrowed to what the phone can show.
+    private func openPlaybackOrigin() {
+        if let albumId = controller.current?.albumId {
+            appModel.pendingDetail = .detail(browseId: albumId, title: controller.current?.albumName ?? "Album")
+            return
+        }
+        pane = .queue
     }
 
     /// The selected content pane, filling the portrait stage or the requested

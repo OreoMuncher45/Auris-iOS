@@ -21,6 +21,12 @@ struct SourcesView: View {
 
     @State private var sourceState = SourceListState.shared
     private var configs: [ConfigDocument] { sourceState.configs }
+    /// Whether YouTube's own streams may be played. The catalogue the app
+    /// browses is YouTube's either way — the switch is about where the audio
+    /// comes from.
+    private var youtubeIsOn: Bool {
+        configs.first { $0.kind == "YOUTUBE" }?.enabled ?? true
+    }
     private var health: [String: Health] { sourceState.health }
     private var probing: Set<String> { sourceState.probing }
     @State private var editing: ConfigDocument?
@@ -229,6 +235,9 @@ struct SourcesView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Reachable means the provider answered its checks. Audio quality is verified separately for each track.")
             Text("If a source does not have a track or cannot be reached, Auris tries the next one. Sources above YouTube can replace its recording when they return a better version.")
+            if !youtubeIsOn {
+                Text("YouTube Music is switched off, so its own recordings are not streamed. Tracks play from the add-ons above it, and a track no addon has will not play. Search, home and your library still come from YouTube Music.")
+            }
             if !AudioRouteState.shared.carriesLossless {
                 Text("Bluetooth compresses the output. Choosing Lossless still allows lossless sources; addons that require a lossless output need a speaker or wired connection.")
             }

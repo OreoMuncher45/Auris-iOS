@@ -17,11 +17,25 @@ extension NowPlayingView {
     var creditsRow: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(controller.current?.title ?? "Nothing playing")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
+                HStack(spacing: 6) {
+                    Text(controller.current?.title ?? "Nothing playing")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
+                    // The explicit chip, as upstream draws it beside the title.
+                    if controller.current?.isExplicit == true {
+                        Text("E")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 4))
+                            .shadow(color: .black.opacity(0.45), radius: 4, y: 1)
+                            .layoutPriority(1)
+                            .accessibilityLabel("Explicit")
+                    }
+                }
                 ArtistCreditText(
                     credit: controller.current?.artist ?? "",
                     font: .subheadline,
