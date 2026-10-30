@@ -44,6 +44,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris
+        # iPhone only. XcodeGen writes its own TARGETED_DEVICE_FAMILY into the
+        # target, so the project-level value does not reach the built app.
+        TARGETED_DEVICE_FAMILY: "1"
         # Music Understanding is resolved on OS 27+; below that Automix runs on
         # the Rust MIR. The framework is not part of the iOS 26 SDK, so it is
         # not linked here — the analyzer guards itself with canImport.
@@ -127,6 +130,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris.widget
+        TARGETED_DEVICE_FAMILY: "1"
     sources:
       - Sources/Widget
     info:
