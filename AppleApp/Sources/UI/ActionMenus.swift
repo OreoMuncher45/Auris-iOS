@@ -171,7 +171,7 @@ struct SongActionButtons: View {
             }
             PHPhotoLibrary.shared().performChanges({
                 PHAssetChangeRequest.creationRequestForAsset(from: image)
-            }) completionHandler: { success, error in
+            }, completionHandler: { success, error in
                 Task { @MainActor in
                     if success {
                         toast.show("Cover saved", kind: .success)

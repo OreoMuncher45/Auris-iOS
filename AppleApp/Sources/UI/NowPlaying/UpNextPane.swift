@@ -105,7 +105,9 @@ struct UpNextPane: View {
                             .onDelete { offsets in remove(offsets, rows: userQueueUpcoming) }
                         }
                         if !playlistUpcoming.isEmpty {
-                            Text("Up next")
+                            // "Next from …", as upstream names the playlist the
+                            // rest of the queue came from.
+                            Text(playlistHeading)
                                 .font(.headline.weight(.medium))
                                 .foregroundStyle(.white.opacity(0.75))
                                 .padding(.top, 16)
@@ -222,10 +224,13 @@ struct UpNextPane: View {
                 ArtworkView(entry: controller.current, side: 40)
                     .clipShape(.rect(cornerRadius: 6, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(controller.current?.title ?? "")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(controller.current?.title ?? "")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        explicitChip(controller.current)
+                    }
                     ArtistCreditText(
                         credit: controller.current?.artist ?? "",
                         font: .caption,
@@ -265,6 +270,28 @@ struct UpNextPane: View {
         }
     }
 
+    /// The heading over the playlist rows: where they came from.
+    private var playlistHeading: String {
+        if let context = controller.playbackContext, !context.isEmpty {
+            return "Next from \(context)"
+        }
+        return "Up next"
+    }
+
+    /// The explicit chip beside a title, as upstream draws it in the queue.
+    @ViewBuilder
+    private func explicitChip(_ entry: QueueEntry?) -> some View {
+        if entry?.isExplicit == true {
+            Text("E")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.8))
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 3))
+                .accessibilityLabel("Explicit")
+        }
+    }
+
     private func historyQueueRow(_ item: QueueRow) -> some View {
         Button {
             controller.playQueueItem(at: item.index)
@@ -273,10 +300,13 @@ struct UpNextPane: View {
                 ArtworkView(entry: item.entry, side: 44)
                     .clipShape(.rect(cornerRadius: 6, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.entry.title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(item.entry.title)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        explicitChip(item.entry)
+                    }
                     Text(item.entry.artist)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.65))
@@ -312,10 +342,13 @@ struct UpNextPane: View {
                     ArtworkView(entry: item.entry, side: 44)
                         .clipShape(.rect(cornerRadius: 6, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.entry.title)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
+                        HStack(spacing: 5) {
+                            Text(item.entry.title)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                            explicitChip(item.entry)
+                        }
                         Text(item.entry.artist)
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.65))
