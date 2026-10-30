@@ -55,32 +55,27 @@ jobs:
       - name: Select an Xcode with the iOS platform installed
         run: |
           set -euo pipefail
-          # Pick the newest Xcode whose SDK set actually contains an iOS
-          # platform. A runner image can carry an Xcode whose iOS platform was
-          # never downloaded, and xcodebuild then fails with
-          # "iOS 26.0 is not installed" instead of saying which Xcode is wrong.
+          # Pick the Xcode whose iOS SDK is newest. A runner image can carry
+          # several Xcodes, and an older one can list an iOS SDK whose platform
+          # was never installed — xcodebuild then fails with "iOS 26.0 is not
+          # installed" instead of saying which Xcode is wrong.
           best=""
-          best_ver=0
+          best_ver=""
           for xc in /Applications/Xcode*.app; do
             [ -x "$xc/Contents/Developer/usr/bin/xcodebuild" ] || continue
-            sdks="$("$xc/Contents/Developer/usr/bin/xcodebuild" -showsdks 2>/dev/null || true)"
-            ios_ver="$(printf '%s\n' "$sdks" | sed -n 's/.*-sdk iphoneos\([0-9.]*\).*/\1/p' | sort -V | tail -1)"
+            [ -d "$xc/Contents/Developer/Platforms/iPhoneOS.platform" ] || continue
+            ios_ver="$("$xc/Contents/Developer/usr/bin/xcodebuild" -showsdks 2>/dev/null \
+              | sed -n 's/.*-sdk iphoneos\([0-9.]*\).*/\1/p' | sort -V | tail -1)"
             [ -n "$ios_ver" ] || continue
-            major="${ios_ver%%.*}"
-            if [ "$major" -ge 26 ]; then
-              echo "candidate: $xc (iOS SDK $ios_ver)"
-              if [ "$major" -gt "$best_ver" ]; then best="$xc"; best_ver="$major"; fi
+            echo "candidate: $xc (iOS SDK $ios_ver)"
+            if [ -z "$best_ver" ] || [ "$(printf '%s\n%s\n' "$best_ver" "$ios_ver" | sort -V | tail -1)" = "$ios_ver" ]; then
+              best="$xc"; best_ver="$ios_ver"
             fi
           done
-          if [ -z "$best" ]; then
-            echo "No Xcode with an iOS 26 SDK found; downloading the platform."
-            sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | tail -1)"
-            sudo xcodebuild -downloadPlatform iOS
-            best="$(ls -d /Applications/Xcode*.app | tail -1)"
-          fi
+          [ -n "$best" ] || { echo "No Xcode with an iOS platform found."; exit 1; }
           sudo xcode-select -s "$best"
           xcodebuild -version
-          xcodebuild -showsdks | grep -E 'iphoneos|iphonesimulator' || true
+          xcodebuild -showsdks | grep -E 'iphoneos' || true
           swift --version
 
       - name: Set up JDK 21
