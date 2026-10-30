@@ -41,10 +41,10 @@ app="$archive/Products/Applications/Auris.app"
 staged_app="$stage/package/Payload/Auris.app"
 
 build_revision="$(git -C "$repo_root" rev-parse --short=12 HEAD)"
-# The version stamp rewrites AppleApp/project.yml before the archive, so that
-# one file being dirty is expected and must not mark the revision as dirty.
-if ! git -C "$repo_root" diff --quiet HEAD -- . ':(exclude)AppleApp/project.yml' \
-   || [[ -n "$(git -C "$repo_root" ls-files --others --exclude-standard)" ]]; then build_revision="$build_revision-dirty"; fi
+# The version stamp rewrites AppleApp/project.yml before the archive, and the
+# build scripts drop generated frameworks into the tree. Neither is a dirty
+# working copy for release purposes, so only tracked changes count.
+if ! git -C "$repo_root" diff --quiet HEAD -- . ':(exclude)AppleApp/project.yml'; then build_revision="$build_revision-dirty"; fi
 xcodebuild \
   -project "$repo_root/AppleApp/Auris.xcodeproj" \
   -scheme Auris \
