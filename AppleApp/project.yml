@@ -44,8 +44,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris
-        # Resolve Music Understanding on OS 27+; leave Automix on Rust MIR below that.
-        OTHER_LDFLAGS: "$(inherited) -weak_framework MusicUnderstanding"
+        # Music Understanding is resolved on OS 27+; below that Automix runs on
+        # the Rust MIR. The framework is not part of the iOS 26 SDK, so it is
+        # not linked here — the analyzer guards itself with canImport.
     sources:
       - path: Sources
         excludes:
@@ -83,8 +84,6 @@ targets:
       - sdk: AVKit.framework
       - sdk: AVFoundation.framework
       - sdk: CoreMotion.framework
-      - sdk: MusicUnderstanding.framework
-        weak: true
       - sdk: Speech.framework
     info:
       path: Auris-Info.plist
