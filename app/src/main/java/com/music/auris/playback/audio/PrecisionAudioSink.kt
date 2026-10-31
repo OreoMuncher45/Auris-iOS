@@ -545,18 +545,18 @@ class PrecisionAudioSink(
             val floatFormat = format.buildUpon()
                 .setPcmEncoding(C.ENCODING_PCM_FLOAT)
                 .build()
-            val pcm16Paurisble =
+            val pcm16Playable =
                 delegate.getFormatSupport(pcm16Format) != AudioSink.SINK_FORMAT_UNSUPPORTED
             val floatIsNative = floatIsNative(floatFormat)
 
             if (format.pcmEncoding == C.ENCODING_PCM_FLOAT) {
                 return when {
                     floatIsNative -> AudioSink.SINK_FORMAT_SUPPORTED_DIRECTLY
-                    pcm16Paurisble -> AudioSink.SINK_FORMAT_SUPPORTED_WITH_TRANSCODING
+                    pcm16Playable -> AudioSink.SINK_FORMAT_SUPPORTED_WITH_TRANSCODING
                     else -> AudioSink.SINK_FORMAT_UNSUPPORTED
                 }
             }
-            if (floatIsNative || pcm16Paurisble) {
+            if (floatIsNative || pcm16Playable) {
                 // PrecisionAudioSink natively consumes every supported linear PCM input
                 // encoding (Float32, PCM16, PCM24, PCM32) straight into its canonical
                 // Float32 AudioBlock, without requiring Media3 to transcode first.

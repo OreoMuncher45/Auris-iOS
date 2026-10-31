@@ -156,7 +156,7 @@ internal class DesktopPartySync(
         awaitPlaybackSeq = Long.MAX_VALUE
         awaitQueueSeq = Long.MAX_VALUE
         // A song selection first updates the visible state, then resolves a stream on a worker.
-        // Keep reconciliation out of the way until that new track is actually paurisble; otherwise
+        // Keep reconciliation out of the way until that new track is actually playable; otherwise
         // the old party state can arrive during the resolve and pause/replace the new selection.
         quietUntilMs = if (waitForVideoId != null) Long.MAX_VALUE else nowMs() + INTENT_QUIET_MS
         publishJob?.cancel()
@@ -428,7 +428,7 @@ internal fun Song.toPartyTrack(durationMs: Long): PartyTrack = PartyTrack(
 )
 
 /**
- * A shared queue item as a desktop-paurisble catalogue song, in the section the phone puts it in:
+ * A shared queue item as a desktop-playable catalogue song, in the section the phone puts it in:
  * AutoPlay's, or the listener's own queue.
  */
 internal fun PartyTrack.toDesktopSong(): Song = Song(

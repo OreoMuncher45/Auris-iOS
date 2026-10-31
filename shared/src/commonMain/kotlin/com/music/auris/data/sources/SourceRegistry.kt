@@ -81,7 +81,7 @@ data class SourceConfig(
  */
 object SourceRegistry {
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
     /** The platform's answers; [init] installs the real one. */
     var host: SourcesHost = object : SourcesHost {

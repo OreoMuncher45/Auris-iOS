@@ -11,13 +11,13 @@ data class ParsedJamInvite(
     val serverUrl: String? = null,
 )
 
-/** Relays a Laya web or scheme invite from the platform's link handler to Compose. */
+/** Relays a Auris web or scheme invite from the platform's link handler to Compose. */
 object JamInviteLink {
 
     const val ORIGIN = "https://laya-listen-together.onrender.com"
 
     private const val HOST = "laya-listen-together.onrender.com"
-    private const val CUSTOM_SCHEME = "laya"
+    private const val CUSTOM_SCHEME = "auris"
     private const val CUSTOM_HOST = "party"
 
     private val _pending = MutableStateFlow<ParsedJamInvite?>(null)
@@ -38,7 +38,7 @@ object JamInviteLink {
 
     /**
      * Parses an incoming invite:
-     * 1. laya://party/<CODE>?server=<SERVER>
+     * 1. auris://party/<CODE>?server=<SERVER>
      * 2. https://laya-listen-together.onrender.com/invite/<CODE>?server=<SERVER>
      */
     fun parseInvite(value: String?): ParsedJamInvite? {
@@ -48,7 +48,7 @@ object JamInviteLink {
         val query = uri.rawQuery
         val server = extractQueryParam(query, "server")?.let { sanitizeServerUrl(it) }
 
-        // 1. Custom scheme: laya://party/<CODE> or laya://party?code=<CODE>
+        // 1. Custom scheme: auris://party/<CODE> or auris://party?code=<CODE>
         if (scheme == CUSTOM_SCHEME && host == CUSTOM_HOST) {
             val pathPart = uri.path.trim('/').takeIf { it.isNotBlank() }
             val candidate = pathPart ?: extractQueryParam(query, "code") ?: return null
@@ -80,9 +80,9 @@ object JamInviteLink {
         val base = customServer?.trim()?.trimEnd('/')
         return if (!base.isNullOrBlank()) {
             val encoded = base.encodeURLParameter(spaceToPlus = true)
-            "laya://party/$normalizedCode?server=$encoded"
+            "auris://party/$normalizedCode?server=$encoded"
         } else {
-            "laya://party/$normalizedCode"
+            "auris://party/$normalizedCode"
         }
     }
 

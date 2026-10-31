@@ -387,7 +387,7 @@ object MediaTagger {
      * [InputStream.skip] is allowed to skip fewer bytes than asked for and does,
      * on the wrapped streams a `content://` uri hands back. Landing one byte
      * short here would splice the tail of a frame header onto the new metadata
-     * and produce a file that is the right length and unpaurisble.
+     * and produce a file that is the right length and unplayable.
      */
     private fun InputStream.skipFully(count: Long) {
         var left = count

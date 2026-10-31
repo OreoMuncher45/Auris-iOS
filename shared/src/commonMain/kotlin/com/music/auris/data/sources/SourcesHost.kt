@@ -9,7 +9,7 @@ import io.ktor.http.Url
  * [SourceRegistry.init]; the defaults are the conservative answers.
  */
 interface SourcesHost {
-    /** Sent as `Laya/v<this>` in the User-Agent of every addon call that doesn't set its own. */
+    /** Sent as `Auris/v<this>` in the User-Agent of every addon call that doesn't set its own. */
     val appVersion: String get() = ""
 
     /** Whether this device can decode E-AC-3 JOC (Dolby Atmos). */

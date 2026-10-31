@@ -5,7 +5,7 @@ import com.music.auris.data.jiosaavn.JioSaavnService
 import com.music.auris.data.jiosaavn.prioritizeExplicit
 import com.music.auris.data.model.Song
 
-private const val TAG = "Laya"
+private const val TAG = "Auris"
 
 class JioSaavnSource(
     override val config: SourceConfig,
@@ -53,7 +53,7 @@ class JioSaavnSource(
                 thumbnailUrl = thumbnail,
                 // JioSaavn provides duration in seconds, but Song expects durationText ("M:SS")
                 // Alternatively, Song.durationMillis() will parse durationText. Let's just 
-                // format it since Laya uses string duration.
+                // format it since Auris uses string duration.
                 durationText = raw.moreInfo.duration.toIntOrNull()?.let { seconds ->
                     val m = seconds / 60
                     val s = seconds % 60

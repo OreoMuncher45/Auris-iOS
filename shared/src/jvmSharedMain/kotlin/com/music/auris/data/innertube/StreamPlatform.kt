@@ -340,7 +340,7 @@ internal actual object StreamPlatform {
                 "NewPipe picked ${stream.format?.name} @ ${stream.averageBitrate}kbps " +
                     "(extraction held the gate ${MonotonicClock.nowMs() - waited}ms)",
             )
-            // stream.content is already paurisble, not raw: YoutubeStreamExtractor
+            // stream.content is already playable, not raw: YoutubeStreamExtractor
             // resolves the signature cipher and the `n` parameter itself while
             // building audioStreams, so it is handed on as-is.
             StreamResolver.Stream(

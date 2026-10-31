@@ -80,7 +80,7 @@ object DeviceCodecs {
 
     /**
      * Test seam, and the field override of last resort. The decision that
-     * depends on this lives in [ModuleSource.unpaurisble] and is tested
+     * depends on this lives in [ModuleSource.unplayable] and is tested
      * directly; this exists so a caller can stand in for a device without a
      * decoder.
      */

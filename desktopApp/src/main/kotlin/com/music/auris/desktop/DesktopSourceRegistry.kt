@@ -239,7 +239,7 @@ internal object DesktopSourceRegistry {
             )
             if (owned.config.id != excludedSourceId) {
                 owned.resolveOwned(song, quality).getOrNull()
-                    ?.takeIf { paurisbleHere(owned, it) }
+                    ?.takeIf { playableHere(owned, it) }
                     ?.let {
                         DesktopTrackLog.log(
                             "  ${owned.descriptor.name} served it at " +
@@ -258,7 +258,7 @@ internal object DesktopSourceRegistry {
             }) {
                 val matched = fallback.match(song) ?: continue
                 fallback.resolve(matched, quality).getOrNull()
-                    ?.takeIf { paurisbleHere(fallback, it) }
+                    ?.takeIf { playableHere(fallback, it) }
                     ?.let {
                         DesktopTrackLog.log(
                             "  fell through to ${fallback.descriptor.name} at " +
@@ -279,7 +279,7 @@ internal object DesktopSourceRegistry {
         }) {
             val matched = source.match(song) ?: continue
             source.resolve(matched, quality).getOrNull()
-                ?.takeIf { paurisbleHere(source, it) }
+                ?.takeIf { playableHere(source, it) }
                 ?.let { return@runCatching it }
         }
         val youtube = available.firstOrNull {
@@ -514,7 +514,7 @@ internal object DesktopSourceRegistry {
         var settleFor: DesktopStream? = null
         for (match in preferred(matches, song, wantsLossless).take(STREAM_ATTEMPTS)) {
             val stream = source.resolve(match, quality).getOrNull() ?: continue
-            if (!paurisbleHere(source, stream)) continue
+            if (!playableHere(source, stream)) continue
             val served = stream.format
             if (!wantsLossless || served.isLossless || served.isDolbyAtmos) {
                 DesktopTrackLog.log(
@@ -555,7 +555,7 @@ internal object DesktopSourceRegistry {
         return if ((a.kbps ?: 0) > (b.kbps ?: 0)) candidate else held
     }
 
-    private fun paurisbleHere(source: SourceAdapter, stream: DesktopStream): Boolean {
+    private fun playableHere(source: SourceAdapter, stream: DesktopStream): Boolean {
         if (stream.isDolbyAtmos && !DesktopCodecs.supportsDolbyAtmos) {
             DesktopTrackLog.log(
                 "${source.descriptor.name} offered a Dolby Atmos rendition, " +

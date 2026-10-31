@@ -127,7 +127,7 @@ class SpatialAudioProcessor : BaseAudioProcessor() {
      *
      * Bowing out with [AudioProcessor.AudioFormat.NOT_SET] rather than an
      * [AudioProcessor.UnhandledAudioFormatException] is what keeps those
-     * tracks paurisble at all.
+     * tracks playable at all.
      * [DefaultAudioSink][androidx.media3.exoplayer.audio.DefaultAudioSink]
      * configures every processor in its chain whether or not the effect is
      * switched on, and a throw from any

@@ -112,10 +112,10 @@ class DesktopAddonTest {
     @Test
     fun silenceAboutResourcesIsNotAClaimThatNothingWorks() {
         // An empty `resources` is settled by asking the endpoints, not by refusing here.
-        assertTrue(DesktopAddonManifest(id = "a").isPaurisble)
-        assertTrue(DesktopAddonManifest(id = "a", resources = listOf("search")).isPaurisble)
+        assertTrue(DesktopAddonManifest(id = "a").isPlayable)
+        assertTrue(DesktopAddonManifest(id = "a", resources = listOf("search")).isPlayable)
         // Everything starts by looking a track up by name.
-        assertFalse(DesktopAddonManifest(id = "a", resources = listOf("stream")).isPaurisble)
+        assertFalse(DesktopAddonManifest(id = "a", resources = listOf("stream")).isPlayable)
     }
 
     @Test

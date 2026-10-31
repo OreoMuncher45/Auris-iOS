@@ -144,8 +144,8 @@ object SpotifyToken {
 
     private val HOOK_SCRIPT = """
         (function () {
-          if (window.__layaTokenHook) return;
-          window.__layaTokenHook = true;
+          if (window.__aurisTokenHook) return;
+          window.__aurisTokenHook = true;
           var report = function (body) {
             try { __REPORT__(body); } catch (e) {}
           };
@@ -169,7 +169,7 @@ object SpotifyToken {
           }
           var origOpen = XMLHttpRequest.prototype.open;
           XMLHttpRequest.prototype.open = function (method, url) {
-            this.__layaUrl = url;
+            this.__aurisUrl = url;
             return origOpen.apply(this, arguments);
           };
           var origSend = XMLHttpRequest.prototype.send;
@@ -177,7 +177,7 @@ object SpotifyToken {
             var xhr = this;
             try {
               xhr.addEventListener('load', function () {
-                if (isToken(xhr.__layaUrl)) {
+                if (isToken(xhr.__aurisUrl)) {
                   try { report(xhr.responseText); } catch (e) {}
                 }
               });

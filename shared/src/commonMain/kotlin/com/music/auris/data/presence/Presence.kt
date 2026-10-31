@@ -22,7 +22,7 @@ import kotlin.random.Random
 enum class PresencePlatform(val wire: String) { Android("android"), Pc("pc") }
 
 /**
- * Tells the Laya server this install is open, so it can publish how many
+ * Tells the Auris server this install is open, so it can publish how many
  * apps are open right now (`GET /api/stats/live`).
  *
  * While open, one small POST goes out every few minutes. The server sets the

@@ -867,8 +867,8 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                                 // A Spotify page lists songs not (or never) found on YouTube Music; play the rest in order.
                                                 val picked = songs.getOrNull(i)
                                                 if (picked?.isUnresolvedSpotify != true) {
-                                                    val paurisble = songs.filterNot { it.isUnresolvedSpotify }
-                                                    player.play(paurisble, paurisble.indexOf(picked).coerceAtLeast(0))
+                                                    val playable = songs.filterNot { it.isUnresolvedSpotify }
+                                                    player.play(playable, playable.indexOf(picked).coerceAtLeast(0))
                                                 }
                                             },
                                             onSongLongPress = { menuSong = it },

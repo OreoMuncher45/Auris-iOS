@@ -103,7 +103,7 @@ object Downloader {
                 // Resolving again re-runs the whole client walk, and a
                 // different client can answer with a different format. Resuming
                 // one stream into the middle of another produces a file that is
-                // the right length and unpaurisble, so a length that has moved
+                // the right length and unplayable, so a length that has moved
                 // is a failure rather than something to work around.
                 if (contentLength(url) != total) error("The stream changed mid-download — try again")
                 continue
@@ -145,7 +145,7 @@ object Downloader {
      *    server that ignores `Range` answers 200 with the whole file rather
      *    than 206 with the slice asked for — and that loop would then write the
      *    opening of the file into the middle of the output and commit something
-     *    the right length and unpaurisble.
+     *    the right length and unplayable.
      *  - **The source's own headers.** A source hands them over alongside the
      *    URL — see [SourceStream.headers][com.music.auris.data.sources.SourceStream.headers]
      *    — and they are whatever that server binds its links to. The

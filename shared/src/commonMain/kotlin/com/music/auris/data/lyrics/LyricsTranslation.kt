@@ -464,7 +464,7 @@ object LyricsTranslation {
                 HttpRequest(
                     url,
                     "POST",
-                    mapOf("User-Agent" to "Laya/1.7.1", "Accept" to "application/json"),
+                    mapOf("User-Agent" to "Auris/1.7.1", "Accept" to "application/json"),
                     form.formUrlEncode().encodeToByteArray(),
                     "application/x-www-form-urlencoded",
                     callTimeoutMs = 12_000,

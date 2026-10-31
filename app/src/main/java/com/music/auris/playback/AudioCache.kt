@@ -570,7 +570,7 @@ object AudioCache {
      * first played with Atmos on writes an Atmos file under `#alt`; turning
      * the setting off changes nothing about that file, so the very next play
      * of the same track reads it straight off disk, atmosAllowed check and
-     * all, because the check lives in [ModuleSource.unpaurisble] and that code
+     * all, because the check lives in [ModuleSource.unplayable] and that code
      * never runs. The suffix means "atmos off" resolves and caches under a
      * key the "atmos on" file was never written to, so the setting actually
      * takes effect on replay; flipping back on reads the original file again
@@ -644,14 +644,14 @@ object AudioCache {
      * fill, and backfills it into any entry already tagged without it.
      */
     fun noteSongs(songs: List<Song>) {
-        val paurisble = songs.filter { it.localUri == null && it.videoId.isNotBlank() }
-        if (paurisble.isEmpty()) return
+        val playable = songs.filter { it.localUri == null && it.videoId.isNotBlank() }
+        if (playable.isEmpty()) return
         if (notedSongs.size > MAX_NOTED_SONGS) notedSongs.clear()
-        paurisble.forEach { notedSongs[it.videoId] = it }
+        playable.forEach { notedSongs[it.videoId] = it }
         if (!::cache.isInitialized) return
         scope.launch {
             val keys = cache.keys
-            paurisble.forEach { song ->
+            playable.forEach { song ->
                 val base = cacheKeyBaseOf(song.videoId)
                 keys.filter { it == base || it.startsWith("$base#") }.forEach { key ->
                     runCatching {

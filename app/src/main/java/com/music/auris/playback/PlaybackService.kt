@@ -903,7 +903,7 @@ class PlaybackService : MediaLibraryService() {
                 }
                 // Sound is out of the speaker, so whatever happens to this track
                 // from here is a failure mid-song. Also the one thing that can
-                // say the queue is not simply unpaurisble end to end.
+                // say the queue is not simply unplayable end to end.
                 audibleMediaId = exoPlayer.currentMediaItem?.mediaId
                 consecutiveErrorSkips = 0
             }
@@ -3611,7 +3611,7 @@ class PlaybackService : MediaLibraryService() {
         // reset by the very retries it was counting. The report shows four resets
         // in 2m41s, each followed by a fresh "attempt 1", eight failures against
         // a budget of two, and roughly twenty-seven full resolve walks for one
-        // unpaurisble track. [retryingMediaId] is the one case that must not
+        // unplayable track. [retryingMediaId] is the one case that must not
         // reset; everything else still does.
         val becameCurrent = mediaItem?.mediaId
         if (becameCurrent == null || becameCurrent != retryingMediaId) {
@@ -3793,7 +3793,7 @@ class PlaybackService : MediaLibraryService() {
      * after the app had given up. Nothing in the log named it, because nothing
      * in the app had asked for it.
      *
-     * Only [StreamResolver.PermanentlyUnpaurisbleException] is refused, and it is
+     * Only [StreamResolver.PermanentlyUnplayableException] is refused, and it is
      * refused rather than delayed because the resolver has already established
      * the answer cannot change — it is the type it uses to say exactly that.
      * Everything else keeps the default behaviour, which is right: a shaped
@@ -3809,7 +3809,7 @@ class PlaybackService : MediaLibraryService() {
             var cause = error
             var depth = 0
             while (cause != null && depth++ < CAUSE_DEPTH) {
-                if (cause is StreamResolver.PermanentlyUnpaurisbleException) return true
+                if (cause is StreamResolver.PermanentlyUnplayableException) return true
                 cause = cause.cause?.takeIf { it !== cause }
             }
             return false
@@ -3951,7 +3951,7 @@ class PlaybackService : MediaLibraryService() {
         // seek-and-prepare at the end is skipped.
         //
         // A verdict counts as exhausting the attempts immediately. The resolver
-        // only throws [StreamResolver.PermanentlyUnpaurisbleException] once it has
+        // only throws [StreamResolver.PermanentlyUnplayableException] once it has
         // established that no client, no session and no extraction can serve the
         // track, so the two further attempts this would otherwise spend are two
         // more full walks for an answer already in hand — and in the report they
@@ -4050,7 +4050,7 @@ class PlaybackService : MediaLibraryService() {
                 // is what the report describes and what "it was stuck on my
                 // phone too" means. Moving on is the only honest answer.
                 skipReason(verdict, error, neverStarted, attempts)?.let { reason ->
-                    withContext(Dispatchers.Main) { skipPastUnpaurisble(mediaId, reason) }
+                    withContext(Dispatchers.Main) { skipPastUnplayable(mediaId, reason) }
                 }
                 return@launch
             }
@@ -4338,7 +4338,7 @@ class PlaybackService : MediaLibraryService() {
      * `rememberPlayerState` in
      * [PlayerConnection][com.music.auris.playback.PlayerConnection].
      */
-    private fun skipPastUnpaurisble(mediaId: String, reason: String) {
+    private fun skipPastUnplayable(mediaId: String, reason: String) {
         val exoPlayer = player ?: return
         if (exoPlayer.currentMediaItem?.mediaId != mediaId) return
         if (!exoPlayer.hasNextMediaItem()) {
@@ -4366,7 +4366,7 @@ class PlaybackService : MediaLibraryService() {
         var cause = error
         var depth = 0
         while (cause != null && depth++ < PERMANENT_CAUSE_DEPTH) {
-            if (cause is StreamResolver.PermanentlyUnpaurisbleException) {
+            if (cause is StreamResolver.PermanentlyUnplayableException) {
                 return cause.message ?: "This track cannot be played"
             }
             cause = cause.cause?.takeIf { it !== cause }
@@ -5375,7 +5375,7 @@ class PlaybackService : MediaLibraryService() {
     ): Resolved {
         // A substitute already broke this track once — see
         // [StreamChoice.refuseSubstitutes]. Racing the modules again would find
-        // the same catalogue holding the same unpaurisble URL, so there is
+        // the same catalogue holding the same unplayable URL, so there is
         // nothing to race: YouTube is the one answer here that hasn't failed.
         // Skipped entirely rather than merely deprioritised, because a lookup
         // that loses is handed to [QualityUpgrade] rather than dropped, and
@@ -5417,7 +5417,7 @@ class PlaybackService : MediaLibraryService() {
             // This clause used to yield null unconditionally, which treats "the
             // YouTube walk is over" as "YouTube has a URL" — true only while
             // failing was the slow outcome. It no longer is: [StreamResolver]
-            // now answers a known-unpaurisble track immediately, so the losing
+            // now answers a known-unplayable track immediately, so the losing
             // leg crosses the line first and, before this, took the track down
             // with it while a module lookup that was about to succeed was still
             // running. Exactly the case in the report — an age-gated track that
@@ -8237,7 +8237,7 @@ class PlaybackService : MediaLibraryService() {
                     MediaMetadata.Builder()
                         .setTitle(getString(R.string.app_name))
                         .setIsBrowsable(true)
-                        .setIsPaurisble(false)
+                        .setIsPlayable(false)
                         .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
                         .setExtras(rootExtras)
                         .build(),
@@ -8457,7 +8457,7 @@ class PlaybackService : MediaLibraryService() {
                         MediaMetadata.Builder()
                             .setTitle(getString(R.string.app_name))
                             .setIsBrowsable(true)
-                            .setIsPaurisble(false)
+                            .setIsPlayable(false)
                             .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
                             .build(),
                     ).build()
@@ -8748,18 +8748,18 @@ class PlaybackService : MediaLibraryService() {
         }
     }
 
-    private fun buildContentStyleBundle(browsableHint: Int, paurisbleHint: Int): Bundle =
+    private fun buildContentStyleBundle(browsableHint: Int, playableHint: Int): Bundle =
         Bundle().apply {
             putInt(EXTRA_CONTENT_STYLE_BROWSABLE_HINT, browsableHint)
-            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT, paurisbleHint)
+            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT, playableHint)
             putInt(EXTRA_CONTENT_STYLE_BROWSABLE_HINT_AX, browsableHint)
-            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT_AX, paurisbleHint)
+            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT_AX, playableHint)
             putInt(EXTRA_CONTENT_STYLE_BROWSABLE_HINT_LEGACY, browsableHint)
-            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT_LEGACY, paurisbleHint)
+            putInt(EXTRA_CONTENT_STYLE_PLAYABLE_HINT_LEGACY, playableHint)
             putInt("android.media.extras.CONTENT_STYLE_BROWSABLE_HINT", browsableHint)
-            putInt("android.media.extras.CONTENT_STYLE_PLAYABLE_HINT", paurisbleHint)
+            putInt("android.media.extras.CONTENT_STYLE_PLAYABLE_HINT", playableHint)
             putInt("android.media.browse.CONTENT_STYLE_BROWSABLE_HINT", browsableHint)
-            putInt("android.media.browse.CONTENT_STYLE_PLAYABLE_HINT", paurisbleHint)
+            putInt("android.media.browse.CONTENT_STYLE_PLAYABLE_HINT", playableHint)
             putBoolean(EXTRA_CONTENT_STYLE_SUPPORTED, true)
             putBoolean(EXTRA_CONTENT_STYLE_SUPPORTED_AX, true)
         }
@@ -8788,7 +8788,7 @@ class PlaybackService : MediaLibraryService() {
                 .setSubtitle(subtitle)
                 .setArtworkUri(artworkUrl?.artworkAt(NOTIFICATION_ART_PX)?.let(Uri::parse))
                 .setIsBrowsable(true)
-                .setIsPaurisble(false)
+                .setIsPlayable(false)
                 .setMediaType(folderType)
                 .setExtras(buildContentStyleBundle(CONTENT_STYLE_GRID_ITEM_HINT_VALUE, CONTENT_STYLE_LIST_ITEM_HINT_VALUE))
                 .build(),
@@ -8863,7 +8863,7 @@ class PlaybackService : MediaLibraryService() {
                     .setTitle(title)
                     .setSubtitle(subtitle)
                     .setIsBrowsable(true)
-                    .setIsPaurisble(false)
+                    .setIsPlayable(false)
                     .setMediaType(if (isGrid && folderType == MediaMetadata.MEDIA_TYPE_FOLDER_MIXED) MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS else folderType)
                     .setExtras(extras)
                     .build(),
@@ -8891,7 +8891,7 @@ class PlaybackService : MediaLibraryService() {
             .setMediaMetadata(
                 mediaMetadata.buildUpon()
                     .setIsBrowsable(true)
-                    .setIsPaurisble(true)
+                    .setIsPlayable(true)
                     .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS)
                     .setExtras(newExtras)
                     .build(),
@@ -8921,7 +8921,7 @@ class PlaybackService : MediaLibraryService() {
                         .setSubtitle(subtitle)
                         .setArtworkUri(thumbnailUrl.artworkAt(NOTIFICATION_ART_PX)?.let { Uri.parse(it) })
                         .setIsBrowsable(true)
-                        .setIsPaurisble(false)
+                        .setIsPlayable(false)
                         .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS)
                         .build(),
                 )
@@ -8948,7 +8948,7 @@ class PlaybackService : MediaLibraryService() {
                     .setTitle(getString(R.string.auto_login_title))
                     .setSubtitle(getString(R.string.auto_login_subtitle))
                     .setIsBrowsable(false)
-                    .setIsPaurisble(false)
+                    .setIsPlayable(false)
                     .build(),
             )
             .build()
@@ -8961,7 +8961,7 @@ class PlaybackService : MediaLibraryService() {
                     .setTitle(title)
                     .setSubtitle(subtitle)
                     .setIsBrowsable(false)
-                    .setIsPaurisble(false)
+                    .setIsPlayable(false)
                     .setExtras(buildContentStyleBundle(CONTENT_STYLE_LIST_ITEM_HINT_VALUE, CONTENT_STYLE_LIST_ITEM_HINT_VALUE))
                     .build(),
             )

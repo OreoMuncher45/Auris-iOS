@@ -111,7 +111,7 @@ fun prioritizeExplicit(songs: List<RawSongItem>): List<RawSongItem> =
 
 @OptIn(ExperimentalEncodingApi::class)
 object JioSaavnService {
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
     // https://www.jiosaavn.com/api.php
     private val BASE_URL = Base64.decode("aHR0cHM6Ly93d3cuamlvc2Fhdm4uY29tL2FwaS5waHA=").decodeToString()

@@ -10,8 +10,8 @@
   "apps": [
     {
       "name": "Auris",
-      "bundleIdentifier": "com.music.auris",
-      "developerName": "impin2rex",
+      "bundleIdentifier": "app.auris.Auris",
+      "developerName": "OreoMuncher45",
       "subtitle": "Music player with lyrics, karaoke and Listen Together.",
       "localizedDescription": "Auris is a music player with synced lyrics, on-device karaoke, Listen Together, Atmos-style reverb and home-screen widgets.",
       "iconURL": "https://raw.githubusercontent.com/OreoMuncher45/Auris-iOS/main/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon.png",

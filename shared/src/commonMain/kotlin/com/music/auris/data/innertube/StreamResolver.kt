@@ -42,7 +42,7 @@ object StreamResolver {
     var maxKbps: () -> Int = { Int.MAX_VALUE }
 
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
         /**
      * @return a directly streamable URL that has been proven to serve bytes,

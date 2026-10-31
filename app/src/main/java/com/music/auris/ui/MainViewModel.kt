@@ -195,7 +195,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     /**
      * Live media results shown alongside typeahead suggestions. Populated by a
      * lightweight search that runs in parallel with text completions; the UI
-     * renders these as paurisble track cards and browse items below the text
+     * renders these as playable track cards and browse items below the text
      * suggestion rows. Cleared when the user commits to a search or empties
      * the field.
      */

@@ -406,7 +406,7 @@ private const val SUGGESTION_DEBOUNCE_MS = 220L
 /** A search costs more than a completion, so the live rows wait for a longer pause. */
 private const val TYPEAHEAD_MEDIA_DEBOUNCE_MS = 400L
 
-/** How many paurisble rows the dropdown shows, matching Android's own limit. */
+/** How many playable rows the dropdown shows, matching Android's own limit. */
 private const val TYPEAHEAD_MEDIA_LIMIT = 8
 
 private const val INITIAL_RADIO_TRACKS = 24
@@ -570,7 +570,7 @@ fun AurisDesktopApp() {
     var searchScrollReset by remember { mutableStateOf(0) }
     var searchFocusRequested by remember { mutableStateOf(false) }
     var searchSuggestions by remember { mutableStateOf<List<String>>(emptyList()) }
-    // Paurisble rows for the half-typed query, shown under the text completions.
+    // Playable rows for the half-typed query, shown under the text completions.
     var searchTypeahead by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
     // False while the query is being set *by* the app.
     var searchTyping by remember { mutableStateOf(false) }
@@ -958,15 +958,15 @@ fun AurisDesktopApp() {
 
     fun playSongs(songs: List<Song>, startIndex: Int = 0, source: DesktopQueueSource? = null) {
         // A Spotify playlist's rows still being matched to YouTube Music, or with no match, have
-        // nothing to play: they stay out of the queue, and the pick moves to the next paurisble row.
+        // nothing to play: they stay out of the queue, and the pick moves to the next playable row.
         val resolved = songs.withIndex().filterNot { it.value.isUnresolvedSpotify }
         if (resolved.isEmpty()) return
         if (partyTrackChangeBlocked()) return
-        val paurisble = resolved.map { canonicalSong(it.value).withSource(source) }
+        val playable = resolved.map { canonicalSong(it.value).withSource(source) }
         // Past the end still means the last row, as the clamp here always did.
         val at = resolved.indexOfFirst { it.index >= startIndex }.takeIf { it >= 0 } ?: resolved.lastIndex
         if (DesktopListenTogether.state.value.inParty) {
-            liveQueue = DesktopQueue(partyPlaybackQueue(paurisble[at]), index = 0)
+            liveQueue = DesktopQueue(partyPlaybackQueue(playable[at]), index = 0)
             preShuffleOrder = emptyList()
             playCurrent()
             return
@@ -976,9 +976,9 @@ fun AurisDesktopApp() {
         val built = QueueTimeline.buildContextQueue(
             currentTimeline = liveQueue.songs,
             currentIndex = liveQueue.index,
-            newContextSongs = paurisble,
+            newContextSongs = playable,
             selectedIndex = at,
-            contextSource = paurisble[at].queueSource(),
+            contextSource = playable[at].queueSource(),
         )
         liveQueue = if (shuffle) {
             DesktopQueue.shuffledStartingAt(built.timeline, built.startIndex)
@@ -6829,7 +6829,7 @@ private fun DesktopSettingsFooter(onLicenses: () -> Unit) {
                 append("GitHub")
             }
             append("  ")
-            withLink(LinkAnnotation.Url("https://github.com/impin2rex", linkStyles)) {
+            withLink(LinkAnnotation.Url("https://github.com/OreoMuncher45/Auris-iOS", linkStyles)) {
                 append("Developer")
             }
             append("  ")

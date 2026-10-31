@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 class DesktopAddonServerTest {
 
     @Test
-    fun `an addon supplies searchable tracks and a paurisble stream`() = runBlocking {
+    fun `an addon supplies searchable tracks and a playable stream`() = runBlocking {
         DesktopAddonSettings.dolbyAtmosEnabled = true
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
         server.start()

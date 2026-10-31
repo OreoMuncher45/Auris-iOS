@@ -313,7 +313,7 @@
     <string name="export_data_subtitle">Pengaturan dan riwayat mendengarkan, sebagai satu file JSON</string>
     <string name="filter_non_music_audio">Filter audio non-musik</string>
     <string name="filter_non_music_audio_subtitle">Menyembunyikan klip di bawah 30 detik, file WAV, catatan suara, rekaman, dan suara sistem</string>
-    <string name="full_screen_cover_art">Sampul aurisr penuh</string>
+    <string name="full_screen_cover_art">Sampul player penuh</string>
     <string name="full_screen_cover_art_subtitle">Membuat sampul memenuhi tepi pemutar alih-alih berbentuk persegi</string>
     <string name="hide_song_status">Sembunyikan status lagu</string>
     <string name="hide_song_status_subtitle">Menyembunyikan teks “Diputar dari” atau “Diputar oleh” di pemutar utama</string>
@@ -326,7 +326,7 @@
     <string name="high_performance_battery_warning">Atur dulu penggunaan baterai Auris ke Tidak Dibatasi. Refresh rate yang lebih tinggi menggunakan lebih banyak baterai, CPU, dan GPU, serta dapat membuat perangkat Anda menjadi hangat.</string>
     <string name="high_performance_before_enabling">Sebelum mengaktifkan</string>
     <string name="high_performance_mode">Mode performa tinggi</string>
-    <string name="high_performance_subtitle">Menggunakan animasi dan blur penuh, serta meminta refresh rate aurisr yang lebih tinggi</string>
+    <string name="high_performance_subtitle">Menggunakan animasi dan blur penuh, serta meminta refresh rate player yang lebih tinggi</string>
     <string name="import_backup_title">Impor cadangan?</string>
     <string name="import_backup_warning">Ini akan mengganti pengaturan dan riwayat mendengarkan perangkat ini dengan isi file tersebut. Ekspor data saat ini terlebih dahulu jika ingin menyimpannya.</string>
     <string name="import_data">Impor data</string>

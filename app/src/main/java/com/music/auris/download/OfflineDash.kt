@@ -42,7 +42,7 @@ import kotlin.math.max
  * `playlist.m3u8`, [Downloads.remember] finds the saved cover by the same
  * test, and playback picks the HLS source off the `.m3u8` extension. Emitting
  * a playlist those three already understand means none of them change, and an
- * offline DASH download is byte-for-byte as paurisble as an offline HLS one.
+ * offline DASH download is byte-for-byte as playable as an offline HLS one.
  *
  * The sibling of [OfflineHls], deliberately not merged with it. That one
  * rewrites a playlist it was given and is the code path every existing offline

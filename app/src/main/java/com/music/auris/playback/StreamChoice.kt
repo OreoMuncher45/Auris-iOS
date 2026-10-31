@@ -73,7 +73,7 @@ object StreamChoice {
      * @param substituted whether this came from a source standing in for
      *   YouTube rather than from YouTube itself. Only the resolver knows, and
      *   only [refuseSubstitutes] needs it — a substitution that turns out to be
-     *   unpaurisble has somewhere else to fall back to, and a YouTube stream
+     *   unplayable has somewhere else to fall back to, and a YouTube stream
      *   that fails has not.
      */
     fun remember(videoId: String, stream: SourceStream, substituted: Boolean) {

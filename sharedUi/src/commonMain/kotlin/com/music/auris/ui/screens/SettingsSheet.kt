@@ -1471,7 +1471,7 @@ fun SettingsScreen(
                     append("GitHub")
                 }
                 append("  ")
-                withLink(LinkAnnotation.Url("https://github.com/impin2rex", linkStyles)) {
+                withLink(LinkAnnotation.Url("https://github.com/OreoMuncher45/Auris-iOS", linkStyles)) {
                     append("Developer")
                 }
                 append("\n~YouTube Music & Listen Together Backend")

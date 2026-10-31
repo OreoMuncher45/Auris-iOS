@@ -39,7 +39,7 @@ import kotlin.concurrent.Volatile
 /** YouTube stream extraction through InnerTubeX's live-benchmarked client catalog and cipher tiers. */
 object InnerTubeXResolver {
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
     /** A stream InnerTubeX found, and the identity its media fetch has to wear. */
     class Extracted(

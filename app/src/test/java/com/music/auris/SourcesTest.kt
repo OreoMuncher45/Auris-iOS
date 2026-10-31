@@ -112,14 +112,14 @@ class SourcesTest {
     @Test
     fun `an Atmos rendition is refused when it is not allowed to play`() {
         val atmos = StreamFormat(codec = "eac3-joc")
-        assertTrue(ModuleSource.unpaurisble(atmos, atmosAllowed = false))
-        assertFalse(ModuleSource.unpaurisble(atmos, atmosAllowed = true))
+        assertTrue(ModuleSource.unplayable(atmos, atmosAllowed = false))
+        assertFalse(ModuleSource.unplayable(atmos, atmosAllowed = true))
 
         // Nothing else is affected either way: a FLAC is a FLAC on every phone,
         // and an undescribed stream is still worth handing to the decoder.
         val flac = StreamFormat(codec = "flac", bitDepth = 16, sampleRateHz = 44_100)
-        assertFalse(ModuleSource.unpaurisble(flac, atmosAllowed = false))
-        assertFalse(ModuleSource.unpaurisble(StreamFormat(), atmosAllowed = false))
+        assertFalse(ModuleSource.unplayable(flac, atmosAllowed = false))
+        assertFalse(ModuleSource.unplayable(StreamFormat(), atmosAllowed = false))
     }
 
     /**
@@ -1797,7 +1797,7 @@ class SourcesTest {
      * The Xiaomi report, which failed a step earlier than the doubled URL: the
      * player threw `HttpDataSourceException: Malformed URL` out of OkHttp's
      * parser without making a request. Anything that parser refuses has to be
-     * refused here too, or it becomes an unpaurisble track.
+     * refused here too, or it becomes an unplayable track.
      */
     @Test
     fun `rejects a stream URL the player's own parser would refuse`() {

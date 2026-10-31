@@ -596,7 +596,7 @@ compose.desktop {
                 iconFile.set(project.file("packaging/icons/AppIcon.png"))
                 menuGroup = "Audio"
                 appCategory = "AudioVideo;Audio;Player"
-                debMaintainer = "impin2rex@gmail.com"
+                debMaintainer = "OreoMuncher45"
                 rpmLicenseType = "GPL-3.0"
             }
 

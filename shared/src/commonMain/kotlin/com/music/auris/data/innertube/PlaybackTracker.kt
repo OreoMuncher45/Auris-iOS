@@ -42,7 +42,7 @@ import kotlinx.coroutines.withContext
  */
 object PlaybackTracker {
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
     /** Report watched time once this much new audio has gone by. */
     private const val REPORT_INTERVAL_SECONDS = 30L

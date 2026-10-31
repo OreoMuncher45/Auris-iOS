@@ -764,7 +764,7 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
                 .onFailure {
                     if (it is kotlinx.coroutines.CancellationException) return@onFailure
                     println("IosPlayer: ${it.message ?: it}")
-                    if (it is StreamResolver.PermanentlyUnpaurisbleException) {
+                    if (it is StreamResolver.PermanentlyUnplayableException) {
                         isLoading = false
                         IosPlayerHost.showMessage("Can't play ${song.title}")
                     } else recover(song, it.message ?: "resolve failed", 0)

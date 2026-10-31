@@ -4,7 +4,20 @@ This document lists the maintainers responsible for Auris.
 
 | Maintainer | GitHub | Responsibilities |
 |---|---|---|
-| Pintu Das | [@impin2rex](https://github.com/impin2rex) | Maintainer, release management, and PR reviews |
+| OreoMuncher45 | [@OreoMuncher45](https://github.com/OreoMuncher45) | Maintainer, release management, and PR reviews |
+
+## Upstream
+
+Auris is built on [Auris](https://github.com/impin2rex/Auris), which is
+GPL-3.0 licensed and remains the work of its own contributors. The upstream
+maintainer is:
+
+| Maintainer | GitHub | Responsibility |
+|---|---|---|
+| Pintu Das | [@impin2rex](https://github.com/impin2rex) | Upstream maintainer of Auris |
+
+Auris's contributors are listed below, and the upstream project keeps its own
+record of them.
 
 ## Responsibilities
 

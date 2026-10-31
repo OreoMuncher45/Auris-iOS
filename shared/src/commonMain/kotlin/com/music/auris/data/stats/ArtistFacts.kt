@@ -314,7 +314,7 @@ object ArtistFacts {
         val cardAt: Long = 0L,
     )
 
-    private const val TAG = "LayaArtists"
+    private const val TAG = "AurisArtists"
     const val FILE_NAME ="artist_facts.json"
     private const val MAX_NAME_LENGTH = 120
     private const val MAX_GENRES_PER_ARTIST = 2

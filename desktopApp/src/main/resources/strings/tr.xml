@@ -260,7 +260,7 @@
     <string name="high_performance_battery_warning">Önce Auris\'un pil kullanımını Sınırsız olarak ayarlayın. Daha yüksek yenileme hızları daha fazla pil, CPU ve GPU kullanır ve cihazınızı ısıtabilir.</string>
     <string name="open_battery_settings">Pil ayarlarını aç</string>
     <string name="enable_high_performance_title">Yüksek performans modu etkinleştirilsin mi?</string>
-    <string name="enable_high_performance_confirmation">Yalnızca Auris\'un pil kullanımı Sınırsız olarak ayarlıysa etkinleştirin. Cihaz ısındığında veya pil azaldığında Android yine de yenileme hızını sınıraurisbilir.</string>
+    <string name="enable_high_performance_confirmation">Yalnızca Auris\'un pil kullanımı Sınırsız olarak ayarlıysa etkinleştirin. Cihaz ısındığında veya pil azaldığında Android yine de yenileme hızını sınırlayabilir.</string>
     <string name="enable">Etkinleştir</string>
     <string name="not_yet">Henüz değil</string>
     <string name="activity">Etkinlik</string>
@@ -485,7 +485,7 @@
     <string name="signed_in_as">%1$s olarak giriş yapıldı</string>
     <string name="signing_in">Giriş yapılıyor…</string>
     <string name="sleep_timer">Uyku zamanlayıcısı</string>
-    <string name="sources_no_lossless">Etkin hiçbir kaynak kayıpsız ses sağaurismıyor. Yeniden kodlama yapmadan mevcut kayıpsız dosyaları çalmak için özel bir modül ekleyin.</string>
+    <string name="sources_no_lossless">Etkin hiçbir kaynak kayıpsız ses sağplayismıyor. Yeniden kodlama yapmadan mevcut kayıpsız dosyaları çalmak için özel bir modül ekleyin.</string>
     <string name="sources_order_footer">Bir kaynakta parça yoksa veya ulaşılamıyorsa Auris bir sonrakini dener. YouTube üzerindeki kaynaklar daha iyi bir sürüm döndürdüklerinde onun kaydının yerini alabilir.</string>
     <string name="sources_order_header">Kaynaklar, bu sırayla denenir</string>
     <string name="sources_quality_capped">Bu bağlantı Yüksek kalitenin altına ayarlandığından, akışlar bu sınıra uyacak şekilde yeniden kodlanır. İndirmeler etkilenmez.</string>
@@ -620,7 +620,7 @@
     <string name="automix_enabled_subtitle">Her geçişin zamanlamasını ve karışımını parçaların kendisinden yapar. Telefon ısınırsa veya çalma takılırsa kapat.</string>
     <string name="automix_disabled_subtitle">Geçişlerin zamanlamasını ve karışımını kaydırıcı olmadan otomatik olarak yapar. Performans daha yavaş cihazlarda değişebilir.</string>
     <string name="no_lyrics_sources_enabled">Yok. Sözler alınmayacak.</string>
-    <string name="song_cache_large_subtitle">Diskte %1$s\'a kadar indirilen sesi tutar. Bu, boş alanının önemli bir kısmını kapaurisbilir.</string>
+    <string name="song_cache_large_subtitle">Diskte %1$s\'a kadar indirilen sesi tutar. Bu, boş alanının önemli bir kısmını kaplayabilir.</string>
     <string name="song_cache_limit_subtitle">Anında atlama ve tekrar dinleme için indirilen sesi diskte tutar</string>
     <string name="replay_genres_enabled_subtitle">Last.fm\'den bir sanatçının türlerini ister. Yalnızca sanatçı adı gönderilir.</string>
     <string name="replay_genres_disabled_subtitle">Bu kapalıyken Replay tür grafiği gizli kalır</string>

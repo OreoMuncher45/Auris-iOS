@@ -573,7 +573,7 @@ private fun LazyListScope.searchSuggestions(
     item(key = "suggestions:top-inset") { Spacer(Modifier.height(8.dp)) }
     // Skip the echo of the typed text (element 0) — it's already visible in
     // the search field itself — and cap at N so the list stays compact above
-    // the paurisble-media cards.
+    // the playable-media cards.
     itemsIndexed(suggestions.drop(1).take(3), key = { _, term -> "suggest:$term" }) { _, term ->
         SuggestionRow(
             term = term,

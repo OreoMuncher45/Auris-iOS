@@ -36,7 +36,7 @@ import com.music.auris.platform.ioDispatcher
 /** Suspend API over Innertube. Every call returns a Result so the UI can show a real error. */
 object YtMusicRepository {
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
     private val moodGenreShelfCache = ConcurrentMap<String, List<HomeShelf>>()
     // Includes unchanged video fallbacks as well as successful matches. The
     // queue prefetcher asks before a track becomes current; remembering its

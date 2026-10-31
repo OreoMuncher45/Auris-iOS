@@ -100,7 +100,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
             }
             if (!manifest.isPlayable) {
                 val declared = manifest.resources.joinToString(", ")
-                throw AddonException("This addon declares $declared — Laya needs search")
+                throw AddonException("This addon declares $declared — Auris needs search")
             }
             manifest
         }.recoverCatching { failure ->
@@ -250,7 +250,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
      *
      * Without it an addon holding an Atmos mix has no way to know it may serve
      * one, so it takes its default branch and sends stereo. That is the whole
-     * of why Laya never heard Atmos from an addon: not a detection bug —
+     * of why Auris never heard Atmos from an addon: not a detection bug —
      * [AddonStream.isDolbyAtmos] reads every spelling an addon sends — but a
      * question that was never asked.
      *
@@ -367,7 +367,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
                     // sends people to re-paste a URL that was always correct.
                     response.code >= 500 -> throw AddonUnavailable("HTTP ${response.code}")
                     response.code != 429 -> throw AddonException("HTTP ${response.code}")
-                    attempt >= MAX_RETRIES -> throw AddonUnavailable("This addon is rate limiting Laya")
+                    attempt >= MAX_RETRIES -> throw AddonUnavailable("This addon is rate limiting Auris")
                     else -> retryAfterMs(response.header("Retry-After"), attempt)
                 }
             }
@@ -419,7 +419,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
     private fun keyOf(vararg parts: String) = parts.joinToString("|") { "${it.length}:$it" }
 
     companion object {
-        private const val TAG = "Laya"
+        private const val TAG = "Auris"
 
         /** The tiers [AddonSource][com.music.auris.data.sources.AddonSource] asks in. */
         const val TIER_LOSSLESS = "LOSSLESS"
@@ -510,7 +510,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
         private const val BACKOFF_CAP_MS = 8_000L
 
         /** What an addon is asked with when its config names no agent of its own. */
-        val DEFAULT_USER_AGENT: String get() = "Laya/v${SourceRegistry.host.appVersion}"
+        val DEFAULT_USER_AGENT: String get() = "Auris/v${SourceRegistry.host.appVersion}"
 
         /**
          * What [probeSearch] asks for. Deliberately an ordinary word rather

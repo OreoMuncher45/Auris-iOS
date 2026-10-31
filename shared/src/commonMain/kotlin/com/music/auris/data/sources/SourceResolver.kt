@@ -47,7 +47,7 @@ import kotlinx.coroutines.withContext
  */
 object SourceResolver {
 
-    private const val TAG = "Laya"
+    private const val TAG = "Auris"
 
     /**
      * What to ask a source for, right now.
@@ -238,7 +238,7 @@ object SourceResolver {
      *
      * A YouTube track keeps its bare video id rather than a
      * [SourceRegistry.trackKey] — see [YouTubeSource] for why — so it reaches
-     * playback as `laya://watch?v=…` and never passes through [resolve].
+     * playback as `auris://watch?v=…` and never passes through [resolve].
      * Without this, ordering a source above YouTube did nothing for anything
      * *queued* from YouTube: the library, a playlist, radio, the home feed —
      * which is very nearly everything. The list said "prefer my server" and

@@ -275,7 +275,7 @@ class ModuleSource(
                 kbpsInferred = trackMeta?.bitrate == null,
             )
             val playsAtmos = DeviceCodecs.playsDolbyAtmos
-            if (unpaurisble(format, atmosAllowed = playsAtmos && AppSettings.dolbyAtmos.value)) {
+            if (unplayable(format, atmosAllowed = playsAtmos && AppSettings.dolbyAtmos.value)) {
                 val why = if (playsAtmos) {
                     "which is switched off in Settings"
                 } else {
@@ -365,7 +365,7 @@ class ModuleSource(
         // guess FLAC and a device that can render the spatial mix never gets
         // offered it. This says it outright.
         //
-        // Repeats what [unpaurisble] enforces on the way back rather than
+        // Repeats what [unplayable] enforces on the way back rather than
         // replacing it. A module is somebody else's JavaScript and is free to
         // ignore anything it is handed — the Tidal one ignores the tier and
         // asks its backend for `MAX` regardless — so this is the polite ask
@@ -502,8 +502,8 @@ class ModuleSource(
          * past the module to the copy it declined to offer, so on a device with
          * no Dolby decoder that track is YouTube's until the module is fixed.
          */
-        internal fun unpaurisble(format: StreamFormat, atmosAllowed: Boolean): Boolean =
-            SourceTiers.unpaurisble(format, atmosAllowed)
+        internal fun unplayable(format: StreamFormat, atmosAllowed: Boolean): Boolean =
+            SourceTiers.unplayable(format, atmosAllowed)
 
         /**
          * The three tiers every compatible module speaks, whatever it

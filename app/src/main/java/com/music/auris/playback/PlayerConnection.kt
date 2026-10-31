@@ -725,7 +725,7 @@ fun Song.toMediaItem(): MediaItem {
             // classify a session by its media type; untyped sessions get treated
             // as generic audio and lose the music-specific card.
             .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
-            .setIsPaurisble(true)
+            .setIsPlayable(true)
             .setIsBrowsable(false)
             // What a queue entry has to carry about itself: which section of
             // the queue it belongs to, whether it is playing off the device,

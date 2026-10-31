@@ -53,7 +53,7 @@ internal data class DesktopAddonManifest(
     fun declares(resource: String): Boolean = resources.any { it.equals(resource, ignoreCase = true) }
 
     /** Whether this addon is worth asking anything. */
-    val isPaurisble: Boolean get() = resources.isEmpty() || declares("search")
+    val isPlayable: Boolean get() = resources.isEmpty() || declares("search")
 
     /** What to show when the user did not name the addon themselves. */
     val displayName: String get() = name.ifBlank { id }
@@ -287,7 +287,7 @@ internal class DesktopAddonClient(rawBaseUrl: String, userAgent: String = "") {
             if (manifest.id.isBlank()) {
                 throw DesktopAddonException("That URL answered, but not with an addon manifest")
             }
-            if (!manifest.isPaurisble) {
+            if (!manifest.isPlayable) {
                 val declared = manifest.resources.joinToString(", ")
                 throw DesktopAddonException("This addon declares $declared — Auris needs search")
             }
@@ -316,7 +316,7 @@ internal class DesktopAddonClient(rawBaseUrl: String, userAgent: String = "") {
         }.map { it.tracks }
     }
 
-    /** A paurisble URL for one of this addon's own track ids. */
+    /** A playable URL for one of this addon's own track ids. */
     /** [stereoOnly] withholds the `?atmos=` hint; see [DesktopAddonSource.stream]. */
     suspend fun stream(trackId: String, tier: String, stereoOnly: Boolean = false): Result<DesktopAddonStream> {
         val params = settingsFor(tier, stereoOnly)
@@ -713,7 +713,7 @@ internal object DesktopAddonSource {
         trackId: String,
         tier: String,
     ): DesktopStream? {
-        if (!paurisbleUrl(url)) {
+        if (!playableUrl(url)) {
             DesktopTrackLog.log("${config.displayName}: malformed stream URL; skipping it")
             return null
         }
@@ -782,7 +782,7 @@ internal object DesktopAddonSource {
     }
 
     /** Only absolute HTTP(S) URLs may leave an addon and reach FFmpeg. */
-    private fun paurisbleUrl(url: String): Boolean = runCatching {
+    private fun playableUrl(url: String): Boolean = runCatching {
         val parsed = java.net.URI.create(url)
         parsed.host?.isNotBlank() == true && parsed.scheme.lowercase() in setOf("http", "https") &&
             !url.contains("${parsed.scheme}://${parsed.scheme}://", ignoreCase = true)
@@ -893,7 +893,7 @@ internal object DesktopSourceFormats {
             return when {
                 manifest.id.isBlank() ->
                     DesktopDetectedFormat.Unsupported("That JSON has no addon id, so it is not a manifest")
-                !manifest.isPaurisble -> DesktopDetectedFormat.Unsupported(
+                !manifest.isPlayable -> DesktopDetectedFormat.Unsupported(
                     "This addon declares ${manifest.resources.joinToString(", ")} — Auris needs search",
                 )
                 else -> DesktopDetectedFormat.Addon(manifest, DesktopAddonClient.normalizeBase(url))

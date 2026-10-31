@@ -345,7 +345,7 @@ class PrecisionAudioSinkTest {
             AudioSink.SINK_FORMAT_SUPPORTED_WITH_TRANSCODING,
             floatOff.getFormatSupport(rawFormat(C.ENCODING_PCM_FLOAT)),
         )
-        // Still paurisble, just not natively.
+        // Still playable, just not natively.
         assertTrue(floatOff.supportsFormat(rawFormat(C.ENCODING_PCM_FLOAT)))
 
         val floatOn = createSink(FakeAudioSink(), enableFloatOutput = true)

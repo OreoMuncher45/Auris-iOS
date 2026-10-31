@@ -512,7 +512,7 @@ class TrackAnalyzer(private val context: Context, private val cache: AudioCache)
                 rendition.cachedPrefix >= previous * HEAD_RETRY_GROWTH
             }
             // Most *audio*, not most bytes: renditions differ in bitrate, so the
-            // largest prefix is not necessarily the longest paurisble head.
+            // largest prefix is not necessarily the longest playable head.
             .maxByOrNull { headSecondsOf(it, durationSeconds) }
             ?: return null
 

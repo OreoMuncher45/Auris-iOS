@@ -11,9 +11,9 @@
 
 <br/>
 
-[![Latest release](https://img.shields.io/github/v/release/impin2rex/Auris?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Auris/releases)
-[![License](https://img.shields.io/github/license/impin2rex/Auris?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Auris/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/impin2rex/Auris/total?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Auris/releases)
+[![Latest release](https://img.shields.io/github/v/release/OreoMuncher45/Auris-iOS?style=for-the-badge&labelColor=0d1117)](https://github.com/OreoMuncher45/Auris-iOS/releases)
+[![License](https://img.shields.io/github/license/OreoMuncher45/Auris-iOS?style=for-the-badge&labelColor=0d1117)](https://github.com/OreoMuncher45/Auris-iOS/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/OreoMuncher45/Auris-iOS/total?style=for-the-badge&labelColor=0d1117)](https://github.com/OreoMuncher45/Auris-iOS/releases)
 
 <br/>
 
@@ -87,15 +87,15 @@
 
 <h1><a id="download"></a>Download</h1>
 
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17b&message=Android%20TV&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Android TV" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Wear%20OS-%234285F4.svg?style=for-the-badge&logo=wear-os&logoColor=white" alt="Available on Wear%20OS" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/windows/cozy.svg" alt="Download for Windows" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/macos/cozy.svg" alt="Download for macOS" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17c&message=Linux&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Linux" height="55"/></a>
-<a href="https://github.com/impin2rex/Auris/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/ios/cozy.svg" alt="Download for iPhone" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17b&message=Android%20TV&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Android TV" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Wear%20OS-%234285F4.svg?style=for-the-badge&logo=wear-os&logoColor=white" alt="Available on Wear%20OS" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/windows/cozy.svg" alt="Download for Windows" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/macos/cozy.svg" alt="Download for macOS" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17c&message=Linux&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Linux" height="55"/></a>
+<a href="https://github.com/OreoMuncher45/Auris-iOS/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/ios/cozy.svg" alt="Download for iPhone" height="55"/></a>
 
-Grab the latest build for your device from the [Releases](https://github.com/impin2rex/Auris/releases) page.
+Grab the latest build for your device from the [Releases](https://github.com/OreoMuncher45/Auris-iOS/releases) page.
 
 | Platform | File | Notes |
 |---|---|---|
@@ -121,7 +121,7 @@ The iOS build is an unsigned `.ipa`, so it has to be signed with your own Apple 
 
 1. **Set up SideStore** once by following the official guide at [docs.sidestore.io](https://docs.sidestore.io). It needs a computer for the first install, a free Apple ID, and a local VPN (LocalDevVPN / StosVPN) that SideStore uses to refresh apps.
 2. **Enable Developer Mode** on the device: Settings → Privacy & Security → Developer Mode → On, then restart.
-3. **Download the IPA** from [Releases](https://github.com/impin2rex/Auris/releases) straight onto the iPhone (`Auris-<version>-ios.ipa`).
+3. **Download the IPA** from [Releases](https://github.com/OreoMuncher45/Auris-iOS/releases) straight onto the iPhone (`Auris-<version>-ios.ipa`).
 4. In SideStore open **My Apps**, tap **+**, and pick the downloaded IPA. Sign in with your Apple ID if asked and wait for the install to finish.
 5. Turn the VPN on and open **Auris** from the home screen. If iOS says the developer is untrusted, go to Settings → General → VPN & Device Management and trust your Apple ID.
 
@@ -154,6 +154,6 @@ Auris is an independent, community-driven third-party audio player and client. I
 
 This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the [LICENSE](LICENSE) file for details.
 
-Auris is a modified version of [BitChord](https://github.com/kushagrasinghx/BitChord), also licensed under GPLv3.
+Auris is a modified version of [Auris](https://github.com/impin2rex/Auris), which is itself based on [BitChord](https://github.com/kushagrasinghx/BitChord). Both are GPLv3, and this fork keeps that licence and the notices that come with it.
 
 </div>

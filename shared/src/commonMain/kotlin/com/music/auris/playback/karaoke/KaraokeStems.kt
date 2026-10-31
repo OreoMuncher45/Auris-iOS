@@ -157,8 +157,8 @@ object KaraokeStems {
         synchronized(guard) {
             if (started) return
             started = true
-            startKaraokeThread("LayaKaraoke", lowPriority = true, body = ::loop)
-            startKaraokeThread("LayaKaraokeAlign", lowPriority = false, body = ::alignLoop)
+            startKaraokeThread("AurisKaraoke", lowPriority = true, body = ::loop)
+            startKaraokeThread("AurisKaraokeAlign", lowPriority = false, body = ::alignLoop)
         }
     }
 

@@ -16,7 +16,7 @@ The following behaviors are unacceptable within the project:
 
 ## Reporting
 If you experience or witness unacceptable behavior, report it privately to the project maintainer:
-- Email: `impin2rex@gmail.com`
+- GitHub: [@OreoMuncher45](https://github.com/OreoMuncher45), privately through the repository's security or profile contact.
 
 Reports will be handled privately and with appropriate discretion.
 

@@ -50,7 +50,7 @@ private val IMPORT_LANGUAGES = listOf(
     "Tamil",
     "Telugu",
     "Kannada",
-    "Maaurislam",
+    "Malayalam",
     "Hindi",
     "English",
     "Multilingual",

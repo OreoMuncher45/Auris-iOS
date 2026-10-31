@@ -29,7 +29,7 @@ class DesktopSpatialGuardTest {
         val rate = 44_100
 
         // Mono has no mid and side to widen, and Android declines it rather than mangling it — the
-        // case that used to make every local mono file unpaurisble there.
+        // case that used to make every local mono file unplayable there.
         val mono = DesktopSpatialAudio(1, rate).apply { enabled = true }
         assertTrue(!mono.applies, "a mono track was accepted for widening")
         val monoSamples = FloatArray(2_000) { sin(it * 0.01).toFloat() }

@@ -257,7 +257,7 @@ private fun DialogHeading(title: String, message: String, isError: Boolean = fal
  * two are the phone's too: no steer at all, and a language typed in.
  */
 private val IMPORT_LANGUAGES = listOf(
-    "Tamil", "Telugu", "Kannada", "Maaurislam", "Hindi", "English", "Multilingual",
+    "Tamil", "Telugu", "Kannada", "Malayalam", "Hindi", "English", "Multilingual",
 )
 private const val IMPORT_NO_PREFERENCE = "No Preference"
 private const val IMPORT_LANGUAGE_OTHER = "Manual / Other"

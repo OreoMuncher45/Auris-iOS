@@ -210,7 +210,7 @@ object AppSettings {
     val wifiOnlyDownloads = MutableStateFlow(true)
 
     /**
-     * Keep ordinary downloads in Music/Laya where other music apps can see
+     * Keep ordinary downloads in Music/Auris where other music apps can see
      * them. Off (the default) keeps downloads in this app's private storage.
      * HLS downloads always stay private because they are a playlist package,
      * not one portable audio file.
@@ -265,7 +265,7 @@ object AppSettings {
      * normalizes by default for the same reason.
      *
      * The case against it is that a constant gain is still a multiplication,
-     * so this is the first thing in Laya that is *on* out of the box and
+     * so this is the first thing in Auris that is *on* out of the box and
      * alters samples. Rather than hide that, the Audio Pipeline readout names
      * it: its Bit-exact row reports the first stage in the chain that is
      * altering samples, and switching this off is the first thing a listener
@@ -767,7 +767,7 @@ object AppSettings {
 
     /**
      * A temporary cap on [effectiveAudioQuality], for as long as something other
-     * than this phone's own speaker is playing — the Laya watch app, whose
+     * than this phone's own speaker is playing — the Auris watch app, whose
      * audio goes over a Bluetooth link that cannot keep up with lossless. Never
      * persisted, never shown: the listener's own settings are untouched, and
      * apply again the moment the phone takes the music back.
@@ -1001,7 +1001,7 @@ object AppSettings {
      * the very first call seeds the stored value from [currentVersionCode]
      * rather than reporting an update.
      *
-     * Laya ships sideloaded (see [com.music.auris.data.AppUpdateChecker]),
+     * Auris ships sideloaded (see [com.music.auris.data.AppUpdateChecker]),
      * so installing a new APK over the old one is the only "update" there is —
      * app data, this pref included, survives it exactly like a Play Store
      * update. Call once per process start, before anything reads a cache that
