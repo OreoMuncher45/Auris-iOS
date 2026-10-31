@@ -144,11 +144,9 @@ class DesktopPersistence {
             }
         }
 
-        // YouTube remains the non-removable catalogue fallback, matching the Android source
-        // registry.
-        val normalized = withBuiltIns.map {
-            if (it.kind == DesktopSourceKind.YOUTUBE && !it.enabled) it.copy(enabled = true) else it
-        }.inSourceOrder()
+        // YouTube stays in the list and cannot be removed — it is the source
+        // every install has — but it can be switched off like any other.
+        val normalized = withBuiltIns.inSourceOrder()
         if (stored == null || normalized != stored || (DesktopPlatform.isWindows && protected == null)) {
             saveSourceConfigs(normalized)
             if (DesktopPlatform.isWindows && stored == null) {

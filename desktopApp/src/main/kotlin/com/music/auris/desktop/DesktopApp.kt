@@ -6737,11 +6737,7 @@ private fun DesktopSettingsScreen(
                             } else {
                                 null
                             },
-                            onToggle = if (config.kind == DesktopSourceKind.YOUTUBE) {
-                                null
-                            } else {
-                                { onSourceEnabledChange(config, it) }
-                            },
+                            onToggle = { onSourceEnabledChange(config, it) },
                             onMoveUp = if (userAddedIds.indexOf(config.id) > 0) {
                                 { onMoveSource(config, -1) }
                             } else null,
