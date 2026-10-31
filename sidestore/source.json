@@ -20,6 +20,15 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "1.9.2",
+          "buildVersion": "33",
+          "date": "2026-10-31T04:52:38Z",
+          "localizedDescription": "Bug Fixes",
+          "downloadURL": "https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.9.2/Auris-1.9.2-ios.ipa",
+          "size": 80016602,
+          "minOSVersion": "16.0"
+        },
+        {
           "version": "1.9.1",
           "buildVersion": "32",
           "date": "2026-10-31T04:08:02Z",
