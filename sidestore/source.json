@@ -23,7 +23,7 @@
           "version": "1.9.1",
           "buildVersion": "32",
           "date": "2026-10-31T04:08:02Z",
-          "localizedDescription": "Bug Fixes",
+          "localizedDescription": "- **The app, rebuilt on Laya and renamed.** The name, the icon, the mark and the artwork are the app's own now, on the phone, on the desktop, on Android and on TV.\n- **Flow.** The endless personal mix is back: your favourites, your history and fresh finds, ordered by a tuner you steer — mood, discovery, memory and the genres to keep out.\n- **YouTube can be switched off.** It is a source like any other now.\n- **The app is Laya inside:** on-device karaoke, AutoMix with beat matching, synced lyrics, Listen Together, Replay, Spotify import, downloads, the equaliser and the reverb.",
           "downloadURL": "https://github.com/OreoMuncher45/Auris-iOS/releases/download/v1.9.1/Auris-1.9.1-ios.ipa",
           "size": 80013631,
           "minOSVersion": "16.0"
