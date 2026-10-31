@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.Bedtime
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.HighQuality
 import androidx.compose.material.icons.automirrored.rounded.Undo
@@ -257,6 +258,8 @@ internal fun IosSongMenu(
     /** Player-only, one at a time like Android: back to YouTube's audio, or the way out of that. Null hides the row. */
     onRevertToOriginal: (() -> Unit)? = null,
     onUpgradeQuality: (() -> Unit)? = null,
+    /** Flow's own row: the track leaves this mix and the next ones. Null hides it. */
+    onNotForMe: (() -> Unit)? = null,
     /** Greys the row out while the lookup runs; the player's seekbar label says "Upgrading quality". */
     upgradeInProgress: Boolean = false,
 ) {
@@ -307,6 +310,7 @@ internal fun IosSongMenu(
             song.albumId?.let { id -> Action(Icons.Rounded.Album, "Open album") { onOpenAlbum(id) } }
             song.artistId?.let { id -> Action(Icons.Rounded.Person, "Open artist") { onOpenArtist(id) } }
             onSongInfo?.let { Action(Icons.Rounded.Info, "Song info", it) }
+            onNotForMe?.let { Action(Icons.Rounded.Block, "Not for me", it) }
             onSleepTimer?.let { Action(Icons.Rounded.Bedtime, sleepStatus?.let { s -> "Sleep timer · $s" } ?: "Sleep timer", it) }
             Action(Icons.Rounded.Share, "Share") { shareText("https://music.youtube.com/watch?v=${song.videoId}") }
             onCopyLog?.let { Action(Icons.Rounded.BugReport, "Copy log", it) }

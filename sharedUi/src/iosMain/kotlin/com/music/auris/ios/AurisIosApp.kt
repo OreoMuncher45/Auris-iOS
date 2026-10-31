@@ -994,7 +994,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                             onPlay = { songs, i -> player.play(songs, i) },
                                             onBuild = { flow.build() },
                                             onGrow = { flow.grow() },
-                                            onBan = { flow.ban(it.videoId) },
+                                            onBan = { menuSong = it },
                                             onMoodTap = { mood ->
                                                 flow.setDraftMood(mood)
                                                 flow.applyTuner()
@@ -1298,6 +1298,11 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                             onToggleDislike = { toggleDislike(m.videoId) },
                             onAddToPlaylist = if (signedIn) ({ playlistTarget = m }) else null,
                             onSongInfo = { infoTarget = m },
+                            // Flow's own row: the track leaves this mix and the next ones.
+                            onNotForMe = if (stack.lastOrNull() is IosPage.Flow) ({
+                                flow.ban(held.videoId)
+                                menuSong = null
+                            }) else null,
                             // Android: sleep timer and Copy log are the player menu's own rows.
                             sleepStatus = player.sleepMinutes?.let { "$it min" } ?: if (player.sleepAfterTrack) "End of track" else null,
                             onSleepTimer = if (nowPlayingOpen) ({ sleepPicker = true }) else null,
