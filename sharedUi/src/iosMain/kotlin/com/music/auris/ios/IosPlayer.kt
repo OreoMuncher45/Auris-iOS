@@ -339,9 +339,9 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         party.onLocalIntent()
     }
 
-    fun play(songs: List<Song>, startIndex: Int) = intent {
+    fun play(songs: List<Song>, startIndex: Int, shuffle: Boolean? = null) = intent {
         val entries = songs.map { it.asQueueEntry(QueueTier.CONTEXT) }
-        if (AppSettings.shuffleEnabled.value) {
+        if (shuffle ?: AppSettings.shuffleEnabled.value) {
             queue = QueueTimeline.shuffledStartingOrder(entries, startIndex)
             start(0)
         } else {
@@ -390,6 +390,19 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         if (queue.isEmpty()) return@intent play(listOf(song), 0)
         val at = QueueTimeline.findUserQueueInsertionIndex(queue, index, next)
         queue = queue.toMutableList().apply { add(at, song.asQueueEntry(QueueTier.USER_QUEUE)) }
+        queueChanged()
+    }
+
+    /**
+     * A grown context (Flow's endless mix) joining a queue that is already
+     * playing: the new tracks land after the last context track and ahead of
+     * the AutoPlay tail, so the mix never runs dry mid-play.
+     */
+    fun appendContext(songs: List<Song>) = intent {
+        val fresh = songs.filter { s -> queue.none { it.videoId == s.videoId } }
+        if (fresh.isEmpty()) return@intent
+        val at = QueueTimeline.contextAppendIndex(queue.map { it.queueTier })
+        queue = queue.toMutableList().apply { addAll(at, fresh.map { it.asQueueEntry(QueueTier.CONTEXT) }) }
         queueChanged()
     }
 

@@ -256,6 +256,23 @@ object QueueTimeline {
         }
     }
 
+    /**
+     * Where a grown context joins the queue: after the last context track and
+     * before the AutoPlay tail.
+     *
+     * An endless mix (Flow) tops itself up while it plays. The new tracks are
+     * context, so they belong with the context block — not behind the
+     * listener's own queued tracks, and not behind the radio suggestions.
+     */
+    fun contextAppendIndex(tiers: List<QueueTier>): Int {
+        val lastContext = tiers.indexOfLast { it == QueueTier.CONTEXT }
+        if (lastContext < 0) return tiers.size
+        for (i in lastContext + 1 until tiers.size) {
+            if (tiers[i] == QueueTier.AUTOPLAY) return i
+        }
+        return lastContext + 1
+    }
+
     /** Indices of the upcoming USER_QUEUE rows — what "Clear" removes. Context and AutoPlay stay. */
     fun upcomingUserQueueIndices(tiers: List<QueueTier>, currentIndex: Int): List<Int> =
         ((currentIndex + 1).coerceAtLeast(0) until tiers.size).filter { tiers[it] == QueueTier.USER_QUEUE }

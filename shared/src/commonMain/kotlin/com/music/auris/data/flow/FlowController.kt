@@ -4,9 +4,13 @@ import com.music.auris.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -27,6 +31,8 @@ data class FlowUiState(
     val neededMore: Int = FlowRules.UNLOCK_FAV_TOTAL,
     val mood: FlowMood = FlowMood.FLOW,
     val tuner: FlowTuner = FlowTuner(),
+    /** Tracks the listener banned from every future mix. */
+    val bannedIds: Set<String> = emptySet(),
 )
 
 /**
@@ -55,9 +61,23 @@ class FlowController(
         FlowUiState(
             mood = FlowStore.mood.value,
             tuner = FlowStore.tuner.value,
+            bannedIds = FlowStore.bannedIds.value,
         )
     )
     val state: StateFlow<FlowUiState> = _state.asStateFlow()
+
+    /**
+     * The tracks a grown mix added, emitted once per successful [grow] so the
+     * player can extend its queue and the mix never runs dry mid-play.
+     */
+    private val _grown = MutableSharedFlow<List<Song>>(extraBufferCapacity = 1)
+    val grown: SharedFlow<List<Song>> = _grown.asSharedFlow()
+
+    init {
+        scope.launch {
+            FlowStore.bannedIds.collect { ids -> _state.update { it.copy(bannedIds = ids) } }
+        }
+    }
 
     /** The tuner as it is being edited, before it is committed. */
     private val _draft = MutableStateFlow(
@@ -75,7 +95,7 @@ class FlowController(
         if (_state.value.songs.isNotEmpty()) return
         val stored = FlowStore.readSnapshot()
         if (stored != null) {
-            _state.value = _state.value.copy(songs = stored)
+            _state.update { it.copy(songs = stored) }
         }
         if (stored == null || FlowStore.snapshotAgeMs()?.let { it > FlowStore.FLOW_TTL_MS } == true) {
             build()
@@ -85,25 +105,29 @@ class FlowController(
     /** Build (or rebuild) the mix from favourites, history and fresh picks. */
     fun build() {
         if (_state.value.loading) return
-        _state.value = _state.value.copy(loading = true, error = null)
+        _state.update { it.copy(loading = true, error = null) }
         scope.launch {
             runCatching { FlowRepository.build() }
                 .onSuccess { mix ->
-                    _state.value = _state.value.copy(
-                        songs = mix.songs,
-                        loading = false,
-                        error = null,
-                        unlocked = mix.unlocked,
-                        favTrackCount = mix.favTrackCount,
-                        favArtistCount = mix.favArtistCount,
-                        neededMore = mix.neededMore,
-                    )
+                    _state.update {
+                        it.copy(
+                            songs = mix.songs,
+                            loading = false,
+                            error = null,
+                            unlocked = mix.unlocked,
+                            favTrackCount = mix.favTrackCount,
+                            favArtistCount = mix.favArtistCount,
+                            neededMore = mix.neededMore,
+                        )
+                    }
                 }
                 .onFailure { e ->
-                    _state.value = _state.value.copy(
-                        loading = false,
-                        error = e.message ?: e.toString(),
-                    )
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            error = e.message ?: e.toString(),
+                        )
+                    }
                 }
         }
     }
@@ -111,14 +135,17 @@ class FlowController(
     /** Append fresh recommendations to the mix. */
     fun grow() {
         if (_state.value.growing || _state.value.songs.isEmpty()) return
-        _state.value = _state.value.copy(growing = true)
+        _state.update { it.copy(growing = true) }
         scope.launch {
+            val before = _state.value.songs.map { it.videoId }.toSet()
             runCatching { FlowRepository.grow(_state.value.songs) }
                 .onSuccess { songs ->
-                    _state.value = _state.value.copy(songs = songs, growing = false)
+                    val added = songs.filter { it.videoId !in before }
+                    _state.update { it.copy(songs = songs, growing = false) }
+                    if (added.isNotEmpty()) _grown.tryEmit(added)
                 }
                 .onFailure {
-                    _state.value = _state.value.copy(growing = false)
+                    _state.update { it.copy(growing = false) }
                 }
         }
     }
@@ -165,23 +192,30 @@ class FlowController(
         FlowStore.setDiscovery(tuner.discovery)
         FlowStore.setMemory(tuner.memory)
         FlowStore.setExcludedGenres(tuner.excludedGenres)
-        _state.value = _state.value.copy(
-            mood = tuner.mood,
-            tuner = FlowStore.tuner.value,
-        )
+        _state.update {
+            it.copy(
+                mood = tuner.mood,
+                tuner = FlowStore.tuner.value,
+            )
+        }
         build()
     }
 
     /** Put a track on the list of tracks this mix will not offer again. */
     fun ban(videoId: String) {
         FlowStore.ban(videoId)
-        _state.value = _state.value.copy(songs = _state.value.songs.filterNot { it.videoId == videoId })
+        _state.update { it.copy(songs = it.songs.filterNot { s -> s.videoId == videoId }) }
+    }
+
+    /** Take a track back off the ban list; it can be offered again. */
+    fun unban(videoId: String) {
+        FlowStore.unban(videoId)
     }
 
     /** A skip counts against the track; a full listen forgives one. */
     fun recordSkip(videoId: String, playedMs: Long, durationMs: Long) {
         if (videoId.isBlank()) return
-        val quickSkip = playedMs < 30_000 || (durationMs > 0 && playedMs < durationMs * 0.4)
-        if (quickSkip) FlowStore.recordSkip(videoId) else FlowStore.recordFullListen(videoId)
+        if (FlowSignal.isQuickSkip(playedMs, durationMs)) FlowStore.recordSkip(videoId)
+        else FlowStore.recordFullListen(videoId)
     }
 }

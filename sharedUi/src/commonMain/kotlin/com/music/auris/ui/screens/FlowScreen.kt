@@ -24,10 +24,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AllInclusive
 import androidx.compose.material.icons.rounded.Celebration
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
@@ -87,6 +91,10 @@ fun FlowScreen(
     onApplyTuner: () -> Unit,
     currentSong: Song? = null,
     isPlaying: Boolean = false,
+    onPlayAll: (() -> Unit)? = null,
+    onShuffle: (() -> Unit)? = null,
+    onNewMix: (() -> Unit)? = null,
+    onUnban: ((String) -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier,
 ) {
@@ -102,6 +110,9 @@ fun FlowScreen(
                 state = state,
                 onTuner = { showTuner = true },
                 onMoodTap = onMoodTap,
+                onPlayAll = onPlayAll,
+                onShuffle = onShuffle,
+                onNewMix = onNewMix,
             )
         }
 
@@ -146,7 +157,7 @@ fun FlowScreen(
                 item(key = "flow:grow") {
                     if (state.growing) {
                         Text(
-                            stringResource(Res.string.flow_finding_more),
+                            stringResource(Res.string.flow_growing),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -159,6 +170,40 @@ fun FlowScreen(
                             Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
                             Text(stringResource(Res.string.flow_more))
+                        }
+                    }
+                }
+            }
+        }
+
+        if (state.bannedIds.isNotEmpty() && onUnban != null) {
+            item(key = "flow:banned") {
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        stringResource(Res.string.flow_banned),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        state.bannedIds.forEach { id ->
+                            FilterChip(
+                                selected = false,
+                                onClick = { onUnban(id) },
+                                label = { Text(id.take(11)) },
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Rounded.Close,
+                                        contentDescription = stringResource(Res.string.remove),
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                },
+                            )
                         }
                     }
                 }
@@ -193,6 +238,9 @@ private fun FlowHeader(
     state: FlowUiState,
     onTuner: () -> Unit,
     onMoodTap: (FlowMood) -> Unit,
+    onPlayAll: (() -> Unit)?,
+    onShuffle: (() -> Unit)?,
+    onNewMix: (() -> Unit)?
 ) {
     Column(
         modifier = Modifier
@@ -212,7 +260,13 @@ private fun FlowHeader(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (state.favTrackCount > 0) {
+                if (state.songs.isNotEmpty()) {
+                    Text(
+                        stringResource(Res.string.flow_mix_title, state.songs.size),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (state.favTrackCount > 0) {
                     Text(
                         stringResource(Res.string.flow_seeded, state.favTrackCount),
                         style = MaterialTheme.typography.bodySmall,
@@ -230,6 +284,35 @@ private fun FlowHeader(
                 Icon(Icons.Rounded.Tune, contentDescription = stringResource(Res.string.flow_tuner))
                 Spacer(Modifier.width(6.dp))
                 Text(stringResource(Res.string.flow_tuner))
+            }
+        }
+
+        if (onPlayAll != null || onShuffle != null || onNewMix != null) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (onPlayAll != null) {
+                    Button(onClick = onPlayAll, enabled = state.songs.isNotEmpty() && !state.loading) {
+                        Icon(Icons.Rounded.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(Res.string.play))
+                    }
+                }
+                if (onShuffle != null) {
+                    TextButton(onClick = onShuffle, enabled = state.songs.isNotEmpty() && !state.loading) {
+                        Icon(Icons.Rounded.Shuffle, contentDescription = stringResource(Res.string.shuffle), modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(Res.string.shuffle))
+                    }
+                }
+                if (onNewMix != null) {
+                    TextButton(onClick = onNewMix, enabled = !state.loading) {
+                        Icon(Icons.Rounded.Refresh, contentDescription = stringResource(Res.string.flow_new_mix), modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(Res.string.flow_new_mix))
+                    }
+                }
             }
         }
 

@@ -19,6 +19,7 @@
     <string name="bit_depth">%1$d-bit</string>
     <string name="cancel">Cancel</string>
     <string name="flow_apply">Apply</string>
+    <string name="flow_banned">Banned from Flow</string>
     <string name="flow_build">Build my mix</string>
     <string name="flow_discovery">Discovery</string>
     <string name="flow_discovery_hint">How much of the mix is new to you.</string>
@@ -28,9 +29,12 @@
     <string name="flow_error_title">Flow could not build a mix</string>
     <string name="flow_finding_more">Finding more…</string>
     <string name="flow_genres">Genres</string>
+    <string name="flow_growing">Growing as you listen</string>
     <string name="flow_mix">Your mix</string>
+    <string name="flow_mix_title">In this mix · %1$d</string>
     <string name="flow_more">More like this</string>
     <string name="flow_needs_more">%1$d more favorites to unlock</string>
+    <string name="flow_new_mix">New mix</string>
     <string name="flow_not_for_me">Not for me</string>
     <string name="flow_seeded">%1$d favorites seeded</string>
     <string name="flow_subtitle">Your personal soundtrack</string>

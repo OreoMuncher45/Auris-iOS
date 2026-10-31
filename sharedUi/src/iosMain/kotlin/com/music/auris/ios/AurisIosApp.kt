@@ -197,6 +197,7 @@ import com.music.auris.ui.screens.HistoryScreen
 import com.music.auris.ui.screens.FlowEntryCard
 import com.music.auris.ui.screens.FlowScreen
 import com.music.auris.data.flow.FlowController
+import com.music.auris.data.flow.FlowSignal
 import org.jetbrains.compose.resources.getString
 
 private fun ShelfItem.toSong() = videoId?.let {
@@ -215,6 +216,19 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
     val flow = remember { FlowController(scope) }
     val flowState by flow.state.collectAsState()
     val flowDraft by flow.draft.collectAsState()
+    // A grown mix joins the playing queue, so the mix never runs dry mid-play.
+    LaunchedEffect(flow) {
+        flow.grown.collect { added -> player.appendContext(added) }
+    }
+    // Tapping a mix row: a track the tap left behind trains the mix, the tap
+    // plays, and near the end of the mix it tops itself up (Android's onSongClick).
+    val playFlow: (List<Song>, Int, Boolean?) -> Unit = { songs, i, shuffle ->
+        FlowSignal.skippedOver(player.song, songs, i)?.let { skipped ->
+            flow.recordSkip(skipped.videoId, player.position.positionMs, player.durationMs)
+        }
+        player.play(songs, i, shuffle)
+        if (FlowSignal.shouldGrow(i, songs.size)) flow.grow()
+    }
     var tab by remember { mutableIntStateOf(0) }
     var nowPlayingOpen by remember { mutableStateOf(false) }
     // Pushed pages (one global stack; a tab tap clears it) and the long-press menu.
@@ -991,7 +1005,11 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                         FlowScreen(
                                             state = flowState,
                                             draft = flowDraft,
-                                            onPlay = { songs, i -> player.play(songs, i) },
+                                            onPlay = { songs, i -> playFlow(songs, i, null) },
+                                            onPlayAll = { playFlow(flowState.songs, 0, false) },
+                                            onShuffle = { playFlow(flowState.songs, 0, true) },
+                                            onNewMix = { flow.build() },
+                                            onUnban = { flow.unban(it) },
                                             onBuild = { flow.build() },
                                             onGrow = { flow.grow() },
                                             onBan = { menuSong = it },
@@ -1298,9 +1316,10 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                             onToggleDislike = { toggleDislike(m.videoId) },
                             onAddToPlaylist = if (signedIn) ({ playlistTarget = m }) else null,
                             onSongInfo = { infoTarget = m },
-                            // Flow's own row: the track leaves this mix and the next ones.
+                            // Flow's own row: the track leaves this mix and the next ones, which rebuilds around it.
                             onNotForMe = if (stack.lastOrNull() is IosPage.Flow) ({
                                 flow.ban(held.videoId)
+                                flow.build()
                                 menuSong = null
                             }) else null,
                             // Android: sleep timer and Copy log are the player menu's own rows.
