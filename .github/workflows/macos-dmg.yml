@@ -1,0 +1,54 @@
+name: macOS arm64 DMG
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+concurrency:
+  group: macos-dmg-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-dmg:
+    runs-on: macos-14
+    env:
+      LISTEN_TOGETHER_SERVER: ${{ secrets.LISTEN_TOGETHER_SERVER }}
+      SIGNATURE_API_URL: ${{ secrets.SIGNATURE_API_URL }}
+      LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+      LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    # Same number the Android build ships, so both artifacts from one push match.
+    - name: Work out the version
+      id: version
+      run: |
+        version=$(sed -n 's/.*extra\["layaVersionName"\] = "\(.*\)".*/\1/p' build.gradle.kts | head -1)
+        echo "value=$version" >> "$GITHUB_OUTPUT"
+        echo "Building $version"
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Tests
+      run: ./gradlew :shared:jvmTest :desktopApp:test -Playa.version=${{ steps.version.outputs.value }}
+
+    - name: Build DMG
+      run: ./gradlew :desktopApp:packageDmg -Playa.version=${{ steps.version.outputs.value }}
+
+    - name: Upload DMG Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: laya-macos-arm64-dmg
+        path: desktopApp/build/compose/binaries/main/dmg/*.dmg
+        if-no-files-found: error

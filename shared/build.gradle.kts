@@ -1,144 +1,91 @@
-// BitChord shared KMP module — spec §1.
-// Apple-only targets for now; androidMain exists as a dormant placeholder for
-// the future Android reunification (§10 non-goals).
-import java.util.Properties
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
-    id("com.rickclephas.kmp.nativecoroutines")
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.library")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 kotlin {
-    // One combined XCFramework consumed by AppleApp (spec §1.1).
-    val xcf = XCFramework("AurisShared")
-
-    // The simulator slice is optional: a device-only release build (the IPA
-    // pipeline) sets -PiosSimulator=false, which halves the Kotlin/Native
-    // compile time on the build machine.
-    val withSimulator = (providers.gradleProperty("iosSimulator").orNull ?: "true").toBoolean()
-    val appleTargets = buildList {
-        add(iosArm64())
-        if (withSimulator) add(iosSimulatorArm64())
-        // Add iosX64() only if Intel simulator support becomes a requirement (§1.1).
-    }
-    appleTargets.forEach { target ->
-        target.binaries.framework {
-            baseName = "AurisShared"
-            binaryOption("bundleId", "app.auris.Auris.shared")
-            isStatic = true
-            xcf.add(this)
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
+
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    iosArm64()
+    iosSimulatorArm64()
+
+    // Android and desktop are both JVM, but the default hierarchy gives them no source set in
+    // common.
+    applyDefaultHierarchyTemplate()
 
     sourceSets {
-        commonMain.dependencies {
-            implementation(project(":innertubex"))
-            implementation("io.ktor:ktor-client-core:3.5.2")
-            implementation("io.ktor:ktor-client-content-negotiation:3.5.2")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
-            implementation("com.rickclephas.kmp:kmp-nativecoroutines-core:1.0.5")
-            // sqldelight: add only if upstream Room usage is confirmed (spec §1.1).
+        all {
+            languageSettings {
+                optIn("kotlin.concurrent.atomics.ExperimentalAtomicApi")
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+                optIn("kotlin.time.ExperimentalTime")
+                optIn("kotlin.io.encoding.ExperimentalEncodingApi")
+            }
         }
+        val jvmSharedMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                // Compile-only: the two applications supply the runtime artifact themselves.
+                compileOnly("com.microsoft.onnxruntime:onnxruntime:1.20.0")
+                // The network stack the lyrics providers and the YouTube Music
+                // client run on, at the phone's versions — both applications
+                // now call the same code, so they resolve the same libraries.
+                api("io.ktor:ktor-client-okhttp:3.5.2")
+                api("org.jsoup:jsoup:1.22.2")
+                // NewPipe is the fallback resolver; compile-only because the phone ships a trimmed jar of it.
+                compileOnly("com.github.TeamNewPipe:NewPipeExtractor:v0.26.3")
+            }
+        }
+        androidMain.get().dependsOn(jvmSharedMain)
+        jvmMain.get().dependsOn(jvmSharedMain)
 
+        commonMain.dependencies {
+            // Models in this module intentionally have no Android or Compose dependency.
+            api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+            api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            api("io.ktor:ktor-client-core:3.5.2")
+            api("io.ktor:ktor-client-websockets:3.5.2")
+            api("io.ktor:ktor-client-content-negotiation:3.5.2")
+            api("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
+            api("com.fleeksoft.ksoup:ksoup:0.2.6")
+            api("com.squareup.okio:okio:3.17.0")
+            // Settings storage: SharedPreferences on Android, NSUserDefaults on iOS.
+            api("com.russhwolf:multiplatform-settings:1.3.0")
+            // YouTube stream resolution: InnerTubeX's client catalog and cipher tiers.
+            api("com.github.MetrolistGroup.innertubex:innertubex:v0.7.0")
+            // Common locks/atomics; the version coroutines already pulls in.
+            implementation("org.jetbrains.kotlinx:atomicfu:0.26.0")
+        }
+        iosMain.dependencies {
+            implementation("io.ktor:ktor-client-darwin:3.5.2")
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation("io.ktor:ktor-client-mock:3.5.2")
-            // For `runTest` only. Kotlin/Native's `kotlin.test` refuses a `suspend`
-            // test function outright, and a `@Test` that blocks the test thread
-            // instead is how a suspended read deadlocks in CI rather than in a
-            // screenshot.
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
         }
-
-        // The Darwin Ktor engine only resolves for Apple targets, so it lives in
-        // appleMain — the common ancestor of every configured Apple target.
-        appleMain.dependencies {
-            implementation("io.ktor:ktor-client-darwin:3.5.2")
-            // The party socket is NSURLSessionWebSocketTask, not Ktor: Ktor 3.2's
-            // client websockets plugin is an empty shell on Darwin, and the platform
-            // API is both shorter and gives the close code and ping/pong this
-            // protocol needs.
+        jvmTest.dependencies {
+            implementation("com.russhwolf:multiplatform-settings-test:1.3.0")
+            implementation("com.squareup.okhttp3:mockwebserver:5.3.2")
+            implementation("com.microsoft.onnxruntime:onnxruntime:1.20.0")
         }
     }
 }
 
-// ---- Build-time configuration ---------------------------------------------
-//
-// Kept out of the source tree on purpose. A build-time value is the one kind of
-// configuration that gets baked into every install and cannot be corrected by the
-// person running it, so it has to be something the *distributor* chose on purpose
-// rather than something a developer left lying around in a committed file.
-//
-// Both sources below are gitignored or outside the repository, so a fresh checkout
-// gets the empty default. See `BuildDefaults.kt` for what an empty one means.
-val localProps = Properties().apply {
-    val f = rootProject.file("local.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
+android {
+    // lintVital (run on every release build) prints Kotlin-metadata errors: AGP 8.10 lint embeds Kotlin 2.1. Full `lint` still runs on demand.
+    lint { checkReleaseBuilds = false }
+    namespace = "com.music.laya.shared"
+    compileSdk = 36
 }
-
-/** A party server to bake in. Empty means "the listener must supply one". */
-val listenTogetherServer: String = (
-    localProps.getProperty("LISTEN_TOGETHER_SERVER")
-        ?: System.getenv("LISTEN_TOGETHER_SERVER")
-        ?: ""
-    ).trim()
-
-// Escaped for a Kotlin string literal, because a server address reaches this file
-// from a text file a person edited and `\` or `"` in it must not become a syntax
-// error in generated code.
-val escaped = listenTogetherServer.replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\${'$'}")
-
-val generatedDir = layout.buildDirectory.dir("generated/listentogether").get().asFile
-val generateDefaults by tasks.registering {
-        val out = File(generatedDir, "com/music/auris/BuildDefaults.kt")
-    val localFile = rootProject.file("local.properties")
-    // Declared as an input, which it was not, and the consequence was that editing
-    // `local.properties` did nothing: the task had an output and no inputs, so Gradle
-    // considered it up to date and the address kept whatever it was generated with.
-    // That is the worst possible failure for this file — a build-time value that
-    // silently refuses to change, so a distributor who removes a server ships the
-    // server anyway. A missing file is a legitimate input state, not an error: the
-    // empty default is the shipped one. `files` rather than `file(...).optional()`:
-    // Gradle validates a single-file input as existing even when it is optional, so
-    // a fresh checkout failed here; a file collection may name a file that is absent.
-    inputs.files(localFile)
-    inputs.property("listenTogetherServer", listenTogetherServer)
-    outputs.file(out)
-    doLast {
-        out.parentFile.mkdirs()
-        out.writeText(
-            """
-            |// GENERATED by shared/build.gradle.kts — do not edit, do not commit.
-            |package com.music.auris
-            |
-            |/** Build-time configuration. See `shared/build.gradle.kts` for where each value comes from. */
-            |object BuildDefaults {
-            |    /**
-            |     * The party server baked into this build, or an empty string when the
-            |     * distributor chose not to name one.
-            |     *
-            |     * Empty is the shipped default on purpose. A party server is a
-            |     * deployment somebody has to run and keep running, and naming one
-            |     * here means every install on this build is coupled to its uptime and
-            |     * its address. So the default is to ask the listener for theirs, which
-            |     * is also the only value that keeps working when they change it.
-            |     */
-            |    const val LISTEN_TOGETHER_SERVER: String = "$escaped"
-            |}
-            |
-            """.trimMargin(),
-        )
-    }
-}
-
-kotlin.sourceSets.commonMain.get().kotlin.srcDir(generatedDir)
-
-// Every Kotlin compile in this module, by name: the klib-metadata task this
-// project used to have no longer exists under that name, and a task that fails to
-// resolve fails the *configuration*, not just a build.
-tasks.matching { it.name.startsWith("compile") && it.name.contains("Kotlin") }
-    .configureEach { dependsOn(generateDefaults) }

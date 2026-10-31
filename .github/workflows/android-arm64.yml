@@ -1,0 +1,56 @@
+name: Android Prod arm64 APK
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+concurrency:
+  group: android-arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-prod-release:
+    runs-on: ubuntu-latest
+    env:
+      LISTEN_TOGETHER_SERVER: ${{ secrets.LISTEN_TOGETHER_SERVER }}
+      SIGNATURE_API_URL: ${{ secrets.SIGNATURE_API_URL }}
+      LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+      LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Setup signing keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > laya-release.jks
+        {
+          echo "storeFile=laya-release.jks"
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}"
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}"
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
+        } > keystore.properties
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Unit tests
+      run: ./gradlew :app:testProdDebugUnitTest --configure-on-demand
+
+    - name: Build Signed Prod Release APK
+      run: ./gradlew :app:assembleProdRelease --configure-on-demand
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: laya-prod-release-signed
+        path: app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk
+        if-no-files-found: error

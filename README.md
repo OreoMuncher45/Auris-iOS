@@ -1,129 +1,159 @@
-# Auris for iPhone
+<div align="center">
 
-![Auris](artwork/cover-exports/Auris-Cover-1920x1080.png)
+<br/>
+<br/>
 
-Auris is an iPhone music client: a SwiftUI interface, shared Kotlin Multiplatform logic, and a Rust audio engine, built on the Apple-platform port of [BitChord](https://github.com/bagumamartin/BitChord) and the [BitChord](https://github.com/kushagrasinghx/BitChord) Android project it descends from.
+<img src="Logo.png" alt="Laya app icon" width="200" />
 
-Derived from [BitChord](https://github.com/kushagrasinghx/BitChord), Copyright © Kushagra Singh and BitChord contributors, licensed under GPLv3. Apple-platform port Copyright © 2026 Martin BAGUMA, also under GPLv3. Auris rebrand and additions Copyright © 2026 OreoMuncher45, also under GPLv3.
+# Laya
 
-Auris is an independent project; it is not affiliated with Google or YouTube.
+### Aesthetic YouTube Music Client
 
-## Platforms
+<br/>
 
-- **iPhone, iOS 18 or later**
-- **Apple Silicon only.** The configured iOS device and iOS Simulator targets are arm64; Intel iOS simulators are not configured.
+[![Latest release](https://img.shields.io/github/v/release/impin2rex/Laya?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Laya/releases)
+[![License](https://img.shields.io/github/license/impin2rex/Laya?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Laya/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/impin2rex/Laya/total?style=for-the-badge&labelColor=0d1117)](https://github.com/impin2rex/Laya/releases)
 
-The project is source-first. An unsigned IPA is produced by the GitHub Actions workflow (`.github/workflows/ios-ipa.yml`); users sign and install it with their own developer identity.
+<br/>
 
-## Install the unsigned IPA
+[**Download**](#download) · [**iPhone**](#install-on-iphone-with-sidestore) · [**Features**](#features) · [**Disclaimer**](#disclaimer)
 
-Every release attaches an unsigned IPA named `Auris-<version>-build<build>-ios-unsigned.ipa`. An unsigned build does not install on its own — sign it with your own Apple Developer identity first, then install it.
+<br/>
 
-- Sideload with a tool that re-signs for you (Sideloadly, AltStore, or a signing service): point it at the downloaded IPA and your Apple ID or developer certificate.
-- Or sign it yourself in Xcode: open `AppleApp/Auris.xcodeproj`, set your Team on the app and widget targets, connect the iPhone, and run the `Auris` scheme. Register and enable the App Group `group.app.auris.Auris` for both targets.
-- A free Apple ID signs for seven days; a paid developer account signs for a year.
 
-Auris is an iPhone app (device family 1) and needs iOS 18 or later.
+</div>
 
-## Features
+> [!IMPORTANT]
+> Laya is not affiliated with, endorsed by, or connected to YouTube or Google in any way. Use it at your own discretion.
 
-The current codebase includes:
+---
 
-- YouTube Music search, browsing, and playback, with optional Google sign-in. Sign-in lets you review the profile before saving; accounts with multiple YouTube channels can switch profiles in Settings.
-- Configurable music sources and source modules, local music files, and WebDAV libraries.
-- Optional [automatic addon renewal](ADDON_REFRESH.md) using a renewal link supplied by the listener; no addon providers are bundled.
-- A native playback engine with downloads, queue management, gapless playback, crossfade, equalizer, and audio-route information.
-- Lyrics from multiple providers, including word-synced lyrics where a source supplies them.
-- Flow, an endless personal mix: it seeds itself from favourites, listening history and fresh recommendations, and a tuner sets the mood, how much discovery versus memory the mix carries, and which genres to leave out.
-- Automix transitions with beat analysis. Optional analysis models can be downloaded in the app; Automix retains a fallback when they are not installed.
-- Listen Together, which requires a compatible server address supplied by the listener.
-- Widgets, Discord Rich Presence, and Last.fm or ListenBrainz scrobbling.
-- Apple-platform audio options, including Dolby Atmos through Apple's renderer for supported source streams, and spatial processing.
+<div align="center">
 
-Features that depend on external services, sources, audio routes, or optional models may behave differently as those dependencies change.
+<img src="Banner.png" alt="Laya banner" width="100%" />
 
-## Build from source
+<h1><a id="features"></a>Features</h1>
 
-Builds currently require a Mac with Xcode and the Apple SDKs for the deployment targets above. Install these tools and make them available on `PATH`:
+<table>
+  <tr>
+    <td width="50%" valign="top">
 
-- Xcode, including its command-line tools.
-- XcodeGen.
-- A JDK supported by the Gradle wrapper.
-- Rust with `rustup` and the Apple targets used by the native core.
-- CMake, needed by the bundled Opus build.
+#### Playback
+- **Search, browse and play** anything available on YouTube Music.
+- **Hi-Res lossless audio** — FLAC/ALAC from a configured module source, with YouTube Music as fallback.
+- **Gapless playback with true crossfade**, adjustable 0–12s.
+- **Automix [Beta]** — DJ-style transitions with beat-matching and tempo-stretching.
+- **Offline downloads** — save tracks with embedded metadata.
+- **Local music library** integration.
+- **Background playback** via a proper foreground media session.
+- **Apple-like lyrics animation** — credit to [binimum](https://github.com/binimum/am-lyrics).
 
-Clone the repository:
+#### Connectivity & Accounts
+- **Sign in with your Google account** for personalized content.
+- **Spotify integration** — connect your account to play your playlists and Liked Songs.
+- **Discord Rich Presence** — in-app login, live track/artist/album and progress.
+- **Scrobbling** to Last.fm and ListenBrainz.
+- **Pluggable sources** — add, edit, test and health-check module sources.
 
-```sh
-git clone https://github.com/OreoMuncher45/Auris-iOS.git
-cd Auris-iOS
-```
+    </td>
+    <td width="50%" valign="top">
 
-The pinned upstream submodule is kept for source comparison and attribution; it is not a build dependency. Initialize it if you want the upstream source locally:
+#### Experience
+- **Animated album canvas** — motion artwork on the now-playing screen.
+- **Word-synced lyrics** — word/syllable-level highlighting from multiple sources.
+- **Lyrics providers** — credit to [lrc.red](https://lrc.red), [BiniLyrics](https://github.com/binimum), [BetterLyrics](https://github.com/better-lyrics/better-lyrics), [PaxSenix](https://lyrics.paxsenix.org), [LyricsPlus](https://github.com/ibratabian17/YouLyPlus), [SimpMusic](https://github.com/maxrave-dev/SimpMusic), [Unison](https://unison.boidu.dev), [Megalobiz](https://www.megalobiz.com), [KuGou](https://www.kugou.com), [LRCLIB](https://lrclib.net), [Musixmatch](https://www.musixmatch.com) and [Genius](https://genius.com).
+- **Dynamic, artwork-driven theming** — Material palette extracted from album art.
+- **Frosted-glass UI** — Telegram-style translucent bars via Haze, Material 3 theming.
 
-```sh
-git submodule update --init --recursive
-```
+#### Controls & Tweaks
+- **Per-network audio quality** — separate quality ceilings for Wi-Fi and mobile data.
+- **Playback speed control** (0.5×–2.0×) and **skip silence**.
+- **Sleep timer** — fixed presets or "stop after this track".
+- **System equalizer** integration.
+- **Karaoke** — sing along with the vocals taken out by an on-device AI separator (UVR MDX-Net), live from the lyrics page. See [docs/KARAOKE.md](docs/KARAOKE.md).
+- **Reverb** — Room, Hall, Plate and Cathedral presets with adjustable decay, pre-delay, damping, mix and width, plus a quick toggle in the player. See [docs/REVERB.md](docs/REVERB.md).
+- **Stats for nerds** — codec, bit depth, sample rate, and more on the now-playing screen.
 
-An earlier build installed under a different app identifier remains a separate app; its local data and Keychain session are not migrated. Sign in again in this build, and keep the earlier install if you still need data stored there.
+    </td>
+  </tr>
+</table>
 
-Build the shared framework and native audio framework, generate the Xcode project, and open it:
+</div>
 
-```sh
-rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
-./scripts/build-shared-framework.sh
-./scripts/build-native-core.sh
-xcodegen generate --spec AppleApp/project.yml
-open AppleApp/Auris.xcodeproj
-```
+---
 
-In Xcode, select the `Auris` scheme, choose an iPhone or Apple Silicon Simulator destination, then select your Apple Developer Team under the app and widget targets' **Signing & Capabilities**. The Team is per-developer and is not stored in the shared project configuration. For device signing, register and enable the App Group entitlement for both targets with your developer account. The generated frameworks, Swift bindings, and Xcode project are build outputs and are ignored by Git.
+<div align="center">
 
-To build an unsigned IPA the same way CI does:
+<h1><a id="download"></a>Download</h1>
 
-```sh
-CONFIG=release IOS_SIMULATOR=false ./scripts/build-shared-framework.sh
-NATIVE_TARGETS="aarch64-apple-darwin aarch64-apple-ios" ./scripts/build-native-core.sh
-xcodegen generate --spec AppleApp/project.yml
-./scripts/package-ios-ipa.sh 1.0.4
-```
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17b&message=Android%20TV&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Android TV" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Wear%20OS-%234285F4.svg?style=for-the-badge&logo=wear-os&logoColor=white" alt="Available on Wear%20OS" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/windows/cozy.svg" alt="Download for Windows" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/macos/cozy.svg" alt="Download for macOS" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://api.jm26.net/badge?label=&icon=f17c&message=Linux&color=000000&labelcolor=000000&fontcolor=white&autofontcolor=false&scale=20" alt="Linux" height="55"/></a>
+<a href="https://github.com/impin2rex/Laya/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/ios/cozy.svg" alt="Download for iPhone" height="55"/></a>
 
-`build-shared-framework.sh` builds the Debug framework by default. For a Release shared framework, run:
+Grab the latest build for your device from the [Releases](https://github.com/impin2rex/Laya/releases) page.
 
-```sh
-CONFIG=release ./scripts/build-shared-framework.sh
-```
+| Platform | File | Notes |
+|---|---|---|
+| Android | `Laya-<version>-android-<abi>.apk` | Sideloading requires enabling "Install unknown apps" for whichever app you download it with. |
+| Android TV | `Laya-<version>-android-tv-<abi>.apk` | Sideload with `adb install` or a file manager on the TV. |
+| Wear OS | `Laya-<version>-wear-os.apk` | Install over ADB / Wi-Fi debugging. |
+| Windows | `.exe`, `.msi`, portable `.zip` | Run the `.exe` installer, no admin rights needed. The `.zip` runs from any folder. |
+| macOS | `.dmg`, `.pkg` | `arm64` for Apple Silicon, `x64` for Intel. If macOS blocks it, run `xattr -cr /Applications/Laya.app`. |
+| Linux | `.AppImage`, `.deb`, `.rpm` | AppImage: `chmod +x` and run. Debian/Ubuntu: `sudo apt install ./Laya-*.deb`. Fedora: `sudo dnf install ./Laya-*.rpm`. |
+| iPhone | `Laya-<version>-ios.ipa` | Unsigned, install with [SideStore](#install-on-iphone-with-sidestore). Runs on iPad in iPhone compatibility mode. |
 
-The native-core script builds Release frameworks for the configured Apple targets. Run both framework scripts again after changing code in `shared/` or `native-core/`.
+</div>
 
-### Optional Listen Together server
+---
 
-The app does not ship with a hosted Listen Together service. Enter a compatible server in the app, or set `LISTEN_TOGETHER_SERVER` in the environment or in the root `local.properties` file. With neither configured, the listener supplies a server in the app.
+<div align="center">
 
-### Optional Automix models
+<h1><a id="install-on-iphone-with-sidestore"></a>Install on iPhone with SideStore</h1>
 
-Automix works without downloaded models, using its built-in analysis fallback. The app can offer the beat-analysis model and the larger vocal-analysis model separately. The developer helper `scripts/fetch-automix-models.sh` downloads and verifies both models into `AppleApp/Resources/Models/` for local builds.
+</div>
 
-## Disclaimer & Legal Notice
+The iOS build is an unsigned `.ipa`, so it has to be signed with your own Apple ID. [SideStore](https://sidestore.io) does this on the device and refreshes the app by itself, no computer needed after setup.
 
-Auris is an independent, unofficial third-party music player and client. It is not affiliated with or endorsed by Google LLC, YouTube Music, or the providers of any configured sources.
+1. **Set up SideStore** once by following the official guide at [docs.sidestore.io](https://docs.sidestore.io). It needs a computer for the first install, a free Apple ID, and a local VPN (LocalDevVPN / StosVPN) that SideStore uses to refresh apps.
+2. **Enable Developer Mode** on the device: Settings → Privacy & Security → Developer Mode → On, then restart.
+3. **Download the IPA** from [Releases](https://github.com/impin2rex/Laya/releases) straight onto the iPhone (`Laya-<version>-ios.ipa`).
+4. In SideStore open **My Apps**, tap **+**, and pick the downloaded IPA. Sign in with your Apple ID if asked and wait for the install to finish.
+5. Turn the VPN on and open **Laya** from the home screen. If iOS says the developer is untrusted, go to Settings → General → VPN & Device Management and trust your Apple ID.
 
-- **No Media Hosting:** Auris does not operate a hosted music catalog. It plays local libraries and accesses configured sources and third-party services; downloads are stored on the listener's device.
-- **Fair Use & API Usage:** Auris is created for personal, research, educational and fair-use purposes. It does not grant rights to music or other content. You are responsible for ensuring your use complies with applicable copyright law and the terms of the services and APIs you choose to access, including YouTube and YouTube Music.
-- **No Ad-Blocking Guarantee:** Auris makes no guarantee about the presence, behavior, or availability of advertisements or other platform features. Third-party services can change their access rules and behavior at any time.
-- **No warranty and limitation of liability:** For GPLv3-covered portions, the software is provided without warranty and liability is limited as stated in Sections 15 and 16 of [`LICENSE`](LICENSE), except where applicable law requires otherwise or the parties agree in writing. This summary does not replace the license; separately licensed components remain subject to their own terms.
-- **Copyleft:** GPLv3 allows redistribution, including for a fee, subject to its terms. Distributors of GPLv3-covered binaries must meet the corresponding-source and notice requirements. Components with additional terms are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+**Good to know**
+- A free Apple ID signs apps for **7 days**. SideStore refreshes Laya in the background while the VPN is on; you can also refresh by hand in My Apps.
+- A free account allows 3 active sideloaded apps and 10 App IDs per week. Laya plus its widgets use 2 App IDs.
+- To update, install the newer IPA over the old one. Your data stays.
+- Laya has iPhone widgets (iOS 17+). On iPad it runs as a scaled iPhone app.
 
-## Credits and licenses
+---
 
-Auris descends from the Apple-platform port of [BitChord by Martin Baguma](https://github.com/bagumamartin/BitChord) (Apple-platform port Copyright © 2026 Martin BAGUMA, GPLv3), which in turn descends from [BitChord by Kushagra Singh](https://github.com/kushagrasinghx/BitChord) (Copyright © Kushagra Singh and BitChord contributors, GPLv3). The Android upstream source is pinned as a Git submodule at [`fe198ac`](https://github.com/kushagrasinghx/BitChord/tree/fe198ac); its source, per-file notices, and license are available in `vendor/bitchord-upstream` when the submodule is initialized. See the upstream repository's [maintainers and contributors](https://github.com/kushagrasinghx/BitChord/blob/fe198ac/MAINTAINERS.md) for upstream attribution.
+<div align="center">
 
-YouTube stream extraction uses [InnerTubeX](https://github.com/MetrolistGroup/innertubex), the maintained resolver used by current Android upstream. Its source is vendored at revision `a6ca8cb76e9c347d4f21824ca9f19b9db2e5aebd` in `vendor/innertubex`, with its GPLv3 license and notices retained. The Apple adapter targets iOS.
+<h1><a id="disclaimer"></a>Disclaimer & Legal Notice</h1>
 
-Some analyzer code was ported from [Orchard](https://github.com/SFG5453/Orchard), by SFG545, through BitChord's Android implementation. The relevant files identify SFG545 and Kushagra Singh and retain their AGPLv3-or-later terms. The audio clarity contour also credits the [LastWave-native](https://github.com/Clash-Projects/LastWave-native) reference in its source and notices. The upstream README credits [binimum/am-lyrics](https://github.com/binimum/am-lyrics) for the Apple-like lyrics animation; that credit is preserved here.
+Laya is an independent, community-driven third-party audio player and client. It is **not** associated with Google LLC, YouTube Music, Deezer, Telegram, or any of their parent companies.
 
-## License
+* **No Media Hosting:** Laya does not host, upload, or store copyrighted music files. It operates strictly as an interface to scan local device storage or stream media directly from public, public-facing, or user-authenticated APIs.
+* **Fair Use & API Usage:** This software is created solely for personal research, educational, and fair-use purposes. The user is entirely responsible for ensuring their usage aligns with their local copyright laws and YouTube Terms of Service.
+* **No Ad-Blocking Guarantee:** While Laya focuses on providing a clean listening environment, it does not guarantee permanent bypasses or modifications to commercial third-party platform conditions.
+* **Copyleft:** Laya is free software under the GPLv3. The license does not let anyone forbid others from selling or redistributing copies, but any distribution must come with the Corresponding Source under the same license.
 
-The project is licensed under the **GNU General Public License v3.0 (GPLv3)**; see [`LICENSE`](LICENSE). Some files and bundled dependencies carry additional or separate terms. Read [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), the license texts in `LICENSES/` and `AppleApp/Resources/AudioLicenses/`, and individual source headers before redistributing or modifying those components. In the app, see **Settings → About → Open-source licenses**.
+</div>
 
-Binary releases: every GitHub release is built from its tagged commit, and that tag's source archive is the Corresponding Source (GPLv3 §6).
+---
+
+<div align="center">
+
+<h1><a id="license"></a>License</h1>
+
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the [LICENSE](LICENSE) file for details.
+
+Laya is a modified version of [BitChord](https://github.com/kushagrasinghx/BitChord), also licensed under GPLv3.
+
+</div>
