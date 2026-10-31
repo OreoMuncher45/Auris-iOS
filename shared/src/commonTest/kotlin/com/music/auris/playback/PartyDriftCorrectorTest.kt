@@ -1,7 +1,7 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.listentogether.PartyPlayback
-import com.music.laya.data.listentogether.PartyTrack
+import com.music.auris.data.listentogether.PartyPlayback
+import com.music.auris.data.listentogether.PartyTrack
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

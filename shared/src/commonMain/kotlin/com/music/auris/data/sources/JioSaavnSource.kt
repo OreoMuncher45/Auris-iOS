@@ -1,9 +1,9 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.jiosaavn.JioSaavnService
-import com.music.laya.data.jiosaavn.prioritizeExplicit
-import com.music.laya.data.model.Song
+import com.music.auris.data.TrackLog
+import com.music.auris.data.jiosaavn.JioSaavnService
+import com.music.auris.data.jiosaavn.prioritizeExplicit
+import com.music.auris.data.model.Song
 
 private const val TAG = "Laya"
 

@@ -1,4 +1,4 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
 /**
  * What Apple Music's artist page shows at the top: a hero photograph, usually

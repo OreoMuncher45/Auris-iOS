@@ -1,8 +1,8 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.model.Song
+import com.music.auris.data.model.Song
 import kotlin.math.abs
-import com.music.laya.platform.normalizeNfkc
+import com.music.auris.platform.normalizeNfkc
 
 /**
  * Decides whether one catalogue's track is the same recording as another's,

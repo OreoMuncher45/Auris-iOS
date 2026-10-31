@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 import kotlin.math.abs
 import kotlin.math.sqrt

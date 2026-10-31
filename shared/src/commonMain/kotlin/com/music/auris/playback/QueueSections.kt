@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 /** Past this point in a track, back restarts it instead of skipping to the previous one. */
 const val BACK_RESTARTS_AFTER_MS = 10_000L

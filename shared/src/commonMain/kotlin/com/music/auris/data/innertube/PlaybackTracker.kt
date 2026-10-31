@@ -1,8 +1,8 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.TrackLog
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.platform.ioDispatcher
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

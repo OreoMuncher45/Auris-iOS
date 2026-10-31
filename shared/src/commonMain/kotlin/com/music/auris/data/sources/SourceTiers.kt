@@ -1,7 +1,7 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
 /**
- * The quality labels a source stamps on its search rows ([com.music.laya.data.model.Song.sourceQuality])
+ * The quality labels a source stamps on its search rows ([com.music.auris.data.model.Song.sourceQuality])
  * and the small checks on a stream URL / format that every source applies. Shared by the addon and
  * module sources; `ModuleSource` re-exports the constants under its old names.
  */

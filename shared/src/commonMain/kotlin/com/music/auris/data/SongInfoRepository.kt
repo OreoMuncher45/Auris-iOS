@@ -1,17 +1,17 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.innertube.Innertube
-import com.music.laya.data.innertube.InnertubeParser
-import com.music.laya.data.model.Song
+import com.music.auris.data.innertube.Innertube
+import com.music.auris.data.innertube.InnertubeParser
+import com.music.auris.data.model.Song
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import com.fleeksoft.ksoup.Ksoup
-import com.music.laya.platform.decimalSeparator
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.platform.ktorClient
+import com.music.auris.platform.decimalSeparator
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.platform.ktorClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext

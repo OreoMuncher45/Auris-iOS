@@ -1,4 +1,4 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
 /**
  * The few parts of `scheme://host[:port]/path?query#fragment` the party code looks at, with

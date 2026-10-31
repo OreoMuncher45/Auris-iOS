@@ -1,10 +1,10 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.platform.normalizeNfd
+import com.music.auris.platform.normalizeNfd
 
 /**
  * Which provider a clip came from — read in one place, by
- * [CanvasArtworkPlayer][com.music.laya.ui.player.CanvasArtworkPlayer]'s
+ * [CanvasArtworkPlayer][com.music.auris.ui.player.CanvasArtworkPlayer]'s
  * caller, to decide whether the backdrop should keep re-tinting itself off
  * the clip as it loops rather than settling on its first frame. See that
  * call site for why Spotify's Canvas gets the periodic re-tint and the other

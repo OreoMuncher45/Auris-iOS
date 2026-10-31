@@ -1,14 +1,14 @@
-package com.music.laya.data.spotify
+package com.music.auris.data.spotify
 
-import com.music.laya.data.YtMusicRepository
-import com.music.laya.data.model.SearchFilter
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.model.Song
-import com.music.laya.data.lyrics.param
-import com.music.laya.data.sources.TrackMatcher
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.YtMusicRepository
+import com.music.auris.data.model.SearchFilter
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.model.Song
+import com.music.auris.data.lyrics.param
+import com.music.auris.data.sources.TrackMatcher
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.ioDispatcher
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlinx.coroutines.async

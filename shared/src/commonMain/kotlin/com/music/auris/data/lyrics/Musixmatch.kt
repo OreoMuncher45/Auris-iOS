@@ -1,10 +1,10 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.hmacSha256
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.hmacSha256
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext

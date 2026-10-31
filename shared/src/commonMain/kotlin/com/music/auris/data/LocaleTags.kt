@@ -1,7 +1,7 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.platform.languageOf
-import com.music.laya.platform.systemLanguageTag
+import com.music.auris.platform.languageOf
+import com.music.auris.platform.systemLanguageTag
 
 /**
  * Single place that knows zh-Hant / zh-Hans.

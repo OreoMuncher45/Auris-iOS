@@ -1,6 +1,6 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.model.LikeStatus
+import com.music.auris.data.model.LikeStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

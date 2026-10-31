@@ -1,6 +1,6 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.model.Song
+import com.music.auris.data.model.Song
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 

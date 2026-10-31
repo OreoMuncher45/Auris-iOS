@@ -1,9 +1,9 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.listentogether.PartyPlayback
-import com.music.laya.data.listentogether.PartyTrack
-import com.music.laya.data.model.QueueTier
-import com.music.laya.data.model.Song
+import com.music.auris.data.listentogether.PartyPlayback
+import com.music.auris.data.listentogether.PartyTrack
+import com.music.auris.data.model.QueueTier
+import com.music.auris.data.model.Song
 import kotlin.math.abs
 
 /**

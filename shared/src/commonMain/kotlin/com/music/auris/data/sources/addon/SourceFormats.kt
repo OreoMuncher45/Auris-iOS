@@ -1,10 +1,10 @@
-package com.music.laya.data.sources.addon
+package com.music.auris.data.sources.addon
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.sources.parseHttpUrl
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.TrackLog
+import com.music.auris.data.sources.parseHttpUrl
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -38,7 +38,7 @@ sealed interface DetectedFormat {
 
     /**
      * A module index: JS plugins listed under `category:*` keys, run in the
-     * QuickJS sandbox. See [ModuleIndex][com.music.laya.data.sources.module.ModuleIndex].
+     * QuickJS sandbox. See [ModuleIndex][com.music.auris.data.sources.module.ModuleIndex].
      */
     data class ModuleIndex(val moduleCount: Int, val url: String) : DetectedFormat
 
@@ -143,7 +143,7 @@ object SourceFormats {
         //    because its marker is unmistakable and belongs to no other format.
         if (obj.keys.any { it.startsWith("category:") }) {
             val modules = runCatching {
-                com.music.laya.data.sources.module.ModuleIndex.parseModules(json, body)
+                com.music.auris.data.sources.module.ModuleIndex.parseModules(json, body)
             }.getOrDefault(emptyList())
             return if (modules.isEmpty()) {
                 DetectedFormat.Unsupported("That module index listed no modules")

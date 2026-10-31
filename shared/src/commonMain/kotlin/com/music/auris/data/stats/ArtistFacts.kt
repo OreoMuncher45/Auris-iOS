@@ -1,13 +1,13 @@
-package com.music.laya.data.stats
+package com.music.auris.data.stats
 
-import com.music.laya.data.DebugLog
-import com.music.laya.data.YtMusicRepository
-import com.music.laya.data.model.SearchFilter
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.DebugLog
+import com.music.auris.data.YtMusicRepository
+import com.music.auris.data.model.SearchFilter
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel

@@ -1,4 +1,4 @@
-package com.music.laya.data.sources.module
+package com.music.auris.data.sources.module
 
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json

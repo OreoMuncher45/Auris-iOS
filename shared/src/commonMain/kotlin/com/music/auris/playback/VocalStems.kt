@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 /**
  * A track's lead vocal, separated ahead of the playhead by a neural model, as

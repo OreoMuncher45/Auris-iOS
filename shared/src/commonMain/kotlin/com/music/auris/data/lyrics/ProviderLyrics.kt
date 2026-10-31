@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

@@ -1,10 +1,10 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.TextNode
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 import kotlin.random.Random
 
@@ -163,9 +163,9 @@ class QueueWindow(
 
     /** Convenience factory for callers that want a fully started window in one expression. */
     companion object {
-        const val WINDOW_AHEAD: Int = com.music.laya.playback.WINDOW_AHEAD
-        const val WINDOW_LOW_WATER: Int = com.music.laya.playback.WINDOW_LOW_WATER
-        const val LOW_WATER: Int = com.music.laya.playback.LOW_WATER
+        const val WINDOW_AHEAD: Int = com.music.auris.playback.WINDOW_AHEAD
+        const val WINDOW_LOW_WATER: Int = com.music.auris.playback.WINDOW_LOW_WATER
+        const val LOW_WATER: Int = com.music.auris.playback.LOW_WATER
 
         fun startAt(
             canonicalSize: Int,

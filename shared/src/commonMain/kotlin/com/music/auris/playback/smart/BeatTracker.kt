@@ -19,7 +19,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
 import kotlin.math.abs
 import kotlin.math.exp

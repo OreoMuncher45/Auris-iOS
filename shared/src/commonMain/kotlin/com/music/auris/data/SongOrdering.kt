@@ -1,7 +1,7 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.model.Song
-import com.music.laya.data.settings.LocalMusicSort
+import com.music.auris.data.model.Song
+import com.music.auris.data.settings.LocalMusicSort
 
 /**
  * Whether this track is a hit for a query typed into a page's filter box — or

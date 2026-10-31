@@ -1,10 +1,10 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.data.DebugLog as Log
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.platform.normalizeNfd
+import com.music.auris.data.DebugLog as Log
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.platform.normalizeNfd
 import io.ktor.http.encodeURLParameter
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized

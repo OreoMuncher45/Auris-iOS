@@ -1,7 +1,7 @@
-package com.music.laya.data.stats
+package com.music.auris.data.stats
 
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.localOffsetMillis
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.localOffsetMillis
 
 /**
  * A calendar day, in the device's own time zone.

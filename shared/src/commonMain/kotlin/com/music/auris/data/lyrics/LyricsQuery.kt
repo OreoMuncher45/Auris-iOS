@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 /**
  * A YouTube title, as a lyrics database would have indexed it.

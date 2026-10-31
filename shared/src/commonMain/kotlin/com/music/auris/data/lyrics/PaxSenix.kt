@@ -1,6 +1,6 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext

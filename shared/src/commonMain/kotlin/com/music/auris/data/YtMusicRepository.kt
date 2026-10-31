@@ -1,37 +1,37 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.DebugLog as Log
-import com.music.laya.data.innertube.Innertube
-import com.music.laya.data.innertube.InnertubeParser
-import com.music.laya.data.model.Account
-import com.music.laya.data.model.AccountChannel
-import com.music.laya.data.model.isExactArtistMatch
-import com.music.laya.data.model.normalizedArtistName
-import com.music.laya.data.model.ArtistPage
-import com.music.laya.data.model.BrowseType
-import com.music.laya.data.model.HomeFeed
-import com.music.laya.data.model.HomeShelf
-import com.music.laya.data.model.LibraryPage
-import com.music.laya.data.model.LibraryState
-import com.music.laya.data.model.LikeStatus
-import com.music.laya.data.model.MoodGenreSection
-import com.music.laya.data.model.playlistMoves
-import com.music.laya.data.model.PlaylistPrivacy
-import com.music.laya.data.model.SearchFilter
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.model.ShelfItem
-import com.music.laya.data.model.Song
-import com.music.laya.data.model.SongMenu
-import com.music.laya.data.model.UserPlaylist
-import com.music.laya.data.sources.TrackMatcher
+import com.music.auris.data.DebugLog as Log
+import com.music.auris.data.innertube.Innertube
+import com.music.auris.data.innertube.InnertubeParser
+import com.music.auris.data.model.Account
+import com.music.auris.data.model.AccountChannel
+import com.music.auris.data.model.isExactArtistMatch
+import com.music.auris.data.model.normalizedArtistName
+import com.music.auris.data.model.ArtistPage
+import com.music.auris.data.model.BrowseType
+import com.music.auris.data.model.HomeFeed
+import com.music.auris.data.model.HomeShelf
+import com.music.auris.data.model.LibraryPage
+import com.music.auris.data.model.LibraryState
+import com.music.auris.data.model.LikeStatus
+import com.music.auris.data.model.MoodGenreSection
+import com.music.auris.data.model.playlistMoves
+import com.music.auris.data.model.PlaylistPrivacy
+import com.music.auris.data.model.SearchFilter
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.model.ShelfItem
+import com.music.auris.data.model.Song
+import com.music.auris.data.model.SongMenu
+import com.music.auris.data.model.UserPlaylist
+import com.music.auris.data.sources.TrackMatcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.ioDispatcher
 
 /** Suspend API over Innertube. Every call returns a Result so the UI can show a real error. */
 object YtMusicRepository {
@@ -366,7 +366,7 @@ object YtMusicRepository {
      * see the audio track — never the video upload's title, art or id.
      *
      * Matched through [TrackMatcher] rather than a bare title compare, for
-     * the same reason [SourceResolver][com.music.laya.data.sources.SourceResolver]
+     * the same reason [SourceResolver][com.music.auris.data.sources.SourceResolver]
      * does: a query for a niche title can come back with nothing that is
      * really the recording, and taking the first row regardless was landing
      * on a same-language, wrong-song hit — a Telugu folk video resolving to
@@ -902,7 +902,7 @@ object YtMusicRepository {
     /**
      * Subscribes to an artist's channel, or unsubscribes. [channelId] is the one
      * the page's own subscribe button named — see
-     * [com.music.laya.data.model.SubscriptionState].
+     * [com.music.auris.data.model.SubscriptionState].
      */
     suspend fun setSubscribed(channelId: String, subscribed: Boolean): Result<Unit> =
         call("subscription:$channelId") { Innertube.setSubscribed(channelId, subscribed) }

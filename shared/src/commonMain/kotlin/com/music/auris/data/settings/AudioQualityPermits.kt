@@ -1,12 +1,12 @@
-package com.music.laya.data.settings
+package com.music.auris.data.settings
 
-import com.music.laya.data.sources.SourceKind
+import com.music.auris.data.sources.SourceKind
 
 /**
  * Whether a stream started under this ceiling may be served by [kind].
  *
  * Asked per stream rather than written into
- * [SourceConfig.enabled][com.music.laya.data.sources.SourceConfig.enabled],
+ * [SourceConfig.enabled][com.music.auris.data.sources.SourceConfig.enabled],
  * which is what this used to do — an `applyQualityPreset` call flipped the
  * module and JioSaavn switches the moment a rung was picked. Two things
  * were wrong with that and both were reported together: picking a rung for

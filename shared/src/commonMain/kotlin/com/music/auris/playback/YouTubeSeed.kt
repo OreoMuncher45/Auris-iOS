@@ -1,11 +1,11 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.YtMusicRepository
-import com.music.laya.data.model.SearchFilter
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.model.Song
-import com.music.laya.data.sources.SourceRegistry
-import com.music.laya.data.sources.TrackMatcher
+import com.music.auris.data.YtMusicRepository
+import com.music.auris.data.model.SearchFilter
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.model.Song
+import com.music.auris.data.sources.SourceRegistry
+import com.music.auris.data.sources.TrackMatcher
 
 /**
  * Finds the YouTube id that should seed AutoPlay for a song. Module tracks do not

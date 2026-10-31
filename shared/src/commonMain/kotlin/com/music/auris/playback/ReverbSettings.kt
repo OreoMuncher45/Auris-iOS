@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 /**
  * The listener's reverb, everything but the on/off switch.

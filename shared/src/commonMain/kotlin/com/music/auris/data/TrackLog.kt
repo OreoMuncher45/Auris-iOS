@@ -1,13 +1,13 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.model.Song
+import com.music.auris.data.model.Song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.aboutContext
-import com.music.laya.platform.currentAbout
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.localOffsetMillis
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.aboutContext
+import com.music.auris.platform.currentAbout
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.localOffsetMillis
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlin.concurrent.Volatile

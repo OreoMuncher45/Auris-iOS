@@ -1,10 +1,10 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.data.sources.SourceTrackKeys
-import com.music.laya.data.sources.StreamFormat
+import com.music.auris.data.sources.SourceTrackKeys
+import com.music.auris.data.sources.StreamFormat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import com.music.laya.platform.ConcurrentMap
+import com.music.auris.platform.ConcurrentMap
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicLong
 
@@ -171,7 +171,7 @@ object NerdStats {
      *
      * Exposed because the decoder's own verdict is also what decides whether a
      * track playing from the disk cache is worth hunting a better copy of — see
-     * [QualityUpgrade.adoptUnresolved][com.music.laya.playback.QualityUpgrade.adoptUnresolved].
+     * [QualityUpgrade.adoptUnresolved][com.music.auris.playback.QualityUpgrade.adoptUnresolved].
      * Reading [Snapshot.isLossless] there instead would mean trusting whichever
      * track the last [current] publish happened to describe, which after a
      * queue advance is the previous one.
@@ -266,7 +266,7 @@ object NerdStats {
     /**
      * YouTube video ids with a module lookup racing YouTube's own resolve
      * for the stream to actually play — see
-     * [PlaybackService][com.music.laya.playback.PlaybackService]'s
+     * [PlaybackService][com.music.auris.playback.PlaybackService]'s
      * resolving data source. Both start together and whichever answers first
      * plays; the module is the one still worth hearing about, because a
      * YouTube win only means the search continues under the music — so this
@@ -383,7 +383,7 @@ object NerdStats {
      *
      * For when a swap to a claimed-better stream doesn't pan out and the
      * player falls back to what it had — see
-     * [PlaybackService][com.music.laya.playback.PlaybackService]'s
+     * [PlaybackService][com.music.auris.playback.PlaybackService]'s
      * upgrade revert. Without this the claim from the abandoned stream keeps
      * describing the one that's actually playing, which is how a reverted
      * FLAC swap leaves the "Lossless" badge lit over plain Opus. [picked] is
@@ -414,7 +414,7 @@ object NerdStats {
      * [mediaId] is keyed by the track and was recorded by the resolver before
      * this point: a read-ahead resolve, or the standby deck's during a
      * crossfade. Clearing it here would erase the incoming track's own claim,
-     * which [PlaybackService][com.music.laya.playback.PlaybackService]
+     * which [PlaybackService][com.music.auris.playback.PlaybackService]
      * reads straight after this call to decide whether it is Dolby Atmos.
      */
     fun onTrackTransition(mediaId: String? = null) {
@@ -429,7 +429,7 @@ object NerdStats {
      *
      * All of this describes a stream that a particular player was reading, and
      * it is scoped to the *process* while the player it describes is scoped to
-     * [PlaybackService][com.music.laya.playback.PlaybackService] — which the
+     * [PlaybackService][com.music.auris.playback.PlaybackService] — which the
      * app being closed destroys while leaving the process alive to be reused.
      * Nothing else clears it: [current] is nulled when the queue moves on, and
      * a service standing back up is not the queue moving on.
@@ -450,7 +450,7 @@ object NerdStats {
      * the decoder has not spoken, and the claim came from a stream that had
      * stopped existing a minute earlier.
      *
-     * @see com.music.laya.playback.QualityUpgrade.forgetLastSession for the
+     * @see com.music.auris.playback.QualityUpgrade.forgetLastSession for the
      *   half of this that decides whether the track gets its lossless copy back
      *   rather than merely how it is labelled.
      */

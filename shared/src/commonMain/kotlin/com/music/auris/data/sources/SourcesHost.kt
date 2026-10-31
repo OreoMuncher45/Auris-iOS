@@ -1,4 +1,4 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url

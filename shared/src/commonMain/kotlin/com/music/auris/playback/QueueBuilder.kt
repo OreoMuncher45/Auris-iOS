@@ -1,6 +1,6 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.model.Song
+import com.music.auris.data.model.Song
 
 /**
  * Builds the station that plays on after a one-off song.

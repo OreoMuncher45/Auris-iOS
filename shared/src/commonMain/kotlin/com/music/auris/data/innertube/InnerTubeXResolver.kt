@@ -1,6 +1,6 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
-import com.music.laya.data.MonotonicClock
+import com.music.auris.data.MonotonicClock
 import com.metrolist.innertubex.InnerTube
 import com.metrolist.innertubex.InnerTubeLogLevel
 import com.metrolist.innertubex.InnerTubeLogger
@@ -18,10 +18,10 @@ import com.metrolist.innertubex.extraction.strategy.PoTokenProviderKind
 import com.metrolist.innertubex.extraction.YtConfigParserImpl
 import com.metrolist.innertubex.extraction.generateClientPlaybackNonce
 import com.metrolist.innertubex.models.YouTubeLocale
-import com.music.laya.data.TrackLog
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.platform.ktorClient
+import com.music.auris.data.TrackLog
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.platform.ktorClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json

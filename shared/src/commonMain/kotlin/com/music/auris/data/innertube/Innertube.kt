@@ -1,7 +1,7 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
-import com.music.laya.auth.normalizeDataSyncId
-import com.music.laya.data.DebugLog as Log
+import com.music.auris.auth.normalizeDataSyncId
+import com.music.auris.data.DebugLog as Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -18,9 +18,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import com.music.laya.data.model.LikeStatus
-import com.music.laya.data.model.PlaylistMove
-import com.music.laya.data.model.PlaylistPrivacy
+import com.music.auris.data.model.LikeStatus
+import com.music.auris.data.model.PlaylistMove
+import com.music.auris.data.model.PlaylistPrivacy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,10 +40,10 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.ktorClient
-import com.music.laya.platform.sha1
-import com.music.laya.platform.systemLanguageTag
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.ktorClient
+import com.music.auris.platform.sha1
+import com.music.auris.platform.systemLanguageTag
 import kotlin.concurrent.Volatile
 import kotlin.io.encoding.Base64
 import kotlinx.io.IOException
@@ -71,17 +71,17 @@ object Innertube {
         get() {
             val raw = appLanguage()?.ifEmpty { null }
                 ?: systemLanguageTag().ifEmpty { "en" }
-            return com.music.laya.data.LocaleTags.normalizeAppTag(raw)
+            return com.music.auris.data.LocaleTags.normalizeAppTag(raw)
         }
 
     val currentLanguage: String
-        get() = com.music.laya.data.LocaleTags.ytHl(currentLocaleTag)
+        get() = com.music.auris.data.LocaleTags.ytHl(currentLocaleTag)
 
     val currentRegion: String
-        get() = com.music.laya.data.LocaleTags.ytGl(currentLocaleTag)
+        get() = com.music.auris.data.LocaleTags.ytGl(currentLocaleTag)
 
     private val acceptLanguageHeader: String
-        get() = com.music.laya.data.LocaleTags.acceptLanguage(currentLocaleTag)
+        get() = com.music.auris.data.LocaleTags.acceptLanguage(currentLocaleTag)
 
     private const val MUSIC_BASE = "https://music.youtube.com/youtubei/v1"
     private const val MUSIC_ORIGIN = "https://music.youtube.com"
@@ -890,7 +890,7 @@ object Innertube {
      * liked one, which is why the Library tab's Albums and Playlists shelves and
      * the account's likes are the same list. [playlistId] is the id the page
      * itself named, not its browse id; see
-     * [com.music.laya.data.model.LibraryState].
+     * [com.music.auris.data.model.LibraryState].
      *
      * No dislike half, unlike [rate]: nothing in YouTube Music reads a disliked
      * release, so the only two states worth expressing are saved and not.
@@ -915,7 +915,7 @@ object Innertube {
      * Not one of the `like/…` endpoints: a subscription is a YouTube-wide
      * relationship rather than a Music one, and it is addressed by channel id —
      * the `UC…` the artist page is served under. See
-     * [com.music.laya.data.model.SubscriptionState].
+     * [com.music.auris.data.model.SubscriptionState].
      *
      * As in [rate], the body is read rather than the status line: Innertube
      * answers a refused write with HTTP 200 and an `error` object.
@@ -935,7 +935,7 @@ object Innertube {
 
     /**
      * Adds or removes a track from the library, using a token minted by
-     * YouTube for exactly that transition — see [com.music.laya.data.model.SongMenu].
+     * YouTube for exactly that transition — see [com.music.auris.data.model.SongMenu].
      * There is no video-id form of this call; the token *is* the request.
      */
     suspend fun sendFeedback(token: String) {
@@ -1061,7 +1061,7 @@ object Innertube {
 
     /**
      * Rearranges a playlist, one [PlaylistMove] after another in the order
-     * given — see [com.music.laya.data.model.playlistMoves] for building
+     * given — see [com.music.auris.data.model.playlistMoves] for building
      * them. A move with no successor goes to the end.
      */
     suspend fun movePlaylistItems(playlistId: String, moves: List<PlaylistMove>) {

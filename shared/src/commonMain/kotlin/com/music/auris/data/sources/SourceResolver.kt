@@ -1,10 +1,10 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.model.Song
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.data.settings.AudioQuality
-import com.music.laya.data.settings.DownloadQuality
+import com.music.auris.data.TrackLog
+import com.music.auris.data.model.Song
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.data.settings.AudioQuality
+import com.music.auris.data.settings.DownloadQuality
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Deferred
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
@@ -363,7 +363,7 @@ object SourceResolver {
      *
      * Pin it. A returned stream is only useful if the *same* stream is what
      * playback goes on to open, and the caller is expected to record it with
-     * [StreamChoice][com.music.laya.playback.StreamChoice] before caching a
+     * [StreamChoice][com.music.auris.playback.StreamChoice] before caching a
      * byte of it. Without that, playback re-runs the race, may land on a
      * different source, and writes a second file into the cache entry the warm
      * one already half-filled — which is the exact corruption
@@ -445,7 +445,7 @@ object SourceResolver {
      * was measured at thirteen seconds.
      *
      * A slow source holding a FLAC can lose here to a fast one holding a
-     * 320kbps AAC. That is not the end of it: [QualityUpgrade][com.music.laya.playback.QualityUpgrade]
+     * 320kbps AAC. That is not the end of it: [QualityUpgrade][com.music.auris.playback.QualityUpgrade]
      * re-arms a lossless follow-up once a lossy swap lands, so the FLAC still
      * gets its turn — just as a second seam rather than the first.
      *
@@ -559,7 +559,7 @@ object SourceResolver {
      *
      * The download path has never come through here. It resolves YouTube
      * directly — see
-     * [resolveForDownload][com.music.laya.data.innertube.StreamResolver.resolveForDownload]
+     * [resolveForDownload][com.music.auris.data.innertube.StreamResolver.resolveForDownload]
      * — so someone with a FLAC server ranked above YouTube was *streaming* the
      * FLAC and *downloading* a transcode of the same recording. This closes that
      * gap, and it is the only search in this class whose result becomes a file.
@@ -610,9 +610,9 @@ object SourceResolver {
      *
      * ### Which settings get this far
      *
-     * [DownloadQuality.LOSSLESS][com.music.laya.data.settings.DownloadQuality.LOSSLESS]
-     * and [DownloadQuality.HIGH][com.music.laya.data.settings.DownloadQuality.HIGH];
-     * not [DownloadQuality.STANDARD][com.music.laya.data.settings.DownloadQuality.STANDARD].
+     * [DownloadQuality.LOSSLESS][com.music.auris.data.settings.DownloadQuality.LOSSLESS]
+     * and [DownloadQuality.HIGH][com.music.auris.data.settings.DownloadQuality.HIGH];
+     * not [DownloadQuality.STANDARD][com.music.auris.data.settings.DownloadQuality.STANDARD].
      * Standard is a 128kbps ceiling chosen to fit more on the device, and a
      * source cannot be asked for *that* rung — only for the best it has, which
      * is a bigger file than the setting exists to avoid. YouTube's ladder is the
@@ -815,7 +815,7 @@ object SourceResolver {
      *
      * The same [UPGRADE_DRIFT_SEC] bar [matchAndStream] applies to the
      * candidates it finds itself, exposed for the one candidate it doesn't:
-     * the live lookup [QualityUpgrade][com.music.laya.playback.QualityUpgrade]
+     * the live lookup [QualityUpgrade][com.music.auris.playback.QualityUpgrade]
      * inherits when the fallback wins the race.
      *
      * Either side being unknown is a no. An unverifiable length is not a
@@ -833,7 +833,7 @@ object SourceResolver {
      *
      * Answerable from the source list alone, without a search, which is what
      * lets the cache and the read-ahead in
-     * [AudioCache][com.music.laya.playback.AudioCache] decide how to treat
+     * [AudioCache][com.music.auris.playback.AudioCache] decide how to treat
      * a YouTube id before anyone has asked a source for it.
      */
     fun canSubstituteForYouTube(): Boolean =
@@ -867,7 +867,7 @@ object SourceResolver {
      *
      * Queued behind the module, JioSaavn's answer arrives at ~14s. Nobody is
      * waiting that long for a song to start, so YouTube wins the race in
-     * [PlaybackService][com.music.laya.playback.PlaybackService]'s
+     * [PlaybackService][com.music.auris.playback.PlaybackService]'s
      * `resolveWithModulePriority` every single time and the listener gets
      * 160kbps Opus — while a 320kbps copy sat four tenths of a second away.
      * Raced, the same answer arrives before YouTube's own walk finishes and the

@@ -1,4 +1,4 @@
-package com.music.laya.playback.karaoke
+package com.music.auris.playback.karaoke
 
 /** What [KaraokeStems]'s two worker threads need from the platform. */
 

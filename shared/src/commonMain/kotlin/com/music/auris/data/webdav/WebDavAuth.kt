@@ -1,12 +1,12 @@
-package com.music.laya.data.webdav
+package com.music.auris.data.webdav
 
 import kotlin.concurrent.Volatile
 
 /**
- * In-memory credentials for [com.music.laya.data.Http]'s interceptor.
+ * In-memory credentials for [com.music.auris.data.Http]'s interceptor.
  *
  * Held outside SharedPreferences so the network layer never touches prefs:
- * [com.music.laya.data.settings.AppSettings] publishes here on init and
+ * [com.music.auris.data.settings.AppSettings] publishes here on init and
  * on every WebDAV edit.
  */
 object WebDavAuth {

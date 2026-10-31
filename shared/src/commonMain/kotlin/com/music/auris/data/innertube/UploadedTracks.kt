@@ -1,6 +1,6 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
-import com.music.laya.platform.ConcurrentMap
+import com.music.auris.platform.ConcurrentMap
 
 /** Video ids known to be the signed-in user's own uploads, which need an upload-hinted request. */
 object UploadedTracks {

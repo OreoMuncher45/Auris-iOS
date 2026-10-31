@@ -1,7 +1,7 @@
-package com.music.laya.data.sources.module
+package com.music.auris.data.sources.module
 
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.currentTimeMillis
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.currentTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -34,7 +34,7 @@ import kotlinx.coroutines.sync.withLock
  *
  * Because this layer's callers are *designed* to give up. [ModuleSource.search]
  * launches every module in an index at once and cancels the losers;
- * [SourceResolver.bestAcross][com.music.laya.data.sources.SourceResolver]
+ * [SourceResolver.bestAcross][com.music.auris.data.sources.SourceResolver]
  * cancels every source still running as soon as one of them answers. Started in
  * the caller's scope, each of those cancellations tore down a request that had
  * already reached the module's server — so the server did the work, answered,

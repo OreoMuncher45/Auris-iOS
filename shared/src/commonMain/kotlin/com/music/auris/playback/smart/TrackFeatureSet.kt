@@ -1,4 +1,4 @@
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

@@ -1,7 +1,7 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.data.innertube.Innertube
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.innertube.Innertube
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

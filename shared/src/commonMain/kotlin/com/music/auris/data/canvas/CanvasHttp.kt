@@ -1,8 +1,8 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.systemLanguageTag
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.systemLanguageTag
 import io.ktor.http.encodeURLParameter
 
 /**

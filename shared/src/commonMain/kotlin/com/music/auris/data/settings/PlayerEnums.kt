@@ -1,4 +1,4 @@
-package com.music.laya.data.settings
+package com.music.auris.data.settings
 
 /**
  * Stream bitrate ceiling on the YouTube fallback path — MEDIUM, HIGH and

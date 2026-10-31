@@ -1,10 +1,10 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.YtMusicRepository
-import com.music.laya.data.innertube.StreamResolver
-import com.music.laya.data.model.SearchFilter
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.model.Song
+import com.music.auris.data.YtMusicRepository
+import com.music.auris.data.innertube.StreamResolver
+import com.music.auris.data.model.SearchFilter
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.model.Song
 
 /**
  * YouTube Music, wrapped so it can be ordered alongside everything else.

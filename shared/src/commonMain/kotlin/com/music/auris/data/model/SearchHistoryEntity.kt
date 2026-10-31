@@ -1,6 +1,6 @@
-package com.music.laya.data.model
+package com.music.auris.data.model
 
-import com.music.laya.platform.currentTimeMillis
+import com.music.auris.platform.currentTimeMillis
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

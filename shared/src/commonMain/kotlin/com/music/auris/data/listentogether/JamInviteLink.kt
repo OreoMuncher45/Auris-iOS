@@ -1,4 +1,4 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
 import io.ktor.http.decodeURLQueryComponent
 import io.ktor.http.encodeURLParameter

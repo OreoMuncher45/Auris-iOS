@@ -133,16 +133,10 @@ fun SourcesPage(contentPadding: PaddingValues, modifier: Modifier = Modifier) {
                     } else {
                         config.statusLine(health[config.id])
                     },
-                    enabled = config.enabled || config.kind == SourceKind.YOUTUBE,
+                    enabled = config.enabled,
                     onClick = if (config.kind.needsServer) ({ editing = config }) else null,
                     trailing = {
-                        if (config.kind == SourceKind.YOUTUBE) {
-                            Text(
-                                stringResource(Res.string.always_on),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        } else Row {
+                        Row {
                             if (config.kind.isUserAdded && addons.size > 1) {
                                 val at = addons.indexOfFirst { it.id == config.id }
                                 IconButton(onClick = { move(config, -1) }, enabled = at > 0, modifier = Modifier.size(36.dp)) {

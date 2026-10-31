@@ -1,4 +1,4 @@
-package com.music.laya.data.settings
+package com.music.auris.data.settings
 
 /**
  * Stable persisted ordering for a Library "Show all" grid — playlists or

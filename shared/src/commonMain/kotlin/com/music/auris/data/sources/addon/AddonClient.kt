@@ -1,14 +1,14 @@
-package com.music.laya.data.sources.addon
+package com.music.auris.data.sources.addon
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.data.sources.SourceRegistry
-import com.music.laya.data.sources.parseHttpUrl
-import com.music.laya.data.sources.module.SharedCalls
+import com.music.auris.data.TrackLog
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.data.sources.SourceRegistry
+import com.music.auris.data.sources.parseHttpUrl
+import com.music.auris.data.sources.module.SharedCalls
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +23,7 @@ import io.ktor.http.appendPathSegments
  * One addon server, and every question this app knows how to ask it.
  *
  * Three endpoints, all GETs returning JSON, none of them executing anything on
- * this side. Compare [ModuleManager][com.music.laya.data.sources.module.ModuleManager],
+ * this side. Compare [ModuleManager][com.music.auris.data.sources.module.ModuleManager],
  * which has to fetch an index, download a JavaScript file per entry and stand
  * up a QuickJS interpreter to ask the same two questions — the whole of that
  * apparatus is what this protocol replaces with a URL.
@@ -262,7 +262,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
      *    Atmos-capable addon into a miss. `auto` is try-Atmos-then-stereo.
      *  - **It is asked for, not asserted.** Both gates are the same two the
      *    playback side enforces in
-     *    [ModuleSource.unplayable][com.music.laya.data.sources.ModuleSource.unplayable],
+     *    [ModuleSource.unplayable][com.music.auris.data.sources.ModuleSource.unplayable],
      *    so an addon is only ever offered Atmos when an Atmos answer would
      *    actually be accepted. With either gate shut the parameter is absent
      *    entirely and the addon's own default — stereo — stands.
@@ -421,7 +421,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
     companion object {
         private const val TAG = "Laya"
 
-        /** The tiers [AddonSource][com.music.laya.data.sources.AddonSource] asks in. */
+        /** The tiers [AddonSource][com.music.auris.data.sources.AddonSource] asks in. */
         const val TIER_LOSSLESS = "LOSSLESS"
         const val TIER_HIGH = "HIGH"
         const val TIER_LOW = "LOW"
@@ -534,7 +534,7 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
  * Something about this addon or its URL that trying again will not fix — a
  * document that is not a manifest, an addon that cannot stream, a token that
  * is no longer accepted. Surfaced as
- * [SourceHealth.Rejected][com.music.laya.data.sources.SourceHealth.Rejected],
+ * [SourceHealth.Rejected][com.music.auris.data.sources.SourceHealth.Rejected],
  * with a line fit to show a user.
  */
 class AddonException(message: String) : Exception(message)
@@ -543,7 +543,7 @@ class AddonException(message: String) : Exception(message)
  * The addon is momentarily not answering — down, overloaded, rate limiting.
  * Worth keeping switched on and worth asking again on the next track, which is
  * the whole distinction
- * [SourceHealth][com.music.laya.data.sources.SourceHealth] draws.
+ * [SourceHealth][com.music.auris.data.sources.SourceHealth] draws.
  */
 class AddonUnavailable(message: String) : Exception(message)
 

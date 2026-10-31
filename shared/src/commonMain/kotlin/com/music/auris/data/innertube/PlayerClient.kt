@@ -1,4 +1,4 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
 import io.ktor.http.Url
 

@@ -1,4 +1,4 @@
-package com.music.laya.platform
+package com.music.auris.platform
 
 expect fun sha1(data: ByteArray): ByteArray
 expect fun sha256(data: ByteArray): ByteArray

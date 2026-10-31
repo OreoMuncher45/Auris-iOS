@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 /**
  * Enhanced ("A2") LRC — a normal LRC line with a stamp in front of each word:

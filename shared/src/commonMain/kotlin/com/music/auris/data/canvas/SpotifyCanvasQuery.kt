@@ -1,6 +1,6 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.platform.currentTimeMillis
+import com.music.auris.platform.currentTimeMillis
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlin.concurrent.Volatile

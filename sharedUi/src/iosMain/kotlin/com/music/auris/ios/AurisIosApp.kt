@@ -194,6 +194,9 @@ import com.music.auris.sharedui.resources.Res
 import com.music.auris.sharedui.resources.history_empty
 import com.music.auris.sharedui.resources.library_empty
 import com.music.auris.ui.screens.HistoryScreen
+import com.music.auris.ui.screens.FlowEntryCard
+import com.music.auris.ui.screens.FlowScreen
+import com.music.auris.data.flow.FlowController
 import org.jetbrains.compose.resources.getString
 
 private fun ShelfItem.toSong() = videoId?.let {
@@ -207,6 +210,11 @@ private fun List<ShelfItem>.songs() = mapNotNull { it.toSong() }
 fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
     val scope = rememberCoroutineScope()
     val player = remember { IosPlayer(engine, scope) }
+    // Flow: the endless mix. The engine lives in the shared module; this only
+    // holds the screen's state and rebuilds the mix when the tuner is applied.
+    val flow = remember { FlowController(scope) }
+    val flowState by flow.state.collectAsState()
+    val flowDraft by flow.draft.collectAsState()
     var tab by remember { mutableIntStateOf(0) }
     var nowPlayingOpen by remember { mutableStateOf(false) }
     // Pushed pages (one global stack; a tab tap clears it) and the long-press menu.
@@ -978,6 +986,29 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                         onItemLongPress = { it.toSong()?.let { s -> menuSong = s } },
                                         contentPadding = PaddingValues(top = 56.dp, bottom = barHeight),
                                     )
+                                    IosPage.Flow -> {
+                                        LaunchedEffect(Unit) { flow.start() }
+                                        FlowScreen(
+                                            state = flowState,
+                                            draft = flowDraft,
+                                            onPlay = { songs, i -> player.play(songs, i) },
+                                            onBuild = { flow.build() },
+                                            onGrow = { flow.grow() },
+                                            onBan = { flow.ban(it.videoId) },
+                                            onMoodTap = { mood ->
+                                                flow.setDraftMood(mood)
+                                                flow.applyTuner()
+                                            },
+                                            onDraftMood = { flow.setDraftMood(it) },
+                                            onDiscovery = { flow.setDraftDiscovery(it) },
+                                            onMemory = { flow.setDraftMemory(it) },
+                                            onGenreToggle = { genre, on -> flow.toggleDraftGenre(genre, on) },
+                                            onApplyTuner = { flow.applyTuner() },
+                                            currentSong = song,
+                                            isPlaying = player.isPlaying,
+                                            contentPadding = PaddingValues(top = 56.dp, bottom = barHeight),
+                                        )
+                                    }
                                     null -> Unit
                                 }
                             }
@@ -1009,6 +1040,15 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                 onLoadMore = ::loadMoreHome,
                                 loadingMore = homePaging || homePending > 0,
                                 recentlyPlayedLoading = recentsLoading,
+                                // Flow's own card: the mix is the listener's
+                                // material, so it sits above the catalogue.
+                                header = if (signedIn) {
+                                    {
+                                        FlowEntryCard(onClick = { stack = stack + IosPage.Flow })
+                                    }
+                                } else {
+                                    null
+                                },
                             )
                             1 -> ExploreScreen(
                                 state = explore,

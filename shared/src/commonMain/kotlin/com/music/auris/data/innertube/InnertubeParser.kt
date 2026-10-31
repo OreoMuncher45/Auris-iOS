@@ -1,25 +1,25 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
-import com.music.laya.auth.normalizeDataSyncId
-import com.music.laya.data.model.Account
-import com.music.laya.data.model.AccountChannel
-import com.music.laya.data.model.ArtistNameIndex
-import com.music.laya.data.model.ArtistPage
-import com.music.laya.data.model.ArtistRef
-import com.music.laya.data.model.completeArtistCredits
-import com.music.laya.data.model.BrowseItem
-import com.music.laya.data.model.BrowseType
-import com.music.laya.data.model.HomeShelf
-import com.music.laya.data.model.LibraryState
-import com.music.laya.data.model.LikeStatus
-import com.music.laya.data.model.MoodGenre
-import com.music.laya.data.model.MoodGenreSection
-import com.music.laya.data.model.SearchResult
-import com.music.laya.data.model.ShelfItem
-import com.music.laya.data.model.Song
-import com.music.laya.data.model.SongMenu
-import com.music.laya.data.model.SubscriptionState
-import com.music.laya.data.model.UserPlaylist
+import com.music.auris.auth.normalizeDataSyncId
+import com.music.auris.data.model.Account
+import com.music.auris.data.model.AccountChannel
+import com.music.auris.data.model.ArtistNameIndex
+import com.music.auris.data.model.ArtistPage
+import com.music.auris.data.model.ArtistRef
+import com.music.auris.data.model.completeArtistCredits
+import com.music.auris.data.model.BrowseItem
+import com.music.auris.data.model.BrowseType
+import com.music.auris.data.model.HomeShelf
+import com.music.auris.data.model.LibraryState
+import com.music.auris.data.model.LikeStatus
+import com.music.auris.data.model.MoodGenre
+import com.music.auris.data.model.MoodGenreSection
+import com.music.auris.data.model.SearchResult
+import com.music.auris.data.model.ShelfItem
+import com.music.auris.data.model.Song
+import com.music.auris.data.model.SongMenu
+import com.music.auris.data.model.SubscriptionState
+import com.music.auris.data.model.UserPlaylist
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -969,7 +969,7 @@ object InnertubeParser {
      * Every other way into a detail page comes from a card that already carried
      * the name and the cover, so nothing used to have to ask. A YouTube Music
      * link tapped outside the app carries a browse id and nothing else — see
-     * [com.music.laya.playback.MusicLink] — and a page with a blank title
+     * [com.music.auris.playback.MusicLink] — and a page with a blank title
      * over a track list reads as the app having half-loaded.
      */
     fun parseBrowseHeader(root: JsonElement): BrowseHeader? {
@@ -1046,8 +1046,8 @@ object InnertubeParser {
      * header itself on some responses, so both are tried. Absent from a
      * playlist page — YouTube writes these for its own catalogue, not for
      * something a user put together — which is why callers only surface it
-     * for [com.music.laya.data.model.BrowseType.ALBUM] and
-     * [com.music.laya.data.model.BrowseType.ARTIST].
+     * for [com.music.auris.data.model.BrowseType.ALBUM] and
+     * [com.music.auris.data.model.BrowseType.ARTIST].
      */
     fun parseDescription(root: JsonElement): String? {
         val shelf = collectRenderers(root, "musicDescriptionShelfRenderer")
@@ -1530,7 +1530,7 @@ private fun JsonElement?.firstRunText(): String? =
  * a square the size of a fingertip.
  *
  * So the size is now decided where the image is drawn rather than here, by
- * [com.music.laya.data.model.artworkAt] — which trades up just as freely
+ * [com.music.auris.data.model.artworkAt] — which trades up just as freely
  * as it trades down, and is what the player calls.
  */
 private fun JsonArray?.best(): String? = this?.lastOrNull().s("url")

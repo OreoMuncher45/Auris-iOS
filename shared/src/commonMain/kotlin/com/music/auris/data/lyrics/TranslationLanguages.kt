@@ -1,6 +1,6 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.platform.displayLanguageName
+import com.music.auris.platform.displayLanguageName
 
 /**
  * One language the translate button can translate lyrics *into*.

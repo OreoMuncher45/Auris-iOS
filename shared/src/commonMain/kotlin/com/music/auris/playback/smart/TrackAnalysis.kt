@@ -19,7 +19,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
 /**
  * Stored offline analysis for one track, in that track's own timeline seconds.

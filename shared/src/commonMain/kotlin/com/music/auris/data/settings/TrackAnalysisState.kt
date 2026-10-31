@@ -1,4 +1,4 @@
-package com.music.laya.data.settings
+package com.music.auris.data.settings
 
 /*
  * Shared between the Android and desktop players: both run the same analyser

@@ -1,4 +1,4 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
 /**
  * Just enough protobuf wire format for the canvaz-cache fallback: length-delimited fields out, and in. Everything

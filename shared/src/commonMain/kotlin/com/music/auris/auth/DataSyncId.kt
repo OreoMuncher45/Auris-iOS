@@ -1,4 +1,4 @@
-package com.music.laya.auth
+package com.music.auris.auth
 
 /**
  * Value accepted by Innertube as `context.user.onBehalfOfUser`.

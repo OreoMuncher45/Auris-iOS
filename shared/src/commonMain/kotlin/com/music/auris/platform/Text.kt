@@ -1,4 +1,4 @@
-package com.music.laya.platform
+package com.music.auris.platform
 
 expect fun normalizeNfd(text: String): String
 expect fun normalizeNfkc(text: String): String

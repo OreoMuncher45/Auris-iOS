@@ -1,10 +1,10 @@
-package com.music.laya.data.presence
+package com.music.auris.data.presence
 
-import com.music.laya.data.DebugLog
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
+import com.music.auris.data.DebugLog
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
 import kotlinx.coroutines.CoroutineScope
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ioDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

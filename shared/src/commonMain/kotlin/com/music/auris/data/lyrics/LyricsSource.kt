@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 /**
  * The databases [LyricsRepository] can ask, in the order it asks them.

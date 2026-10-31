@@ -1,10 +1,10 @@
-package com.music.laya.playback.karaoke
+package com.music.auris.playback.karaoke
 
-import com.music.laya.platform.ConcurrentMap
-import com.music.laya.platform.nanoTime
-import com.music.laya.playback.Karaoke
-import com.music.laya.playback.VocalStems
-import com.music.laya.playback.smart.AnalysisLog
+import com.music.auris.platform.ConcurrentMap
+import com.music.auris.platform.nanoTime
+import com.music.auris.playback.Karaoke
+import com.music.auris.playback.VocalStems
+import com.music.auris.playback.smart.AnalysisLog
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import okio.FileHandle

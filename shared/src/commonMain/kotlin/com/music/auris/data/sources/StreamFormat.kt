@@ -1,4 +1,4 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
 
 /**
@@ -23,7 +23,7 @@ data class StreamFormat(
      * True when [kbps] was filled in from the tier the source was asked for
      * rather than stated by the source — an addon's HIGH meaning 320. Still
      * worth ranking a stream by, but not a measurement of what arrived; see
-     * [NerdStats.sourceBitrate][com.music.laya.data.NerdStats.sourceBitrate].
+     * [NerdStats.sourceBitrate][com.music.auris.data.NerdStats.sourceBitrate].
      */
     val kbpsInferred: Boolean = false,
 ) {

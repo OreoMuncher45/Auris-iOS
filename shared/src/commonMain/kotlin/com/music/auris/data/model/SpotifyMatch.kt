@@ -1,4 +1,4 @@
-package com.music.laya.data.model
+package com.music.auris.data.model
 
 /**
  * A Spotify playlist page lists Spotify's tracks first and finds each one's

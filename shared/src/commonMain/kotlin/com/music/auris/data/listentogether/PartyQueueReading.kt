@@ -1,4 +1,4 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
 /**
  * Where [videoId] stands in the party's running order, read the same way on every device.

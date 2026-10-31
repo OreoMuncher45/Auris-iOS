@@ -1,15 +1,15 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.model.Song
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.data.sources.addon.AddonClient
-import com.music.laya.data.sources.addon.AddonException
-import com.music.laya.data.sources.addon.AddonManifest
-import com.music.laya.data.sources.addon.AddonNotFound
-import com.music.laya.data.sources.addon.AddonStream
-import com.music.laya.data.sources.addon.AddonTrack
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.TrackLog
+import com.music.auris.data.model.Song
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.data.sources.addon.AddonClient
+import com.music.auris.data.sources.addon.AddonException
+import com.music.auris.data.sources.addon.AddonManifest
+import com.music.auris.data.sources.addon.AddonNotFound
+import com.music.auris.data.sources.addon.AddonStream
+import com.music.auris.data.sources.addon.AddonTrack
+import com.music.auris.platform.ioDispatcher
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.withContext
@@ -44,7 +44,7 @@ class AddonSource(
      *
      * Two things need them after the fact and neither is reachable from a bare
      * id. The first is the duration the catalogue claimed, which
-     * [QualityUpgrade][com.music.laya.playback.QualityUpgrade] checks a
+     * [QualityUpgrade][com.music.auris.playback.QualityUpgrade] checks a
      * substitute against before cutting it into a track already playing — a
      * match on title and artist alone has put a 189s cut under a 163s
      * recording before. The second is the row's own `streamURL`, which the
@@ -187,7 +187,7 @@ class AddonSource(
      * where the best the catalogue holds is exactly what should be shown.
      *
      * The order is left exactly as it arrived.
-     * [TrackMatcher][com.music.laya.data.sources.TrackMatcher] decides which
+     * [TrackMatcher][com.music.auris.data.sources.TrackMatcher] decides which
      * rows are the recording and [SourceResolver] decides which to open; an
      * addon knows its own catalogue better than a re-sort here would.
      */

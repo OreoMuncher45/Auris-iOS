@@ -1,4 +1,4 @@
-package com.music.laya.data.model
+package com.music.auris.data.model
 
 /**
  * One step of a playlist reorder: put the entry [setVideoId] directly before

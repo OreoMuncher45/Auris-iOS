@@ -1,4 +1,4 @@
-package com.music.laya.data.innertube
+package com.music.auris.data.innertube
 
 /** One NewPipe audio stream, reduced to what StreamResolver chooses between. */
 internal class NewPipeAudio(val isM4a: Boolean, val isWebmOpus: Boolean)

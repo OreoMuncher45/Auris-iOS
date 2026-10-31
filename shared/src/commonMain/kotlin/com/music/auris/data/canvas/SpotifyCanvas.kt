@@ -1,8 +1,8 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.data.DebugLog as Log
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
+import com.music.auris.data.DebugLog as Log
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject

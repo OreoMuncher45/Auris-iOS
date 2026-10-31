@@ -1,10 +1,10 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.platform.HttpException
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.languageOf
-import com.music.laya.platform.sha256
+import com.music.auris.platform.HttpException
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.languageOf
+import com.music.auris.platform.sha256
 import io.ktor.http.formUrlEncode
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -15,7 +15,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ioDispatcher
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

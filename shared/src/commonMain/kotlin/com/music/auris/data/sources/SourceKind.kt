@@ -1,4 +1,4 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
 /**
  * The kinds of source this build knows how to talk to.
@@ -37,7 +37,7 @@ enum class SourceKind(
      *
      * False for [YOUTUBE] as well, though it *is* warmed ahead of time — that
      * happens through its own read-ahead in
-     * [AudioCache][com.music.laya.playback.AudioCache], which speaks video
+     * [AudioCache][com.music.auris.playback.AudioCache], which speaks video
      * ids directly and needs no cross-source match to find the track.
      */
     val worthPrefetching: Boolean = false,
@@ -47,7 +47,7 @@ enum class SourceKind(
      * Separate from [ordinal] because two kinds share a position: an addon and
      * a module index are both sources the user added on purpose, and which of
      * *those* is asked first is theirs to set by dragging — see
-     * [SourceRegistry.reorderAddons][com.music.laya.data.sources.SourceRegistry.reorderAddons].
+     * [SourceRegistry.reorderAddons][com.music.auris.data.sources.SourceRegistry.reorderAddons].
      * Sorting on `ordinal` made that impossible to express: a stable sort would
      * always put every addon ahead of every module index whatever order the
      * list was in, so the drag would have moved a row on screen and changed

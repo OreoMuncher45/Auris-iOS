@@ -1,6 +1,6 @@
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
-import com.music.laya.platform.ConcurrentMap
+import com.music.auris.platform.ConcurrentMap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okio.FileSystem
@@ -19,7 +19,7 @@ import kotlin.math.floor
  *
  *  - The analyzer needs a track's opening, contiguously, and the cache evicts
  *    openings first because they are read once and never touched again. See
- *    [com.music.laya.playback.DynamicLruCacheEvictor], which now holds them
+ *    [com.music.auris.playback.DynamicLruCacheEvictor], which now holds them
  *    back — but only within a budget, and only for tracks played recently.
  *  - Even with the bytes present, analysis costs a decode plus two model
  *    inferences, several seconds, and it has to finish *before* the transition

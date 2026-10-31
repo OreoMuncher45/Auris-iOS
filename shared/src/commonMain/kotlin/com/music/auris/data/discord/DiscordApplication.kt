@@ -1,4 +1,4 @@
-package com.music.laya.data.discord
+package com.music.auris.data.discord
 
 /**
  * Laya's own Discord application, shared by the phone and desktop presence.

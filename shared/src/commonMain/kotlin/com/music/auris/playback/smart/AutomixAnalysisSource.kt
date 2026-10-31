@@ -1,4 +1,4 @@
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
 /**
  * Keeps Automix analysis on the canonical YouTube Opus rendition.

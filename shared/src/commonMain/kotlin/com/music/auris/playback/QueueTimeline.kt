@@ -1,8 +1,8 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
-import com.music.laya.data.model.PlaybackSourceType
-import com.music.laya.data.model.QueueTier
-import com.music.laya.data.model.Song
+import com.music.auris.data.model.PlaybackSourceType
+import com.music.auris.data.model.QueueTier
+import com.music.auris.data.model.Song
 import kotlin.uuid.Uuid
 
 /**

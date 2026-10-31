@@ -1,10 +1,10 @@
-package com.music.laya.data.stats
+package com.music.auris.data.stats
 
-import com.music.laya.data.DebugLog
-import com.music.laya.data.model.Song
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.platform.localOffsetMillis
+import com.music.auris.data.DebugLog
+import com.music.auris.data.model.Song
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.platform.localOffsetMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

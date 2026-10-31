@@ -141,6 +141,13 @@ fun HomeScreen(
     leadHero: Boolean = true,
     currentSong: Song? = null,
     isPlaying: Boolean = false,
+    /**
+     * A card or two above the feed, for the pages' own entry points.
+     *
+     * Flow's card lives here: the mix is the listener's own material, and it
+     * belongs above the catalogue's shelves rather than inside them.
+     */
+    header: (@Composable () -> Unit)? = null,
 ) {
     val recentsViewType by AppUi.host.homeRecentsViewType.collectAsStateWithLifecycle()
 
@@ -166,6 +173,9 @@ fun HomeScreen(
         ) {
             if (title != null) {
                 item { HomeTitle(title) }
+            }
+            header?.let { card ->
+                item { card() }
             }
             if (!signedIn && onSignIn != null) {
                 item {

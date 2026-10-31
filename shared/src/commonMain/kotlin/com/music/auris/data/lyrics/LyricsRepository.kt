@@ -1,9 +1,9 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.platform.ioDispatcher
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.async

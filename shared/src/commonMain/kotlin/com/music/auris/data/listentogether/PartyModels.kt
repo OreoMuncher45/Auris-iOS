@@ -1,4 +1,4 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 /**
  * A song as the party knows it.
  *
- * Deliberately *not* [Song][com.music.laya.data.model.Song]. What a party
+ * Deliberately *not* [Song][com.music.auris.data.model.Song]. What a party
  * shares is which track is playing and where the playhead is; how each device
  * gets the audio — which source answered, at what quality, from the network or
  * from a download — stays that device's own business. Two people in a party can

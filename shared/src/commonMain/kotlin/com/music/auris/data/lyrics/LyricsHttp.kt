@@ -1,7 +1,7 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
 import io.ktor.http.URLBuilder
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.Json

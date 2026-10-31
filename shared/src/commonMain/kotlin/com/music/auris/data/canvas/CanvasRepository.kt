@@ -1,9 +1,9 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
-import com.music.laya.data.DebugLog as Log
-import com.music.laya.data.model.Song
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.DebugLog as Log
+import com.music.auris.data.model.Song
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.platform.ioDispatcher
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.sync.Mutex

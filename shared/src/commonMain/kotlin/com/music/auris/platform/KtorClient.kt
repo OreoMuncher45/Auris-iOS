@@ -1,4 +1,4 @@
-package com.music.laya.platform
+package com.music.auris.platform
 
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig

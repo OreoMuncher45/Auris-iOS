@@ -1,4 +1,4 @@
-package com.music.laya.platform
+package com.music.auris.platform
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

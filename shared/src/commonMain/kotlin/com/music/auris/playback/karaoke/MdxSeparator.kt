@@ -1,4 +1,4 @@
-package com.music.laya.playback.karaoke
+package com.music.auris.playback.karaoke
 
 /**
  * An MDX-Net vocal model and the STFT it was trained on, from UVR's own model

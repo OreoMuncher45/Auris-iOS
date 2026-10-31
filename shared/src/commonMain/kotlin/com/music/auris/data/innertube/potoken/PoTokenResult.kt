@@ -1,4 +1,4 @@
-package com.music.laya.data.innertube.potoken
+package com.music.auris.data.innertube.potoken
 
 class PoTokenResult(
     val playerRequestPoToken: String,

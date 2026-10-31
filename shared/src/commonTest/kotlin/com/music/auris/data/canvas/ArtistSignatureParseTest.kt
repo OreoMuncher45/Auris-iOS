@@ -1,4 +1,4 @@
-package com.music.laya.data.canvas
+package com.music.auris.data.canvas
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

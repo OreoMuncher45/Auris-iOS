@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 /**
  * The manual tab's starting points, one gain per centre in

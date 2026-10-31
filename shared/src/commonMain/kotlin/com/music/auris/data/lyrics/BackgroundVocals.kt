@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 /**
  * Pulls the answering vocal out of a line and hangs it underneath, as

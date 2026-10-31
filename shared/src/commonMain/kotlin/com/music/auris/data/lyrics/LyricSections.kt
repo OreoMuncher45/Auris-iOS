@@ -1,4 +1,4 @@
-package com.music.laya.data.lyrics
+package com.music.auris.data.lyrics
 
 /**
  * Whether a plain lyric line is one of Genius's section markers — `[Chorus]`,

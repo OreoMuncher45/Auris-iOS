@@ -1,4 +1,4 @@
-package com.music.laya.playback.smart
+package com.music.auris.playback.smart
 
 /** The Beat This! heads over a whole clip: one logit per mel frame, at [frameRate] frames a second. */
 internal class BeatLogits(val beat: FloatArray, val downbeat: FloatArray, val frameRate: Double)

@@ -1,9 +1,9 @@
-package com.music.laya.data.settings
+package com.music.auris.data.settings
 
-import com.music.laya.data.lyrics.LyricsSource
-import com.music.laya.playback.EqLayout
-import com.music.laya.playback.EqualizerPreset
-import com.music.laya.playback.ReverbSettings
+import com.music.auris.data.lyrics.LyricsSource
+import com.music.auris.playback.EqLayout
+import com.music.auris.playback.EqualizerPreset
+import com.music.auris.playback.ReverbSettings
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -32,7 +32,7 @@ enum class OutputPcmMode(val label: String) {
  *
  * The rungs themselves differ too. On the YouTube fallback path a download is
  * Opus-in-WebM (see
- * [StreamResolver.resolveForDownload][com.music.laya.data.innertube.StreamResolver.resolveForDownload]),
+ * [StreamResolver.resolveForDownload][com.music.auris.data.innertube.StreamResolver.resolveForDownload]),
  * while configured sources can supply their own AAC or lossless copy. And
  * [LOSSLESS] has no streaming counterpart at all: it is the only rung that lets
  * a configured source's bit-exact file end up as a file on disk.
@@ -132,6 +132,8 @@ open class AppSettingsHost {
 
 /** Keeps the `prefs.getX` / `prefs.edit().putX().apply()` call shape the Android code always had. */
 private class Prefs(private val s: Settings) {
+    /** The store itself, for the few callers that need to open another view of it. */
+    val raw: Settings get() = s
     fun getBoolean(k: String, d: Boolean) = s.getBoolean(k, d)
     fun getInt(k: String, d: Int) = s.getInt(k, d)
     fun getLong(k: String, d: Long) = s.getLong(k, d)
@@ -222,7 +224,7 @@ object AppSettings {
     // the Sources screen. It is gone: sources are asked for their best and each
     // degrades on its own terms, so the switch's only real effect was to ask a
     // module for a worse file than it was holding. See
-    // [SourceResolver.requestForNow][com.music.laya.data.sources.SourceResolver.requestForNow],
+    // [SourceResolver.requestForNow][com.music.auris.data.sources.SourceResolver.requestForNow],
     // which now reads [effectiveAudioQuality] and nothing else.
 
     val crossfadeSeconds = MutableStateFlow(0)
@@ -235,7 +237,7 @@ object AppSettings {
      * still being analysed. Off by default: analysis costs a background
      * decode per track.
      *
-     * See [com.music.laya.playback.smart.TransitionPlanner].
+     * See [com.music.auris.playback.smart.TransitionPlanner].
      */
     val smartFadeEnabled = MutableStateFlow(false)
 
@@ -252,7 +254,7 @@ object AppSettings {
     /**
      * Level every track to the same loudness, using YouTube's own
      * normalization figure for it — see
-     * [com.music.laya.playback.PlaybackService.setupLoudnessEnhancer].
+     * [com.music.auris.playback.PlaybackService.setupLoudnessEnhancer].
      *
      * On by default, which is the one genuinely contentious thing about it.
      * The case for it: a queue drawn from several sources is a queue of
@@ -286,11 +288,11 @@ object AppSettings {
      * as a FLAC, and someone listening on wired headphones may well prefer the
      * bit-exact stereo copy to a spatial mix their output can't render. Turning
      * this off is how they say so; see
-     * [ModuleSource.unplayable][com.music.laya.data.sources.ModuleSource],
+     * [ModuleSource.unplayable][com.music.auris.data.sources.ModuleSource],
      * which is where the refusal is applied.
      *
      * Independent of whether the device *can* decode it — that question is
-     * [DeviceCodecs.playsDolbyAtmos][com.music.laya.data.sources.DeviceCodecs],
+     * [DeviceCodecs.playsDolbyAtmos][com.music.auris.data.sources.DeviceCodecs],
      * and the two are deliberately not folded together: this one is the
      * listener's answer, is persisted, and must survive being read on a phone
      * that cannot honour it (a restored backup, a swapped device) without
@@ -299,7 +301,7 @@ object AppSettings {
     val dolbyAtmos = MutableStateFlow(true)
 
     /**
-     * Widens stereo output via [com.music.laya.playback.SpatialAudioProcessor],
+     * Widens stereo output via [com.music.auris.playback.SpatialAudioProcessor],
      * a stereo widening + cross-feed effect running inside ExoPlayer's own
      * pipeline. Not true object-based spatial audio — YouTube only ever hands
      * us a stereo stream, so there's no Atmos-style source to render.
@@ -346,7 +348,7 @@ object AppSettings {
 
     /**
      * The app's own reverb, master switch — see
-     * [com.music.laya.playback.ReverbProcessor]. Kept apart from
+     * [com.music.auris.playback.ReverbProcessor]. Kept apart from
      * [reverb] so the player's toggle flips it without touching the room the
      * Settings page dialled in.
      */
@@ -449,7 +451,7 @@ object AppSettings {
      * Costs a video stream on top of the audio one and reaches three
      * services that have nothing to do with playback, so it stays a switch —
      * but it is the better default, and most tracks resolve to no canvas at
-     * all. See [CanvasRepository][com.music.laya.data.canvas.CanvasRepository].
+     * all. See [CanvasRepository][com.music.auris.data.canvas.CanvasRepository].
      */
     val animatedCanvas = MutableStateFlow(true)
 
@@ -460,7 +462,7 @@ object AppSettings {
      *
      * Off by default. A canvas clip loops for as long as its track plays,
      * and every loop past the first re-fetches the same few seconds of video
-     * — see [CanvasCache][com.music.laya.data.canvas.CanvasCache] for why
+     * — see [CanvasCache][com.music.auris.data.canvas.CanvasCache] for why
      * that costs network at all rather than being answered from a buffer —
      * so a few-second clip behind a four-minute track on cellular is not a
      * flat video cost, it is that cost repeated dozens of times per song.
@@ -491,7 +493,7 @@ object AppSettings {
      * Off restores the card: the sleeve keeps its corners, its shadow and its
      * shrink-while-paused, and only a clip goes full-bleed. Phones only either
      * way — see the hero notes in
-     * [NowPlayingScreen][com.music.laya.ui.player.NowPlayingScreen].
+     * [NowPlayingScreen][com.music.auris.ui.player.NowPlayingScreen].
      */
     val fullBleedArtwork = MutableStateFlow(true)
 
@@ -501,10 +503,10 @@ object AppSettings {
      * the sleeve's bottom edge.
      *
      * Off by default, because the current backdrop replaced it for two reasons
-     * that have not gone away — see [ArtworkMesh][com.music.laya.ui.player.ArtworkMesh]
+     * that have not gone away — see [ArtworkMesh][com.music.auris.ui.player.ArtworkMesh]
      * for the colour one (a cover that is nine-tenths black with a red stripe
      * comes back from the quantiser as a red screen) and
-     * [ArtworkMeshBackdrop][com.music.laya.ui.player.ArtworkMeshBackdrop]
+     * [ArtworkMeshBackdrop][com.music.auris.ui.player.ArtworkMeshBackdrop]
      * for the cost one (blobs that drift are a full-screen blur redrawn while
      * they move, where a mesh is drawn once per track and then composited).
      * Kept as a switch because people asked for the old look back, and neither
@@ -528,7 +530,7 @@ object AppSettings {
     val lyricsSources = MutableStateFlow(LyricsSource.offered.toSet())
 
     /**
-     * The order [lyricsSources] are asked in — see [LyricsRepository][com.music.laya.data.lyrics.LyricsRepository]:
+     * The order [lyricsSources] are asked in — see [LyricsRepository][com.music.auris.data.lyrics.LyricsRepository]:
      * every enabled source is asked at once, but a higher-priority one still
      * pending is never preempted by a lower one that happened to answer first.
      * Reordered from Settings, so this is a full permutation of
@@ -551,7 +553,7 @@ object AppSettings {
     val paxSenixApiKey = MutableStateFlow("")
 
     /**
-     * Disk budget for cached audio. [AudioCache][com.music.laya.playback.AudioCache] evicts past it.
+     * Disk budget for cached audio. [AudioCache][com.music.auris.playback.AudioCache] evicts past it.
      * [UNLIMITED_CACHE_LIMIT_BYTES] means no ceiling of the app's own.
      */
     val audioCacheLimitBytes = MutableStateFlow(DEFAULT_CACHE_LIMIT_BYTES)
@@ -572,7 +574,7 @@ object AppSettings {
      * Its own switch because it is the one part of Replay that isn't purely
      * local: everything else on that page is counted on this device and never
      * leaves it, while a genre has to be looked up by artist name — see
-     * [ArtistFacts][com.music.laya.data.stats.ArtistFacts]. On by default,
+     * [ArtistFacts][com.music.auris.data.stats.ArtistFacts]. On by default,
      * since it sends a name and nothing else and the answer is what makes a
      * quarter of the page exist; off, the genre chart simply isn't drawn.
      */
@@ -671,7 +673,7 @@ object AppSettings {
 
     /**
      * The connected Discord account's token, mirrored out of [AuthStore] so
-     * [PlaybackService][com.music.laya.playback.PlaybackService] can pick
+     * [PlaybackService][com.music.auris.playback.PlaybackService] can pick
      * up a login without polling for one. Empty means not connected.
      *
      * Only the mirror is here — the persisted copy is encrypted, because unlike
@@ -804,12 +806,15 @@ object AppSettings {
         prefs = Prefs(settings)
         this.host = host
         readAll()
+        // Flow keeps its tuner, bans and skip counts in the same store, so it
+        // has to be opened over the same settings object.
+        com.music.auris.data.flow.FlowStore.init(settings)
     }
 
     /**
      * Re-reads every setting off disk.
      *
-     * The one caller is an import ([Backup][com.music.laya.data.stats.Backup]),
+     * The one caller is an import ([Backup][com.music.auris.data.stats.Backup]),
      * which writes the whole preference file underneath these flows. Nothing
      * else in the app changes a preference without going through the setter
      * beside it, so nothing else has a reason to ask.
@@ -820,6 +825,7 @@ object AppSettings {
     fun reload() {
         if (!this::prefs.isInitialized) return
         readAll()
+        com.music.auris.data.flow.FlowStore.init(prefs.raw)
     }
 
     private fun readAll() {
@@ -918,7 +924,7 @@ object AppSettings {
         lyricsSourceOrder.value = readLyricsSourceOrder()
         prioritizeSyllableSync.value = prefs.getBoolean(KEY_PRIORITIZE_SYLLABLE_SYNC, false)
         paxSenixApiKey.value = prefs.getString(KEY_PAXSENIX_API_KEY, "").orEmpty()
-        com.music.laya.data.lyrics.PaxSenix.setApiKey(paxSenixApiKey.value)
+        com.music.auris.data.lyrics.PaxSenix.setApiKey(paxSenixApiKey.value)
         audioCacheLimitBytes.value = clampCacheLimit(prefs.getLong(KEY_CACHE_LIMIT, DEFAULT_CACHE_LIMIT_BYTES))
         showCacheFolder.value = prefs.getBoolean(KEY_SHOW_CACHE_FOLDER, false)
         lastfmEnabled.value = prefs.getBoolean(KEY_LASTFM_ENABLED, false)
@@ -995,7 +1001,7 @@ object AppSettings {
      * the very first call seeds the stored value from [currentVersionCode]
      * rather than reporting an update.
      *
-     * Laya ships sideloaded (see [com.music.laya.data.AppUpdateChecker]),
+     * Laya ships sideloaded (see [com.music.auris.data.AppUpdateChecker]),
      * so installing a new APK over the old one is the only "update" there is —
      * app data, this pref included, survives it exactly like a Play Store
      * update. Call once per process start, before anything reads a cache that
@@ -1424,10 +1430,10 @@ object AppSettings {
     }
 
     fun setPaxSenixApiKey(value: String) {
-        val normalized = com.music.laya.data.lyrics.normalizePaxSenixApiKey(value)
+        val normalized = com.music.auris.data.lyrics.normalizePaxSenixApiKey(value)
         paxSenixApiKey.value = normalized
         prefs.edit().putString(KEY_PAXSENIX_API_KEY, normalized).apply()
-        com.music.laya.data.lyrics.PaxSenix.setApiKey(normalized)
+        com.music.auris.data.lyrics.PaxSenix.setApiKey(normalized)
     }
 
     /**
@@ -1948,7 +1954,7 @@ object AppSettings {
      * Preferences that describe *this device* rather than this configuration,
      * and so are neither exported nor overwritten by an import.
      *
-     * [Downloads][com.music.laya.download.Downloads] keeps its record of
+     * [Downloads][com.music.auris.download.Downloads] keeps its record of
      * what is saved in this same preference file, and that record is a list of
      * files on this phone's storage. Carrying it into a backup would restore a
      * folder full of tracks that are not here; clearing it on import would leave

@@ -1,10 +1,10 @@
-package com.music.laya.data.jiosaavn
+package com.music.auris.data.jiosaavn
 
-import com.music.laya.data.TrackLog
-import com.music.laya.platform.HttpRequest
-import com.music.laya.platform.NetHttp
-import com.music.laya.platform.desEcbDecrypt
-import com.music.laya.platform.ioDispatcher
+import com.music.auris.data.TrackLog
+import com.music.auris.platform.HttpRequest
+import com.music.auris.platform.NetHttp
+import com.music.auris.platform.desEcbDecrypt
+import com.music.auris.platform.ioDispatcher
 import io.ktor.http.URLBuilder
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
@@ -164,7 +164,7 @@ object JioSaavnService {
      * The rewrite to `_320` is conditional on [RawMoreInfo.supports320] rather
      * than applied to everything: the CDN has no 320 rendition for a track that
      * hasn't got one, and a 96kbps stream advertised as 320 would clear
-     * [SourceResolver.worthSwapping][com.music.laya.data.sources.SourceResolver]
+     * [SourceResolver.worthSwapping][com.music.auris.data.sources.SourceResolver]
      * against YouTube's 160kbps Opus.
      */
     private fun bestStream(encryptedUrl: String, supports320: Boolean): SaavnStream? =

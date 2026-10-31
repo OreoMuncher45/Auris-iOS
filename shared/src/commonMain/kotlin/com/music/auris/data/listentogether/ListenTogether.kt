@@ -1,10 +1,10 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
-import com.music.laya.data.DebugLog as Log
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.platform.currentTimeMillis
-import com.music.laya.platform.ioDispatcher
-import com.music.laya.platform.sha256
+import com.music.auris.data.DebugLog as Log
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.platform.currentTimeMillis
+import com.music.auris.platform.ioDispatcher
+import com.music.auris.platform.sha256
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -131,7 +131,7 @@ val ServerConnectionState.health: ListenTogether.Health
  * the clock, and the controls any member may send. It does **not** touch the
  * player. What it publishes instead is [partyPositionMs]: where this device
  * ought to be, right now, on its own clock.
- * [PartySync][com.music.laya.playback.PartySync] is what binds that to
+ * [PartySync][com.music.auris.playback.PartySync] is what binds that to
  * Media3, and it lives in the playback service rather than here, because
  * everything above that line is testable and everything below it is not.
  *
@@ -1440,7 +1440,7 @@ object ListenTogether {
     /**
      * Who this device is jamming as, or null if it cannot.
      *
-     * [AuthStore.isSignedIn][com.music.laya.auth.AuthStore.isSignedIn]
+     * [AuthStore.isSignedIn][com.music.auris.auth.AuthStore.isSignedIn]
      * rather than "is there a cookie": a jar with no signable secret in it is a
      * session the app is already treating as signed out everywhere else, and a
      * party is not the place to start disagreeing with that.

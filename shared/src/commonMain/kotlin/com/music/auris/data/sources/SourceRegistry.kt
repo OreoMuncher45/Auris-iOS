@@ -1,13 +1,13 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
-import com.music.laya.data.TrackLog
-import com.music.laya.data.settings.AppSettings
-import com.music.laya.data.settings.permits
-import com.music.laya.data.sources.addon.AddonClient
-import com.music.laya.data.sources.addon.AddonException
-import com.music.laya.data.sources.addon.DetectedFormat
-import com.music.laya.data.sources.addon.SourceFormats
-import com.music.laya.data.settings.AudioQuality
+import com.music.auris.data.TrackLog
+import com.music.auris.data.settings.AppSettings
+import com.music.auris.data.settings.permits
+import com.music.auris.data.sources.addon.AddonClient
+import com.music.auris.data.sources.addon.AddonException
+import com.music.auris.data.sources.addon.DetectedFormat
+import com.music.auris.data.sources.addon.SourceFormats
+import com.music.auris.data.settings.AudioQuality
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -150,7 +150,6 @@ object SourceRegistry {
             .filterNot { it.kind == SourceKind.MODULE }
             .map { config ->
                 when {
-                    config.kind == SourceKind.YOUTUBE && !config.enabled -> config.copy(enabled = true)
                     config.kind == SourceKind.JIOSAAVN && forceJioSaavnOff -> config.copy(enabled = false)
                     else -> config
                 }
@@ -234,9 +233,9 @@ object SourceRegistry {
      * [active], so the Wi-Fi and mobile-data rungs stay two independent
      * answers to "what does this minute cost" and switching networks switches
      * between them. Downloads deliberately keep asking [active]: what a saved
-     * file is worth is [DownloadQuality][com.music.laya.data.settings.DownloadQuality]'s
+     * file is worth is [DownloadQuality][com.music.auris.data.settings.DownloadQuality]'s
      * question, and when it may be fetched is
-     * [AppSettings.wifiOnlyDownloads][com.music.laya.data.settings.AppSettings.wifiOnlyDownloads]'s.
+     * [AppSettings.wifiOnlyDownloads][com.music.auris.data.settings.AppSettings.wifiOnlyDownloads]'s.
      */
     fun activeForPlayback(): List<MusicSource> {
         val ceiling = AppSettings.effectiveAudioQuality
@@ -301,10 +300,12 @@ object SourceRegistry {
      * doesn't even stop it being played, because a YouTube-queued track whose
      * substitutes all miss still falls back to it. A switch that cannot honour
      * its own off position is worse than no switch, so it isn't offered one:
-     * see [SourcesScreen][com.music.laya.ui.screens.SourcesScreen].
+     * see [SourcesScreen][com.music.auris.ui.screens.SourcesScreen].
      */
     fun setEnabled(configId: String, enabled: Boolean) {
-        if (!enabled && config(configId)?.kind == SourceKind.YOUTUBE) return
+        // YouTube can be switched off like any other source: the listener who
+        // only wants their own sources' audio should not have to hear it.
+        // It still cannot be removed — it is the one source every install has.
         publish(configs.value.map { if (it.id == configId) it.copy(enabled = enabled) else it })
     }
 
@@ -484,7 +485,7 @@ object SourceRegistry {
     /**
      * A source-backed track's id, as it travels through the queue.
      *
-     * Packed into the existing [Song.videoId][com.music.laya.data.model.Song.videoId]
+     * Packed into the existing [Song.videoId][com.music.auris.data.model.Song.videoId]
      * rather than added beside it: that field is the app's media id everywhere —
      * the queue, the notification, the history, the like state — and a second
      * identity field would have to be threaded through every one of them, with

@@ -1,9 +1,9 @@
-package com.music.laya.data.innertube.potoken
+package com.music.auris.data.innertube.potoken
 
 import com.metrolist.innertubex.extraction.TokenProvider
 import com.metrolist.innertubex.extraction.TokenProviderCapabilities
 import com.metrolist.innertubex.extraction.strategy.PoTokenProviderKind
-import com.music.laya.data.TrackLog
+import com.music.auris.data.TrackLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex

@@ -1,4 +1,4 @@
-package com.music.laya.playback.karaoke
+package com.music.auris.playback.karaoke
 
 import kotlin.concurrent.Volatile
 import kotlinx.atomicfu.locks.SynchronizedObject

@@ -1,4 +1,4 @@
-package com.music.laya.data
+package com.music.auris.data
 
 import kotlin.concurrent.Volatile
 

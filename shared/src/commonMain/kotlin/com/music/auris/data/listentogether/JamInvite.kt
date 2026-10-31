@@ -1,4 +1,4 @@
-package com.music.laya.data.listentogether
+package com.music.auris.data.listentogether
 
 /**
  * The public invite URL for a party, and the only shape that is accepted back.

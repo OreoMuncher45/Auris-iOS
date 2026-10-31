@@ -1,6 +1,6 @@
-package com.music.laya.data
+package com.music.auris.data
 
-import com.music.laya.platform.nanoTime
+import com.music.auris.platform.nanoTime
 import kotlin.concurrent.Volatile
 
 /**

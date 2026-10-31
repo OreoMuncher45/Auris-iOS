@@ -1,4 +1,4 @@
-package com.music.laya.data.stats
+package com.music.auris.data.stats
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

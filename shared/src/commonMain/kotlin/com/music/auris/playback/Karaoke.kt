@@ -1,4 +1,4 @@
-package com.music.laya.playback
+package com.music.auris.playback
 
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
@@ -42,7 +42,7 @@ object Karaoke {
         if (id == track) return
         track = id
         if (_enabled.value) setEnabled(false)
-        com.music.laya.playback.karaoke.KaraokeStems.retainOnly(id)
+        com.music.auris.playback.karaoke.KaraokeStems.retainOnly(id)
     }
     private val _warm = MutableStateFlow(false)
     private val showing = AtomicInt(0)
@@ -59,7 +59,7 @@ object Karaoke {
     fun lyricsShown(): () -> Unit {
         if (showing.incrementAndFetch() == 1) {
             _warm.value = true
-            com.music.laya.playback.karaoke.KaraokeStems.wake()
+            com.music.auris.playback.karaoke.KaraokeStems.wake()
         }
         val released = AtomicBoolean(false)
         return {
@@ -85,7 +85,7 @@ object Karaoke {
             _unavailable.value = false
             _neural.value = false
         }
-        com.music.laya.playback.karaoke.KaraokeStems.wake()
+        com.music.auris.playback.karaoke.KaraokeStems.wake()
     }
 
     /** Hands a processor's verdict to [unavailable]. From the audio thread. */

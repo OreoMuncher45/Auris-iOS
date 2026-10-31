@@ -1,4 +1,4 @@
-package com.music.laya.data.sources
+package com.music.auris.data.sources
 
 /**
  * The shape of a source-backed track's id — `src:<configId>::<trackId>` — as the
