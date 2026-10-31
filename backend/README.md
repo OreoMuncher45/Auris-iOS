@@ -1,4 +1,4 @@
-# Laya — Listen Together
+# Auris — Listen Together
 
 The party server behind **Listen together**: create a six-character code, share
 it, and up to five signed-in devices listen to the same thing at the same time.
@@ -259,14 +259,14 @@ Caddy in front for HTTPS and WebSockets. Files are in `deploy/`.
    sudo DOMAIN=laya-listen-together.onrender.com bash deploy/setup.sh
    ```
 
-   It installs Go, builds the server into `/opt/laya-jam`, runs it as the
-   `laya-jam` systemd service on `:8000`, installs Caddy for the domain, and
+   It installs Go, builds the server into `/opt/auris-jam`, runs it as the
+   `auris-jam` systemd service on `:8000`, installs Caddy for the domain, and
    opens 80/443 in the VM's own iptables. Oracle's Ubuntu images carry a REJECT
    rule besides the security list, so both have to be opened. Re-run the same
    command to deploy a new build.
 
 Check it with `curl https://<domain>/healthz`. Logs are in
-`journalctl -u laya-jam` and `journalctl -u caddy`.
+`journalctl -u auris-jam` and `journalctl -u caddy`.
 
 ## Deploying to Render
 

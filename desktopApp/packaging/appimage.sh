@@ -10,12 +10,12 @@ APP_DIR_SRC=${1:?usage: appimage.sh <app-image-dir> <out.AppImage> [appimagetool
 OUT=${2:?usage: appimage.sh <app-image-dir> <out.AppImage> [appimagetool]}
 TOOL=${3:-appimagetool}
 
-[ -x "$APP_DIR_SRC/bin/Laya" ] || { echo "no launcher in $APP_DIR_SRC" >&2; exit 1; }
+[ -x "$APP_DIR_SRC/bin/Auris" ] || { echo "no launcher in $APP_DIR_SRC" >&2; exit 1; }
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
-APPDIR="$STAGE/Laya.AppDir"
+APPDIR="$STAGE/Auris.AppDir"
 
 mkdir -p "$APPDIR/usr"
 cp -a "$APP_DIR_SRC/." "$APPDIR/usr/"
@@ -24,25 +24,25 @@ cp -a "$APP_DIR_SRC/." "$APPDIR/usr/"
 cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "$0")")"
-exec "$HERE/usr/bin/Laya" "$@"
+exec "$HERE/usr/bin/Auris" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 
-cat > "$APPDIR/laya.desktop" <<'DESKTOP'
+cat > "$APPDIR/auris.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
-Name=Laya
+Name=Auris
 GenericName=Music Player
 Comment=Aesthetic YouTube Music client
-Exec=Laya
-Icon=laya
+Exec=Auris
+Icon=auris
 Categories=AudioVideo;Audio;Player;
 Terminal=false
-StartupWMClass=com-music-laya-desktop-MainKt
+StartupWMClass=com-music-auris-desktop-MainKt
 DESKTOP
 
 # appimagetool reads the icon by the desktop entry; the desktop reads .DirIcon.
-cp "$ROOT/desktopApp/packaging/icons/AppIcon.png" "$APPDIR/laya.png"
+cp "$ROOT/desktopApp/packaging/icons/AppIcon.png" "$APPDIR/auris.png"
 cp "$ROOT/desktopApp/packaging/icons/AppIcon.png" "$APPDIR/.DirIcon"
 
 mkdir -p "$(dirname "$OUT")"

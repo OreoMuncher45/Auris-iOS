@@ -3,7 +3,7 @@ import os
 import Foundation
 import MediaPlayer
 import QuartzCore
-import LayaKit
+import AurisKit
 import UIKit
 
 /// AVFoundation implementation of the Kotlin `AudioEngine`.

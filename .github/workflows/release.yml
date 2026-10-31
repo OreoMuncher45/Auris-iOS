@@ -56,32 +56,32 @@ jobs:
       - run: chmod +x gradlew
 
       - name: Tests
-        run: ./gradlew :shared:jvmTest :desktopUi:jvmTest :desktopApp:test -Playa.version=${{ steps.version.outputs.value }}
+        run: ./gradlew :shared:jvmTest :desktopUi:jvmTest :desktopApp:test -Pauris.version=${{ steps.version.outputs.value }}
 
       - name: Build deb, rpm and the app image
         run: |
           ./gradlew :desktopApp:packageDeb :desktopApp:packageRpm :desktopApp:createDistributable \
-            -Playa.version=${{ steps.version.outputs.value }}
+            -Pauris.version=${{ steps.version.outputs.value }}
 
       - name: The analyser and models are in the jar
         run: |
-          jar=$(ls desktopApp/build/compose/binaries/main/app/Laya/lib/app/desktopApp*.jar)
-          jar tf "$jar" | grep -q 'native/liblaya_analysis.so'
+          jar=$(ls desktopApp/build/compose/binaries/main/app/Auris/lib/app/desktopApp*.jar)
+          jar tf "$jar" | grep -q 'native/libauris_analysis.so'
           jar tf "$jar" | grep -q 'models/.*\.onnx'
 
       - name: Build the AppImage
         run: |
           desktopApp/packaging/appimage.sh \
-            desktopApp/build/compose/binaries/main/app/Laya \
-            dist/Laya-${{ steps.version.outputs.value }}-linux-x86_64.AppImage \
+            desktopApp/build/compose/binaries/main/app/Auris \
+            dist/Auris-${{ steps.version.outputs.value }}-linux-x86_64.AppImage \
             "$PWD/appimagetool.AppImage"
 
       - name: Collect
         run: |
           v=${{ steps.version.outputs.value }}
           mkdir -p dist
-          cp desktopApp/build/compose/binaries/main/deb/*.deb "dist/Laya-$v-linux-amd64.deb"
-          cp desktopApp/build/compose/binaries/main/rpm/*.rpm "dist/Laya-$v-linux-x86_64.rpm"
+          cp desktopApp/build/compose/binaries/main/deb/*.deb "dist/Auris-$v-linux-amd64.deb"
+          cp desktopApp/build/compose/binaries/main/rpm/*.rpm "dist/Auris-$v-linux-x86_64.rpm"
           ls -lh dist
 
       - uses: actions/upload-artifact@v4
@@ -132,30 +132,30 @@ jobs:
           echo "SIGNATURE_API_URL=${{ secrets.SIGNATURE_API_URL }}" >> local.properties
 
       - name: Tests
-        run: .\gradlew.bat :shared:jvmTest :desktopUi:jvmTest :desktopApp:test "-Playa.version=${{ steps.version.outputs.value }}"
+        run: .\gradlew.bat :shared:jvmTest :desktopUi:jvmTest :desktopApp:test "-Pauris.version=${{ steps.version.outputs.value }}"
 
       - name: Build msi, exe and the app image
         run: |
-          .\gradlew.bat :desktopApp:packageMsi :desktopApp:packageExe :desktopApp:createDistributable "-Playa.version=${{ steps.version.outputs.value }}"
+          .\gradlew.bat :desktopApp:packageMsi :desktopApp:packageExe :desktopApp:createDistributable "-Pauris.version=${{ steps.version.outputs.value }}"
 
       - name: The analyser and models are in the jar
         shell: bash
         run: |
-          jar=$(ls desktopApp/build/compose/binaries/main/app/Laya/app/desktopApp*.jar)
-          jar tf "$jar" | grep -q 'native/laya_analysis.dll'
+          jar=$(ls desktopApp/build/compose/binaries/main/app/Auris/app/desktopApp*.jar)
+          jar tf "$jar" | grep -q 'native/auris_analysis.dll'
           jar tf "$jar" | grep -q 'models/.*\.onnx'
           # WinRT, so only MSVC can build it and only this job ever does.
-          jar tf "$jar" | grep -q 'native/laya_smtc.dll'
+          jar tf "$jar" | grep -q 'native/auris_smtc.dll'
 
       - name: Collect
         shell: pwsh
         run: |
           $v = "${{ steps.version.outputs.value }}"
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item desktopApp/build/compose/binaries/main/msi/*.msi "dist/Laya-$v-windows-x64.msi"
-          Copy-Item desktopApp/build/compose/binaries/main/exe/*.exe "dist/Laya-$v-windows-x64-setup.exe"
-          7z a -tzip -mx=5 "dist/Laya-$v-windows-x64-portable.zip" `
-            "desktopApp/build/compose/binaries/main/app/Laya/*" | Out-Null
+          Copy-Item desktopApp/build/compose/binaries/main/msi/*.msi "dist/Auris-$v-windows-x64.msi"
+          Copy-Item desktopApp/build/compose/binaries/main/exe/*.exe "dist/Auris-$v-windows-x64-setup.exe"
+          7z a -tzip -mx=5 "dist/Auris-$v-windows-x64-portable.zip" `
+            "desktopApp/build/compose/binaries/main/app/Auris/*" | Out-Null
           Get-ChildItem dist | Format-Table Name, Length
 
       - uses: actions/upload-artifact@v4
@@ -202,16 +202,16 @@ jobs:
       - run: chmod +x gradlew
 
       - name: Tests
-        run: ./gradlew :shared:jvmTest :desktopUi:jvmTest :desktopApp:test -Playa.version=${{ steps.version.outputs.value }}
+        run: ./gradlew :shared:jvmTest :desktopUi:jvmTest :desktopApp:test -Pauris.version=${{ steps.version.outputs.value }}
 
       - name: Build DMG, PKG and the app bundle
         run: |
           ./gradlew :desktopApp:packageDmg :desktopApp:packagePkg :desktopApp:createDistributable \
-            -Playa.version=${{ steps.version.outputs.value }}
+            -Pauris.version=${{ steps.version.outputs.value }}
 
       - name: The analyser and models are in the jar
         run: |
-          jar=$(ls desktopApp/build/compose/binaries/main/app/Laya.app/Contents/app/desktopApp*.jar)
+          jar=$(ls desktopApp/build/compose/binaries/main/app/Auris.app/Contents/app/desktopApp*.jar)
           jar tf "$jar" | grep -q 'models/.*\.onnx'
 
       - name: Collect
@@ -220,12 +220,12 @@ jobs:
           arch="${{ matrix.arch }}"
           mkdir -p dist
           for f in desktopApp/build/compose/binaries/main/dmg/*.dmg; do
-            [ -f "$f" ] && cp "$f" "dist/Laya-$v-macos-$arch.dmg"
+            [ -f "$f" ] && cp "$f" "dist/Auris-$v-macos-$arch.dmg"
           done
           for f in desktopApp/build/compose/binaries/main/pkg/*.pkg; do
-            [ -f "$f" ] && cp "$f" "dist/Laya-$v-macos-$arch.pkg"
+            [ -f "$f" ] && cp "$f" "dist/Auris-$v-macos-$arch.pkg"
           done
-          ditto -c -k --keepParent desktopApp/build/compose/binaries/main/app/Laya.app "dist/Laya-$v-macos-$arch.zip"
+          ditto -c -k --keepParent desktopApp/build/compose/binaries/main/app/Auris.app "dist/Auris-$v-macos-$arch.zip"
           ls -lh dist
 
       - uses: actions/upload-artifact@v4
@@ -264,9 +264,9 @@ jobs:
       # app only pairs with a phone app signed by the same key.
       - name: Signing keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > laya-release.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > auris-release.jks
           {
-            echo "storeFile=laya-release.jks"
+            echo "storeFile=auris-release.jks"
             echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}"
             echo "keyAlias=${{ secrets.KEY_ALIAS }}"
             echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
@@ -283,13 +283,13 @@ jobs:
           mkdir -p dist
           for f in app/build/outputs/apk/prod/release/app-prod-*-release.apk; do
             abi=$(basename "$f" | sed -E 's/^app-prod-(.*)-release\.apk$/\1/')
-            cp "$f" "dist/Laya-$v-android-$abi.apk"
+            cp "$f" "dist/Auris-$v-android-$abi.apk"
           done
           for f in tv/build/outputs/apk/prod/release/tv-prod-*-release.apk; do
             abi=$(basename "$f" | sed -E 's/^tv-prod-(.*)-release\.apk$/\1/')
-            cp "$f" "dist/Laya-$v-android-tv-$abi.apk"
+            cp "$f" "dist/Auris-$v-android-tv-$abi.apk"
           done
-          cp wearos/build/outputs/apk/prod/release/*.apk "dist/Laya-$v-wear-os.apk"
+          cp wearos/build/outputs/apk/prod/release/*.apk "dist/Auris-$v-wear-os.apk"
           ls -lh dist
 
       - uses: actions/upload-artifact@v4
@@ -323,7 +323,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Laya ${{ github.ref_name }}
+          name: Auris ${{ github.ref_name }}
           draft: true
           files: dist/*
         env:

@@ -33,7 +33,7 @@ jobs:
     - name: Work out the version
       id: version
       run: |
-        version=$(sed -n 's/.*extra\["layaVersionName"\] = "\(.*\)".*/\1/p' build.gradle.kts | head -1)
+        version=$(sed -n 's/.*extra\["aurisVersionName"\] = "\(.*\)".*/\1/p' build.gradle.kts | head -1)
         echo "value=$version" >> "$GITHUB_OUTPUT"
         echo "Building $version"
 
@@ -41,14 +41,14 @@ jobs:
       run: chmod +x gradlew
 
     - name: Tests
-      run: ./gradlew :shared:jvmTest :desktopApp:test -Playa.version=${{ steps.version.outputs.value }}
+      run: ./gradlew :shared:jvmTest :desktopApp:test -Pauris.version=${{ steps.version.outputs.value }}
 
     - name: Build DMG
-      run: ./gradlew :desktopApp:packageDmg -Playa.version=${{ steps.version.outputs.value }}
+      run: ./gradlew :desktopApp:packageDmg -Pauris.version=${{ steps.version.outputs.value }}
 
     - name: Upload DMG Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: laya-macos-arm64-dmg
+        name: auris-macos-arm64-dmg
         path: desktopApp/build/compose/binaries/main/dmg/*.dmg
         if-no-files-found: error

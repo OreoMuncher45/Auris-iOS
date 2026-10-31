@@ -1,18 +1,18 @@
 import CryptoKit
 import Foundation
-import LayaKit
+import AurisKit
 import UIKit
 
 /// Kotlin's WidgetHost: turns what the player publishes into the snapshot the widget extension draws
-/// (LayaWidgetStore), with the covers fetched into the shared container first, since the extension can't wait on the
+/// (AurisWidgetStore), with the covers fetched into the shared container first, since the extension can't wait on the
 /// network. A changed cover keeps the old picture up until the new one is in, as Android's widgets hold their last.
 final class WidgetHostImpl: NSObject, WidgetHost {
-    private let queue = DispatchQueue(label: "laya.widgets")
+    private let queue = DispatchQueue(label: "auris.widgets")
     // Queue only.
-    private var snapshot = LayaWidgetStore.load()
+    private var snapshot = AurisWidgetStore.load()
     private var artURL: String?
     private var likedURLs: [String] = []
-    private var saved: LayaWidgetSnapshot?
+    private var saved: AurisWidgetSnapshot?
 
     func publish(mediaId: String?, title: String, artist: String, artworkUrl: String?, isPlaying: Bool, hasPrevious: Bool,
                  hasNext: Bool, isLiked: Bool, canLike: Bool, shuffleEnabled: Bool) {
@@ -43,7 +43,7 @@ final class WidgetHostImpl: NSObject, WidgetHost {
         queue.async {
             self.likedURLs = artworkUrls
             self.snapshot.liked = ids.indices.map { i in
-                LayaWidgetSnapshot.Liked(id: ids[i], title: titles[safe: i] ?? "",
+                AurisWidgetSnapshot.Liked(id: ids[i], title: titles[safe: i] ?? "",
                                          art: self.snapshot.liked.first { $0.id == ids[i] }?.art)
             }
             self.commit()
@@ -61,9 +61,9 @@ final class WidgetHostImpl: NSObject, WidgetHost {
     private func commit() {
         guard snapshot != saved else { return }
         saved = snapshot
-        LayaWidgetStore.save(snapshot)
+        AurisWidgetStore.save(snapshot)
         let keep = Set([snapshot.art].compactMap { $0 } + snapshot.liked.compactMap(\.art))
-        guard let dir = LayaWidgetStore.directory,
+        guard let dir = AurisWidgetStore.directory,
               let files = try? FileManager.default.contentsOfDirectory(atPath: dir.path) else { return }
         for f in files where (f.hasPrefix("art-") || f.hasPrefix("tile-")) && !keep.contains(f) {
             try? FileManager.default.removeItem(at: dir.appendingPathComponent(f))
@@ -73,7 +73,7 @@ final class WidgetHostImpl: NSObject, WidgetHost {
     /// The picture at [url] (remote, or a local cover path) saved no larger than [maxPx]; [done] on the queue with
     /// its file name, or nil when there is none. Reused when already saved.
     private func fetch(_ url: String?, prefix: String, maxPx: CGFloat, done: @escaping (String?) -> Void) {
-        guard let url, !url.isEmpty, let dir = LayaWidgetStore.directory else { return done(nil) }
+        guard let url, !url.isEmpty, let dir = AurisWidgetStore.directory else { return done(nil) }
         let name = "\(prefix)-" + SHA256.hash(data: Data(url.utf8)).prefix(10).map { String(format: "%02x", $0) }.joined() + ".jpg"
         let file = dir.appendingPathComponent(name)
         if FileManager.default.fileExists(atPath: file.path) { return done(name) }

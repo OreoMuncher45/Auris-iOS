@@ -1,0 +1,138 @@
+package com.music.auris.playback.audio
+
+import android.util.Log
+import com.music.auris.BuildConfig
+import com.music.auris.playback.EqualizerProcessor
+import com.music.auris.playback.KaraokeProcessor
+import com.music.auris.playback.LoudnessProcessor
+import com.music.auris.playback.ReverbProcessor
+import com.music.auris.playback.SpatialAudioProcessor
+import com.music.auris.playback.TransitionFilterProcessor
+
+/**
+ * Composite DSP chain executing Auris's custom audio processors in their canonical sequence:
+ *
+ * AudioBlock(Float32) -> KaraokeProcessor -> SpatialAudioProcessor -> EqualizerProcessor
+ *   -> ReverbProcessor -> TransitionFilterProcessor -> LoudnessProcessor -> AudioBlock(Float32)
+ *
+ * Karaoke comes first because it reads the vocal off how alike the two
+ * channels are, and spatial widening is exactly a change to that; the reverb
+ * after it then fills the room with the backing, not the voice that was taken out.
+ *
+ * Reverb follows the equaliser so the room hears the listener's tone, and
+ * comes before the transition filter so a handoff's bass swap or sweep takes
+ * the tail along with the dry sound instead of leaving it behind; before
+ * loudness, too, so the limiter sees whatever energy the tail adds.
+ *
+ * Operates purely on in-place Float32 audio blocks without intermediate fixed-point quantization,
+ * preserving full dynamic range and headroom.
+ *
+ * Loudness normalization is the last stage, and per sink on purpose: each
+ * player levels the track *it* is playing, so the two sides of a crossfade are
+ * each levelled for their own song — see [LoudnessProcessor]. Last because its
+ * limiter has to see the signal every other stage has finished shaping.
+ * That limiter is also the equaliser's: [EqualizerProcessor] only takes back
+ * half of a boost, and while it is shaping the signal the limiter stays on.
+ *
+ * ## Staying out of the way
+ *
+ * Every stage here self-bypasses when its own setting is off, returning before
+ * it reads a single sample rather than multiplying through by unity. With every
+ * stage idle the block leaves this class byte-identical to how it arrived,
+ * which is what lets [PcmBoundary]'s power-of-two scaling round-trip 16- and
+ * 24-bit integers unchanged — see `PrecisionAudioSink.publishOutputExactness`.
+ */
+class DspChain(
+    val spatial: SpatialAudioProcessor = SpatialAudioProcessor(),
+    val equalizer: EqualizerProcessor = EqualizerProcessor(),
+    val transition: TransitionFilterProcessor = TransitionFilterProcessor(),
+    val loudness: LoudnessProcessor = LoudnessProcessor(),
+    val reverb: ReverbProcessor = ReverbProcessor(),
+    val karaoke: KaraokeProcessor = KaraokeProcessor(),
+) : FloatAudioProcessor {
+
+    /**
+     * The next block's position in its track, in microseconds, as the sink
+     * knows it; lets karaoke line its neural stems up. Unknown by default.
+     */
+    var blockMediaTimeUs: Long = KaraokeProcessor.TIME_UNKNOWN
+
+    private var currentSampleRate: Int = 0
+    private var processCounter: Long = 0L
+
+    override fun configure(sampleRate: Int, channelCount: Int) {
+        this.currentSampleRate = sampleRate
+        karaoke.configure(sampleRate, channelCount)
+        spatial.configure(sampleRate, channelCount)
+        equalizer.configure(sampleRate, channelCount)
+        reverb.configure(sampleRate, channelCount)
+        transition.configure(sampleRate, channelCount)
+        loudness.configure(sampleRate, channelCount)
+    }
+
+    /** A new track has begun gaplessly on this sink; see [LoudnessProcessor.onStreamBoundary]. */
+    fun onStreamBoundary() {
+        loudness.onStreamBoundary()
+        karaoke.onStreamBoundary()
+    }
+
+    override fun process(block: AudioBlock) {
+        if (block.frameCount == 0) return
+
+        if (BuildConfig.DEBUG) {
+            processCounter++
+            if (processCounter == 1L || processCounter % 500L == 0L) {
+                try {
+                    val count = processCounter
+                    val frames = block.frameCount
+                    val sr = currentSampleRate
+                    val spatialOn = spatial.enabled
+                    val eqOn = equalizer.isEnabled
+                    val reverbOn = reverb.isActive
+                    val karaokeOn = if (karaoke.isUsingStems) "neural" else karaoke.isActive.toString()
+                    val transitionOn = transition.isFiltering
+                    Log.d(
+                        TAG,
+                        "process() #$count frames=$frames sr=$sr " +
+                            "spatial=$spatialOn eq=$eqOn reverb=$reverbOn karaoke=$karaokeOn transition=$transitionOn",
+                    )
+                } catch (_: Throwable) {
+                }
+            }
+        }
+
+        karaoke.process(block.samples, block.sampleCount, blockMediaTimeUs)
+        spatial.process(block)
+        equalizer.process(block)
+        reverb.process(block.samples, block.sampleCount)
+        transition.process(block)
+        // The equaliser leaves its overs in place for the stages after it to
+        // see; the loudness stage's limiter is what catches whatever survives.
+        loudness.holdLimiter = equalizer.isShaping
+        loudness.process(block)
+    }
+
+    @Suppress("DEPRECATION")
+    override fun flush() {
+        karaoke.reset()
+        spatial.flush()
+        equalizer.flush()
+        reverb.reset()
+        transition.flush()
+        loudness.flush()
+    }
+
+    override fun reset() {
+        processCounter = 0L
+        karaoke.reset()
+        spatial.reset()
+        equalizer.reset()
+        reverb.reset()
+        transition.reset()
+        loudness.reset()
+    }
+
+    companion object {
+        private const val TAG = "DspChain"
+    }
+}

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Laya</string>
+	<string>Auris</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -32,24 +32,24 @@
 	</dict>
 	<!-- Replay and lyrics cards: "Save" adds the picture to the photo library (add-only, nothing is read). -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Laya saves your Replay and lyrics cards to your photo library when you tap Save.</string>
+	<string>Auris saves your Replay and lyrics cards to your photo library when you tap Save.</string>
 	<!-- Google Cast discovery: the default media receiver's id is CC1AD845 (CastOptionsProvider on Android). -->
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Laya finds Chromecasts and Google Cast speakers on your Wi-Fi so you can play music on them.</string>
+	<string>Auris finds Chromecasts and Google Cast speakers on your Wi-Fi so you can play music on them.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_googlecast._tcp</string>
 		<string>_CC1AD845._googlecast._tcp</string>
 	</array>
-	<!-- laya://party/<CODE> invites; the https invite links need an associated domain the party server would have to host. -->
+	<!-- auris://party/<CODE> invites; the https invite links need an associated domain the party server would have to host. -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.music.laya.party</string>
+			<string>app.auris.Auris.party</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>laya</string>
+				<string>auris</string>
 			</array>
 		</dict>
 	</array>

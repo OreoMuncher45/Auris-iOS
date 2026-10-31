@@ -39,20 +39,20 @@ targets:
       - framework: Vendor/GoogleCast.xcframework
         embed: true
       - sdk: Photos.framework
-      - target: LayaWidgets
+      - target: AurisWidgets
         embed: true
     settings:
       base:
         # Checked-in plist; XcodeGen's `info:` key would overwrite it.
         INFOPLIST_FILE: iosApp/Info.plist
-        # The App Group the widgets read the snapshot from (LayaWidgetStore).
+        # The App Group the widgets read the snapshot from (AurisWidgetStore).
         CODE_SIGN_ENTITLEMENTS: iosApp/iosApp.entitlements
         GENERATE_INFOPLIST_FILE: NO
-        PRODUCT_NAME: Laya
+        PRODUCT_NAME: Auris
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Alternate icons for the App icon picker (IosAppIcon): Icon Composer documents, so iOS 26 renders them as Liquid Glass.
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-LiquidGlass AppIcon-LiquidGlassDark"
-        PRODUCT_BUNDLE_IDENTIFIER: com.music.laya
+        PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         FRAMEWORK_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../sharedUi/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
@@ -61,7 +61,7 @@ targets:
         CLANG_CXX_LANGUAGE_STANDARD: gnu++17
         # The analyzer's DSP is O(n) over a whole track; -O0 would make it crawl in Debug.
         GCC_OPTIMIZATION_LEVEL: "3"
-        OTHER_LDFLAGS: "$(inherited) -framework LayaKit"
+        OTHER_LDFLAGS: "$(inherited) -framework AurisKit"
     preBuildScripts:
       - name: Compile Kotlin framework
         basedOnDependencyAnalysis: false
@@ -72,21 +72,21 @@ targets:
           ./gradlew :sharedUi:embedAndSignAppleFrameworkForXcode
 
   # The home-screen widgets (Android's four), WidgetKit. iOS 17: interactive buttons start there.
-  LayaWidgets:
+  AurisWidgets:
     type: app-extension
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - LayaWidgets
+      - AurisWidgets
       - Shared
     settings:
       base:
-        INFOPLIST_FILE: LayaWidgets/Info.plist
+        INFOPLIST_FILE: AurisWidgets/Info.plist
         GENERATE_INFOPLIST_FILE: NO
-        PRODUCT_NAME: LayaWidgets
-        PRODUCT_BUNDLE_IDENTIFIER: com.music.laya.widgets
+        PRODUCT_NAME: AurisWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: app.auris.Auris.widgets
         TARGETED_DEVICE_FAMILY: "1"
-        CODE_SIGN_ENTITLEMENTS: LayaWidgets/LayaWidgets.entitlements
-        # Shared/LayaWidgetShared.swift leaves out what an extension may not use.
+        CODE_SIGN_ENTITLEMENTS: AurisWidgets/AurisWidgets.entitlements
+        # Shared/AurisWidgetShared.swift leaves out what an extension may not use.
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) LAYA_WIDGET_EXTENSION"
         SKIP_INSTALL: YES

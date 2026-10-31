@@ -81,14 +81,14 @@ val signatureApiUrl: String = (
 val betaSuffix = ""
 
 android {
-    namespace = "com.music.laya"
+    namespace = "com.music.auris"
     // InnerTubeX's AAR requires compiling against 37; targetSdk (runtime behaviour) stays 36.
     compileSdk = 37
 
     defaultConfig {
         // Its own id, so the TV app is a separate install from the phone app
         // rather than an upgrade over it (or under it).
-        applicationId = "com.music.laya.tv"
+        applicationId = "com.music.auris.tv"
         // 26 keeps reach wide; real-time blur (RenderEffect) kicks in on API 31+,
         // Haze falls back to a translucent scrim below that.
         minSdk = 26
@@ -112,7 +112,7 @@ android {
             "\"${signatureApiUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"",
         )
         // The TV APKs share a GitHub release with the phone ones and are told
-        // apart by name (Laya-1.8.3-android-tv-universal.apk, …-android-tv-x86_64.apk), so
+        // apart by name (Auris-1.8.3-android-tv-universal.apk, …-android-tv-x86_64.apk), so
         // the updater installs the TV app here, never the phone app. See
         // AppUpdateChecker.apkAssetUrl.
         buildConfigField("String", "UPDATE_APK_KIND", "\"android-tv\"")
@@ -163,12 +163,12 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
-            applicationId = "com.dev.laya.tv"
-            resValue("string", "app_name", "Laya TV")
+            applicationId = "com.dev.auris.tv"
+            resValue("string", "app_name", "Auris TV")
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Laya TV")
+            resValue("string", "app_name", "Auris TV")
         }
     }
 
@@ -381,7 +381,7 @@ dependencies {
     // a camera scanner and an Activity with it, and nothing here reads a code —
     // a party is joined by tapping somebody else's link or typing six
     // characters. This produces the bit matrix; the drawing is ours, in
-    // [com.music.laya.ui.components.QrCode], so the result is styled like
+    // [com.music.auris.ui.components.QrCode], so the result is styled like
     // the rest of the app rather than a stock black-and-white bitmap.
     implementation("com.google.zxing:core:3.5.3")
 
@@ -446,8 +446,8 @@ dependencies {
     // ---- Casting: Google Cast sender + the route discovery it sits on ----
     // The framework and the router only. media3-cast is left out on purpose:
     // its CastPlayer hands the receiver whatever URI a MediaItem carries, and
-    // ours are `laya://` addresses that only the service's resolver can
-    // turn into a real stream — see [com.music.laya.playback.cast.CastPlayback].
+    // ours are `auris://` addresses that only the service's resolver can
+    // turn into a real stream — see [com.music.auris.playback.cast.CastPlayback].
     implementation("com.google.android.gms:play-services-cast-framework:22.2.0")
     implementation("androidx.mediarouter:mediarouter:1.8.1")
 
@@ -486,10 +486,10 @@ val verifyDevInstall = tasks.register("verifyDevInstall") {
             .drop(1)
             .mapNotNull { line -> line.split('\t').takeIf { it.size == 2 && it[1] == "device" }?.get(0) }
         serials.forEach { serial ->
-            logger.lifecycle("verifyDevInstall: compiling com.dev.laya on $serial")
+            logger.lifecycle("verifyDevInstall: compiling com.dev.auris on $serial")
             ProcessBuilder(
                 adbPath, "-s", serial, "shell", "cmd", "package", "compile",
-                "-m", "verify", "-f", "com.dev.laya",
+                "-m", "verify", "-f", "com.dev.auris",
             ).inheritIO().start().waitFor()
         }
     }

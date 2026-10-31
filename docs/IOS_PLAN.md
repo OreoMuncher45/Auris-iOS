@@ -1,4 +1,4 @@
-# Laya for iOS — build plan
+# Auris for iOS — build plan
 
 Goal: an `.ipa` for iPhone that matches the Android app feature-for-feature, built by
 reusing the existing Kotlin Multiplatform code instead of writing a Swift app from scratch.
@@ -27,9 +27,9 @@ can't compile. Most of the work is moving that code into `commonMain` behind sma
 
 ## 1. Existing iOS ports we can borrow from
 
-Two public forks of upstream **BitChord** (Laya's parent; package `com.music.bitchord`, ours is
-`com.music.laya`) already attempted this. Both are GPL-3.0 like Laya, so code can be copied with
-attribution. Both fork an **older** BitChord, so anything copied must be merged into Laya's newer
+Two public forks of upstream **BitChord** (Auris's parent; package `com.music.bitchord`, ours is
+`com.music.auris`) already attempted this. Both are GPL-3.0 like Auris, so code can be copied with
+attribution. Both fork an **older** BitChord, so anything copied must be merged into Auris's newer
 files (karaoke, reverb, system font, etc.), never pasted over them.
 
 ### A. `atlasoftimezz-coder/BitChord-iOS` — honest, partly proven on a real iPhone
@@ -57,7 +57,7 @@ files (karaoke, reverb, system font, etc.), never pasted over them.
 
 ### B. `Spvteam/bitchord-ipados` — right structure, unverified claims
 
-- Same layout as Laya: moved `shared` + `sharedUi` from `jvmSharedMain` into **`commonMain`**
+- Same layout as Auris: moved `shared` + `sharedUi` from `jvmSharedMain` into **`commonMain`**
   in place (shared ~16k, sharedUi ~21k), so Android/desktop/iOS compile the same files. This is
   the approach this plan wants.
 - Vendors InnerTubeX as a KMP module with its own iOS cipher loader (likely unnecessary now that
@@ -69,15 +69,15 @@ files (karaoke, reverb, system font, etc.), never pasted over them.
 - **Caution**: one squashed commit, AI-generated, and the "12/12 done, 284 tests" tracker does
   not hold up. `IOSAudioEngine.kt` only stores the URL and never decodes or schedules audio; the
   app actually plays through a plain `AVPlayer` inside a custom 2.2k-line `BitChordIosApp.kt`
-  (not the real Laya UI). Treat every file as a draft to review, not as working code.
+  (not the real Auris UI). Treat every file as a draft to review, not as working code.
 
 ### What we take from each
 
 | Need | Take from | How |
 |---|---|---|
-| `commonMain` migration of `shared` / `sharedUi` | **B** as a reference diff | Re-do the move on Laya's files; use B's diffs to speed up the JVM→common rewrites |
+| `commonMain` migration of `shared` / `sharedUi` | **B** as a reference diff | Re-do the move on Auris's files; use B's diffs to speed up the JVM→common rewrites |
 | InnerTubeX on iOS | **A** | Bump to upstream `v0.7.4+` (multiplatform). Drop NewPipe on iOS |
-| Audio engine, chunked loader, EQ tap, analysis bridge | **A** | Copy the Swift files, rename package, wire to Laya's `CrossfadeController` / processors |
+| Audio engine, chunked loader, EQ tap, analysis bridge | **A** | Copy the Swift files, rename package, wire to Auris's `CrossfadeController` / processors |
 | CI + unsigned `.ipa` + sideload | **A** | Copy `ios.yml` + `project.yml` (XcodeGen) |
 | Keychain, PoToken, sandbox storage, share sheet, haptics | **B** | Review, test on device, keep what works |
 | Real phone UI | neither | Our own work (Phase 4) |
@@ -132,15 +132,15 @@ files (karaoke, reverb, system font, etc.), never pasted over them.
 ### Phase 1 — iOS targets, CI, "hello" on a phone
 
 1. Add `iosArm64()` + `iosSimulatorArm64()` to `shared` and `sharedUi`; `sharedUi` exports a
-   static framework `LayaKit`.
+   static framework `AurisKit`.
 2. Copy A's `ios/iosApp/project.yml` + `iOSApp.swift` into `iosApp/`, rename bundle id to
-   `com.music.laya`, host `MainViewController()` (Compose) from SwiftUI.
+   `com.music.auris`, host `MainViewController()` (Compose) from SwiftUI.
 3. Copy A's `.github/workflows/ios.yml`, adjust paths (our root Gradle build, not `ios/`), output
-   `Laya.ipa` artifact.
+   `Auris.ipa` artifact.
 4. `settings.gradle.kts` already skips Android modules without an SDK — make sure the macOS CI
    runner builds only what iOS needs.
 
-**Done when:** CI produces `Laya.ipa`, it sideloads, and shows a Compose screen.
+**Done when:** CI produces `Auris.ipa`, it sideloads, and shows a Compose screen.
 
 ### Phase 2 — Move shared logic into `commonMain` (use B as the reference diff)
 
@@ -162,16 +162,16 @@ Leaf-first, small batches, `./gradlew :shared:jvmTest` after each:
 ### Phase 3 — Playback on iOS (copy A's engine)
 
 1. Copy `AudioEngine.swift`, `ChunkedResourceLoader.swift`, `TransitionFilter.swift` into
-   `iosApp/`. Rename `Shared`/bitchord types to Laya's; expose the Kotlin `AudioEngine`
+   `iosApp/`. Rename `Shared`/bitchord types to Auris's; expose the Kotlin `AudioEngine`
    interface they implement from `shared/iosMain`.
-2. Drive them from Laya's queue (`QueueCoordinator`-equivalent logic in common), autoplay,
+2. Drive them from Auris's queue (`QueueCoordinator`-equivalent logic in common), autoplay,
    shuffle, history, sleep timer, last-played.
-3. Gapless (pre-resolved next item) and crossfade 0–12s via Laya's `CrossfadeController`.
+3. Gapless (pre-resolved next item) and crossfade 0–12s via Auris's `CrossfadeController`.
 4. Background audio (`UIBackgroundModes: audio`), lock screen, Control Center, AirPods,
    interruptions — already in A's engine; verify.
 5. Per-network quality via `NWPathMonitor`; speed 0.5–2.0×, skip silence.
 6. **Effects through `MTAudioProcessingTap`** (A's pattern): EQ (replaces Android's system EQ),
-   loudness, Laya's **reverb** (`docs/REVERB.md`) and spatial processors — port the DSP to C++
+   loudness, Auris's **reverb** (`docs/REVERB.md`) and spatial processors — port the DSP to C++
    (`native/`) or call Kotlin from the tap; measure CPU on device.
 7. Stats for nerds from `AVPlayerItem` access log / track format descriptions.
 
@@ -180,7 +180,7 @@ Known ceiling: AVPlayer can't decode WebM/Opus, so YouTube tops out at AAC ~130 
 
 **Done when:** 30+ minutes of locked-screen playback with gapless, crossfade, EQ and reverb.
 
-### Phase 4 — Real Laya UI on iOS
+### Phase 4 — Real Auris UI on iOS
 
 Neither reference repo did this; it's the largest single chunk.
 
@@ -223,7 +223,7 @@ Neither reference repo did this; it's the largest single chunk.
 ### Phase 7 — On-device AI: Karaoke & Automix
 
 1. A already runs the C++ analyzer + Beat This! + open-unmix ONNX on iOS
-   (`AnalysisBridge.swift`) — copy, then add Laya's `UVR_MDXNET_9482.onnx` karaoke separator.
+   (`AnalysisBridge.swift`) — copy, then add Auris's `UVR_MDXNET_9482.onnx` karaoke separator.
 2. Karaoke output: separated stems played through the tap / a second deck.
 3. Gate by device RAM and thermal state; "karaoke unavailable" fallback.
 
@@ -242,7 +242,7 @@ Neither reference repo did this; it's the largest single chunk.
 
 ### Phase 9 — Release
 
-1. CI from Phase 1 builds `Laya.ipa` on tags; upload to the GitHub release next to the APK and
+1. CI from Phase 1 builds `Auris.ipa` on tags; upload to the GitHub release next to the APK and
    desktop builds (`docs/DESKTOP_RELEASES.md`).
 2. Version from `app/build.gradle.kts` → `CFBundleShortVersionString` / `CFBundleVersion`.
 3. Info.plist: `UIBackgroundModes` (audio), `NSLocalNetworkUsageDescription` +
@@ -276,7 +276,7 @@ Neither reference repo did this; it's the largest single chunk.
 
 | Risk | Mitigation |
 |---|---|
-| Code copied from A/B is written against older BitChord | Merge file by file into Laya's versions; never overwrite |
+| Code copied from A/B is written against older BitChord | Merge file by file into Auris's versions; never overwrite |
 | B's code looks complete but isn't (e.g. silent audio engine) | Treat B as a draft; every borrowed file needs an on-device check |
 | `commonMain` move regresses Android/desktop | Small batches, JVM tests each time, Android releases continue from `development` |
 | AAC ~130 kbps ceiling on YouTube | Phase 8 Opus decoder; FLAC module sources unaffected |

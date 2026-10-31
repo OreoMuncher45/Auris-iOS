@@ -1,6 +1,6 @@
 package com.my.kizzy.gateway
 
-import com.music.laya.platform.nanoTime
+import com.music.auris.platform.nanoTime
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.websocket.WebSockets

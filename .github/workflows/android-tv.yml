@@ -31,9 +31,9 @@ jobs:
 
     - name: Setup signing keystore
       run: |
-        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > laya-release.jks
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > auris-release.jks
         {
-          echo "storeFile=laya-release.jks"
+          echo "storeFile=auris-release.jks"
           echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}"
           echo "keyAlias=${{ secrets.KEY_ALIAS }}"
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
@@ -48,6 +48,6 @@ jobs:
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: laya-tv-prod-release-signed
+        name: auris-tv-prod-release-signed
         path: tv/build/outputs/apk/prod/release/*universal*.apk
         if-no-files-found: error

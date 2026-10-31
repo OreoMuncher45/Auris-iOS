@@ -6,7 +6,7 @@
  *
  * Orchard's original source is licensed under the GNU Affero General Public
  * License, version 3 or later. Per AGPLv3 section 13, this file is combined
- * here into Laya -- a work licensed under the GNU General Public
+ * here into Auris -- a work licensed under the GNU General Public
  * License, version 3 or later -- and remains itself governed by the AGPLv3
  * as part of that combination.
  *
@@ -39,7 +39,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace laya::smart {
+namespace auris::smart {
 
 // Zero crossings kept either side of each output sample. Higher is a better
 // stopband at linear cost; 32 puts the aliasing well below the noise floor of
@@ -60,4 +60,4 @@ std::vector<float> Resample(
   double output_rate
 );
 
-}  // namespace laya::smart
+}  // namespace auris::smart

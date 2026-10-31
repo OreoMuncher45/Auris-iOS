@@ -1,6 +1,6 @@
 package com.my.kizzy.rpc
 
-import com.music.laya.platform.ConcurrentMap
+import com.music.auris.platform.ConcurrentMap
 
 internal object ArtworkCache {
     private val cache = ConcurrentMap<String, String>()

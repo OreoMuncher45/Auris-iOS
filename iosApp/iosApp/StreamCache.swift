@@ -11,13 +11,13 @@ final class StreamCache {
     static let capBytes: Int64 = 512 << 20
 
     /// All download state lives on this queue; readers on other threads go through the entry's lock.
-    fileprivate let queue = DispatchQueue(label: "laya.stream-cache")
+    fileprivate let queue = DispatchQueue(label: "auris.stream-cache")
     private let dir: URL
     private var entries: [String: Entry] = [:]
     private let lock = NSLock()
 
     private init() {
-        dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("laya-stream")
+        dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("auris-stream")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     }
 

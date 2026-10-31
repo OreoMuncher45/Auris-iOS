@@ -15,7 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Laya"
+rootProject.name = "Auris"
 include(":shared")
 include(":sharedUi")
 include(":desktopUi")

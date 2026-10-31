@@ -78,14 +78,14 @@ jobs:
     # installd rejects a bundle with no signature; Sideloadly/AltStore re-sign it.
     - name: Ad-hoc sign
       run: |
-        APP=build/dd/Build/Products/Release-iphoneos/Laya.app
+        APP=build/dd/Build/Products/Release-iphoneos/Auris.app
         find "$APP" -type d -empty -delete
         # Embedded frameworks (ONNX Runtime, Google Cast) are signed before the bundle that contains them.
         for f in "$APP"/Frameworks/*.framework; do [ -e "$f" ] && codesign --force --sign - --timestamp=none "$f"; done
         # The widgets extension, then the app, with the App Group they share: an unsigned build carries no
         # entitlements, and a re-signing sideloader only sets up the groups it finds here.
         codesign --force --sign - --timestamp=none --generate-entitlement-der \
-          --entitlements iosApp/LayaWidgets/LayaWidgets.entitlements "$APP/PlugIns/LayaWidgets.appex"
+          --entitlements iosApp/AurisWidgets/AurisWidgets.entitlements "$APP/PlugIns/AurisWidgets.appex"
         codesign --force --sign - --timestamp=none --generate-entitlement-der \
           --entitlements iosApp/iosApp/iosApp.entitlements "$APP"
         codesign --verify --strict --verbose=2 "$APP"
@@ -96,13 +96,13 @@ jobs:
     - name: Package .ipa
       run: |
         mkdir -p build/ipa/Payload
-        cp -R build/dd/Build/Products/Release-iphoneos/Laya.app build/ipa/Payload/
-        cd build/ipa && zip -qry "../Laya-${{ steps.version.outputs.value }}-ios.ipa" Payload
+        cp -R build/dd/Build/Products/Release-iphoneos/Auris.app build/ipa/Payload/
+        cd build/ipa && zip -qry "../Auris-${{ steps.version.outputs.value }}-ios.ipa" Payload
 
     - uses: actions/upload-artifact@v4
       with:
-        name: Laya-ipa
-        path: build/Laya-*-ios.ipa
+        name: Auris-ipa
+        path: build/Auris-*-ios.ipa
         retention-days: 30
 
     # release.yml creates the (draft) release when its own jobs finish, which may be after this one.
@@ -115,7 +115,7 @@ jobs:
         tag="${GITHUB_REF_NAME}"
         for i in $(seq 1 90); do
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" build/Laya-*-ios.ipa --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$tag" build/Auris-*-ios.ipa --clobber --repo "$GITHUB_REPOSITORY"
             exit 0
           fi
           echo "Release $tag not there yet ($i/90); waiting"

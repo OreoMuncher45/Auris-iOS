@@ -1,9 +1,9 @@
 import Foundation
-import LayaKit
+import AurisKit
 import OnnxRuntimeBindings
 
 /// What Automix's analysis needs from the platform (see AutomixNative.kt): the track decoded to 22,050 Hz mono,
-/// the C++ DSP analyzer (LayaAnalysis.mm) and the Beat This! model on ONNX Runtime. Worker threads only.
+/// the C++ DSP analyzer (AurisAnalysis.mm) and the Beat This! model on ONNX Runtime. Worker threads only.
 final class AutomixNativeImpl: NSObject, AutomixNative {
     private static let rate = 22_050
     /// BeatTracker.CHUNK_FRAMES / BORDER_FRAMES: the model reads 1500-frame chunks and has no context at their edges.
@@ -60,7 +60,7 @@ final class AutomixNativeImpl: NSObject, AutomixNative {
         var frames = 0
         let spectrogram: Data? = left.withUnsafeBufferPointer { l in
             right.withUnsafeBufferPointer { r in
-                LayaAnalysis.vocalSpectrogramLeft(l.baseAddress!, right: r.baseAddress!, count: l.count, frames: &frames) as Data?
+                AurisAnalysis.vocalSpectrogramLeft(l.baseAddress!, right: r.baseAddress!, count: l.count, frames: &frames) as Data?
             }
         }
         guard let spectrogram, frames > 0, frames <= Self.vocalFrames else { return nil }
@@ -127,7 +127,7 @@ final class AutomixNativeImpl: NSObject, AutomixNative {
 
     private func beatLogitsNow(modelPath: String, threads: Int32, pcm: UnsafeMutableRawPointer, count: Int32) -> AutomixLogits? {
         var frames = 0
-        guard let mel = LayaAnalysis.beatSpectrogram(pcm.assumingMemoryBound(to: Float.self), count: Int(count), frames: &frames), frames > 0,
+        guard let mel = AurisAnalysis.beatSpectrogram(pcm.assumingMemoryBound(to: Float.self), count: Int(count), frames: &frames), frames > 0,
               let session = session(modelPath, Int(threads)) else { return nil }
         var beat = [Float](repeating: 0, count: frames)
         var downbeat = [Float](repeating: 0, count: frames)
@@ -195,7 +195,7 @@ private final class PcmBuffer: NSObject, AutomixPcm {
 
     func features(durationSeconds: Double) -> String? {
         samples.withUnsafeBufferPointer {
-            LayaAnalysis.featuresJSON($0.baseAddress!, count: $0.count, rate: 22_050, duration: durationSeconds)
+            AurisAnalysis.featuresJSON($0.baseAddress!, count: $0.count, rate: 22_050, duration: durationSeconds)
         }
     }
 

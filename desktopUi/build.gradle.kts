@@ -85,6 +85,6 @@ kotlin {
 compose.resources {
     publicResClass = true
     // The same class :sharedUi generates, so the desktop's `Res` imports did not move.
-    packageOfResClass = "com.music.laya.sharedui.resources"
+    packageOfResClass = "com.music.auris.sharedui.resources"
     generateResClass = always
 }

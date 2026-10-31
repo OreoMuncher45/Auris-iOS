@@ -1,6 +1,6 @@
 # Maintainers
 
-This document lists the maintainers responsible for Laya.
+This document lists the maintainers responsible for Auris.
 
 | Maintainer | GitHub | Responsibilities |
 |---|---|---|

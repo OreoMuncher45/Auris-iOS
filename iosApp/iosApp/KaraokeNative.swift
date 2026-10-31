@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import LayaKit
+import AurisKit
 import OnnxRuntimeBindings
 
 /// What neural karaoke needs from the platform: ONNX Runtime for the MDX model, and a decode of

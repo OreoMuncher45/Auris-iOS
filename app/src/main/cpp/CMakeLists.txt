@@ -11,7 +11,7 @@
 # to that same tree without duplicating this module.
 
 cmake_minimum_required(VERSION 3.22.1)
-project(laya_analysis LANGUAGES C CXX)
+project(auris_analysis LANGUAGES C CXX)
 
 get_filename_component(LAYA_NATIVE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../native"
@@ -20,7 +20,7 @@ get_filename_component(LAYA_NATIVE_DIR
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(laya_analysis SHARED
+add_library(auris_analysis SHARED
     ${LAYA_NATIVE_DIR}/analyzer/audio_analysis.cpp
     ${LAYA_NATIVE_DIR}/analyzer/tempo_analysis.cpp
     ${LAYA_NATIVE_DIR}/analyzer/resampler.cpp
@@ -31,31 +31,31 @@ add_library(laya_analysis SHARED
     jni/vocal_jni.cpp
 )
 
-target_include_directories(laya_analysis PRIVATE
+target_include_directories(auris_analysis PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${LAYA_NATIVE_DIR}
 )
 
 # -ffast-math is deliberately NOT enabled: the analyzer's log/mel-adjacent
 # arithmetic (see audio_analysis.cpp) is tuned against exact IEEE behaviour.
-target_compile_options(laya_analysis PRIVATE -O3 -fvisibility=hidden)
+target_compile_options(auris_analysis PRIVATE -O3 -fvisibility=hidden)
 
 find_library(log-lib log)
-target_link_libraries(laya_analysis ${log-lib})
+target_link_libraries(auris_analysis ${log-lib})
 
 # 16KB page-size support (Android 15+ 16KB kernels, Play requirement): align
 # LOAD segments to 16KB. A superset of 4KB alignment, so 4KB devices are
 # unaffected. APK-side alignment of uncompressed .so files is handled by AGP.
-target_link_options(laya_analysis PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_options(auris_analysis PRIVATE "-Wl,-z,max-page-size=16384")
 
 # DSD playback (DSF/DFF). The decimator turns 1-bit DSD into float PCM for
 # DsdExtractor; DST is the lossless compression SACD rips use inside DFF.
 # DST is LGPL (see dsd/dst/NOTICE.md), so it is a library of its own that can
 # be rebuilt or swapped without touching the rest.
-add_library(laya_dsd SHARED dsd/dsd_decimator.cpp)
-target_compile_options(laya_dsd PRIVATE -O3 -fno-fast-math -ffp-contract=off -fvisibility=hidden)
-target_link_options(laya_dsd PRIVATE "-Wl,-z,max-page-size=16384")
+add_library(auris_dsd SHARED dsd/dsd_decimator.cpp)
+target_compile_options(auris_dsd PRIVATE -O3 -fno-fast-math -ffp-contract=off -fvisibility=hidden)
+target_link_options(auris_dsd PRIVATE "-Wl,-z,max-page-size=16384")
 
-add_library(laya_dst SHARED dsd/dst/decoder.c dsd/dst/jni.cpp)
-target_compile_options(laya_dst PRIVATE -O3 -fno-strict-aliasing -fvisibility=hidden)
-target_link_options(laya_dst PRIVATE "-Wl,-z,max-page-size=16384")
+add_library(auris_dst SHARED dsd/dst/decoder.c dsd/dst/jni.cpp)
+target_compile_options(auris_dst PRIVATE -O3 -fno-strict-aliasing -fvisibility=hidden)
+target_link_options(auris_dst PRIVATE "-Wl,-z,max-page-size=16384")

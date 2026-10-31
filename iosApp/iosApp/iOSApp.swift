@@ -1,5 +1,5 @@
 import SwiftUI
-import LayaKit
+import AurisKit
 
 @main
 struct iOSApp: App {
@@ -15,7 +15,7 @@ struct iOSApp: App {
         _ = iOSApp.castNative // statics are lazy
         // Home-screen widgets: what they draw, and where their buttons' intents land.
         IosWidgets.shared.host = WidgetHostImpl()
-        LayaWidgetCommands.handler = { IosWidgets.shared.perform(command: $0) }
+        AurisWidgetCommands.handler = { IosWidgets.shared.perform(command: $0) }
     }
 
     var body: some Scene {

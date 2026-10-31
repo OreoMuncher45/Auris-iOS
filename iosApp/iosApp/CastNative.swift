@@ -1,6 +1,6 @@
 import Foundation
 import GoogleCast
-import LayaKit
+import AurisKit
 
 /// Google Cast for the Kotlin side (IosCast): discovery, sessions, and the receiver's queue and clock.
 /// Android's CastOptionsProvider, ported: the stock media receiver, and the receiver is stopped when the session ends.

@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import LayaKit
+import AurisKit
 import MediaToolbox
 import QuartzCore
 

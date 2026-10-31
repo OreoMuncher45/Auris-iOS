@@ -52,7 +52,7 @@ jobs:
         gh release download "$tag" -p "$name" -O app.ipa
         # Version and build come from the IPA itself, so SideStore compares against exactly what installs.
         # SideStore treats the first entry as the latest, so the list is kept newest first even when an older tag is re-added.
-        unzip -p app.ipa 'Payload/Laya.app/Info.plist' > Info.plist
+        unzip -p app.ipa 'Payload/Auris.app/Info.plist' > Info.plist
         read -r ver build minos < <(python3 -c "import plistlib;p=plistlib.load(open('Info.plist','rb'));print(p['CFBundleShortVersionString'],p['CFBundleVersion'],p.get('MinimumOSVersion','16.0'))")
         # Only the release notes' iOS section (a "## ... iOS" / "### ... iOS" heading, up to the next heading);
         # a release with none still ships an IPA, so it reads as fixes.

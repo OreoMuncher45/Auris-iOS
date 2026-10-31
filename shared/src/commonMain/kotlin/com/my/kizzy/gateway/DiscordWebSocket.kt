@@ -38,11 +38,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import com.music.laya.platform.runBlockingCompat
+import com.music.auris.platform.runBlockingCompat
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import com.music.laya.data.DebugLog
+import com.music.auris.data.DebugLog
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement

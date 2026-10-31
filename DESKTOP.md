@@ -1,6 +1,6 @@
-# Laya Desktop
+# Auris Desktop
 
-Laya has a Kotlin Multiplatform shared module and a Compose Multiplatform
+Auris has a Kotlin Multiplatform shared module and a Compose Multiplatform
 desktop application for macOS, Linux, and Windows. Desktop uses the JVM target, which is
 the supported Compose Multiplatform desktop model.
 
@@ -27,28 +27,28 @@ running `gradlew.bat :desktopApp:run`.
 
 ## Installing a release
 
-Every download on the [releases page](https://github.com/impin2rex/Laya/releases) carries its own Java
+Every download on the [releases page](https://github.com/impin2rex/Auris/releases) carries its own Java
 runtime, the FFmpeg and ONNX natives, the Automix analyser and its models.
 Nothing else has to be installed first — no JDK, no codec pack.
 
 | Platform | Download | Notes |
 |---|---|---|
-| macOS | `Laya-<version>-macos-arm64.dmg` | For Apple Silicon Macs (M1/M2/M3/M4/later). Drag to Applications. |
-| macOS | `Laya-<version>-macos-x64.dmg` | For Intel Macs. Drag to Applications. |
-| macOS | `Laya-<version>-macos-*.pkg` | Standard macOS installer package for automated or managed installations. |
-| Linux | `Laya-<version>-linux-x86_64.AppImage` | `chmod +x` it and run. No install, works on any distribution. |
-| Linux | `Laya-<version>-linux-amd64.deb` | `sudo apt install ./Laya-*.deb` on Debian, Ubuntu and derivatives. |
-| Linux | `Laya-<version>-linux-x86_64.rpm` | `sudo dnf install ./Laya-*.rpm` on Fedora, RHEL and openSUSE. |
-| Windows | `Laya-<version>-windows-x64-setup.exe` | The ordinary installer. Installs for the current user, so it never asks for an administrator. |
-| Windows | `Laya-<version>-windows-x64.msi` | The same thing for anyone who deploys by MSI. |
-| Windows | `Laya-<version>-windows-x64-portable.zip` | Unzip anywhere and run `Laya.exe`. Writes nothing outside the folder. |
+| macOS | `Auris-<version>-macos-arm64.dmg` | For Apple Silicon Macs (M1/M2/M3/M4/later). Drag to Applications. |
+| macOS | `Auris-<version>-macos-x64.dmg` | For Intel Macs. Drag to Applications. |
+| macOS | `Auris-<version>-macos-*.pkg` | Standard macOS installer package for automated or managed installations. |
+| Linux | `Auris-<version>-linux-x86_64.AppImage` | `chmod +x` it and run. No install, works on any distribution. |
+| Linux | `Auris-<version>-linux-amd64.deb` | `sudo apt install ./Auris-*.deb` on Debian, Ubuntu and derivatives. |
+| Linux | `Auris-<version>-linux-x86_64.rpm` | `sudo dnf install ./Auris-*.rpm` on Fedora, RHEL and openSUSE. |
+| Windows | `Auris-<version>-windows-x64-setup.exe` | The ordinary installer. Installs for the current user, so it never asks for an administrator. |
+| Windows | `Auris-<version>-windows-x64.msi` | The same thing for anyone who deploys by MSI. |
+| Windows | `Auris-<version>-windows-x64-portable.zip` | Unzip anywhere and run `Auris.exe`. Writes nothing outside the folder. |
 
 **macOS Gatekeeper.** Unsigned binaries built locally or downloaded outside the Mac App Store
-may trigger a macOS security prompt ("Laya is damaged and can't be opened" or "unidentified developer").
+may trigger a macOS security prompt ("Auris is damaged and can't be opened" or "unidentified developer").
 To clear the quarantine flag, run:
 
 ```bash
-xattr -cr /Applications/Laya.app
+xattr -cr /Applications/Auris.app
 ```
 
 The Linux packages are built on Ubuntu 22.04 against its glibc, so they install
@@ -63,7 +63,7 @@ time.
 
 **Windows and the Visual C++ runtime.** The Automix analyser is linked against a
 static C runtime, so on almost every machine there is nothing to install. If
-Laya starts but Automix never analyses anything, install the
+Auris starts but Automix never analyses anything, install the
 [Microsoft Visual C++ 2015–2022 Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 and restart it — that is the one dependency the bundled runtime cannot carry
 itself, because Windows expects it to be a system component.
@@ -83,9 +83,9 @@ On macOS:
 # Builds the .pkg installer
 ./gradlew :desktopApp:packagePkg
 
-# Standalone Laya.app bundle
+# Standalone Auris.app bundle
 ./gradlew :desktopApp:createDistributable
-# Output is at: desktopApp/build/compose/binaries/main/app/Laya.app
+# Output is at: desktopApp/build/compose/binaries/main/app/Auris.app
 ```
 
 On Linux — `rpm`, `fakeroot` and `binutils` must be installed for the packages,
@@ -98,8 +98,8 @@ bash ./gradlew :desktopApp:packageRpm
 # The AppImage is wrapped around the app image jpackage produces.
 bash ./gradlew :desktopApp:createDistributable
 desktopApp/packaging/appimage.sh \
-  desktopApp/build/compose/binaries/main/app/Laya \
-  dist/Laya-linux-x86_64.AppImage
+  desktopApp/build/compose/binaries/main/app/Auris \
+  dist/Auris-linux-x86_64.AppImage
 ```
 
 On Windows — [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases) must
@@ -113,5 +113,5 @@ REM The portable build is the app image, zipped.
 gradlew.bat :desktopApp:createDistributable
 ```
 
-Pass `-Playa.version=1.2.3` to stamp a version other than the one in
+Pass `-Pauris.version=1.2.3` to stamp a version other than the one in
 `desktopApp/build.gradle.kts`; a release build takes it from the tag.

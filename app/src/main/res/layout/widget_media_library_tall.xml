@@ -176,7 +176,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- The Laya mark, top right, as Spotify's widget carries its own. Opens the app. -->
+    <!-- The Auris mark, top right, as Spotify's widget carries its own. Opens the app. -->
     <ImageView
         android:id="@+id/widget_logo"
         android:layout_width="20dp"
@@ -185,6 +185,6 @@
         android:layout_marginTop="14dp"
         android:layout_marginRight="14dp"
         android:alpha="0.9"
-        android:contentDescription="@string/widget_open_laya"
+        android:contentDescription="@string/widget_open_auris"
         android:src="@drawable/ic_notification_logo" />
 </FrameLayout>

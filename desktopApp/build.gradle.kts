@@ -4,23 +4,23 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /** What the packages, the launcher and the settings footer all say. */
-val appVersion: String = providers.gradleProperty("laya.version").orNull
+val appVersion: String = providers.gradleProperty("auris.version").orNull
     ?.removePrefix("v")
     ?.takeIf { it.isNotBlank() }
     // The same version the Android build ships, from the root build — a hard-coded fallback here
     // went stale and made every local or unversioned build announce itself as 1.8-beta1, which
     // the update checker then offered to "update" to an older release.
-    ?: rootProject.extra["layaVersionName"] as String
+    ?: rootProject.extra["aurisVersionName"] as String
 
 /** Which platform this build is *for*, which is the host unless told otherwise. */
 val hostIsWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
 val hostIsLinux = System.getProperty("os.name").contains("Linux", ignoreCase = true)
 val hostIsMac = System.getProperty("os.name").contains("Mac", ignoreCase = true)
-val targetOs: String = (providers.gradleProperty("laya.target").orNull ?: when {
+val targetOs: String = (providers.gradleProperty("auris.target").orNull ?: when {
     hostIsWindows -> "windows"
     hostIsLinux -> "linux"
     hostIsMac -> "macos"
-    else -> error("Laya desktop supports Linux, Windows, and macOS only")
+    else -> error("Auris desktop supports Linux, Windows, and macOS only")
 }).lowercase()
 
 val hostArch = System.getProperty("os.arch").lowercase()
@@ -40,7 +40,7 @@ val nativeClassifier = when (targetOs) {
     "windows" -> "windows-x86_64"
     "linux" -> "linux-x86_64"
     "macos" -> if (isArm64) "macosx-arm64" else "macosx-x86_64"
-    else -> error("Laya desktop supports Linux, Windows, and macOS only")
+    else -> error("Auris desktop supports Linux, Windows, and macOS only")
 }
 private fun localProperty(name: String): String = rootProject.file("local.properties")
     .takeIf { it.isFile }
@@ -403,7 +403,7 @@ val windowsPortableAssemble by tasks.registering {
     group = "distribution"
     description = "Lays out a Windows-runnable folder: application jars, Windows natives, launcher."
     dependsOn(tasks.named("jar"))
-    val stage = windowsPortableDir.map { it.dir("Laya") }
+    val stage = windowsPortableDir.map { it.dir("Auris") }
     val appJar = tasks.named<Jar>("jar").flatMap { it.archiveFile }
     val runtime = configurations.named("runtimeClasspath")
     val version = appVersion
@@ -436,25 +436,25 @@ val windowsPortableAssemble by tasks.registering {
             val name = if (group.isNullOrBlank()) artifact.file.name else "$group.${artifact.file.name}"
             artifact.file.copyTo(File(lib, name), overwrite = true)
         }
-        appJar.get().asFile.copyTo(File(lib, "laya-app.jar"), overwrite = true)
+        appJar.get().asFile.copyTo(File(lib, "auris-app.jar"), overwrite = true)
 
         // `lib\*` rather than a spelled-out classpath: the wildcard is what keeps this working when
         // a dependency is added, and the JVM is what expands it.
-        File(target, "Laya.bat").writeText(
+        File(target, "Auris.bat").writeText(
             buildString {
                 appendLine("@echo off")
                 appendLine("setlocal")
-                appendLine("rem Laya, portable. Needs a Java 21+ runtime on PATH or in JAVA_HOME.")
+                appendLine("rem Auris, portable. Needs a Java 21+ runtime on PATH or in JAVA_HOME.")
                 appendLine("set \"HERE=%~dp0\"")
                 appendLine("set \"RUNNER=java\"")
                 appendLine("if defined JAVA_HOME set \"RUNNER=%JAVA_HOME%\\bin\\java\"")
-                append("\"%RUNNER%\" -Dlaya.version=$version")
-                if (moduleIndex.isNotBlank()) append(" -Dlaya.module.index=$moduleIndex")
+                append("\"%RUNNER%\" -Dauris.version=$version")
+                if (moduleIndex.isNotBlank()) append(" -Dauris.module.index=$moduleIndex")
                 if (lastfmKey.isNotBlank() && lastfmSharedSecret.isNotBlank()) {
-                    append(" -Dlaya.lastfm.key=$lastfmKey -Dlaya.lastfm.secret=$lastfmSharedSecret")
+                    append(" -Dauris.lastfm.key=$lastfmKey -Dauris.lastfm.secret=$lastfmSharedSecret")
                 }
-                if (partyServer.isNotBlank()) append(" -Dlaya.listentogether.server=$partyServer")
-                if (signatureUrl.isNotBlank()) append(" -Dlaya.signature.url=$signatureUrl")
+                if (partyServer.isNotBlank()) append(" -Dauris.listentogether.server=$partyServer")
+                if (signatureUrl.isNotBlank()) append(" -Dauris.signature.url=$signatureUrl")
                 appendLine(" -cp \"%HERE%lib\\*\" $mainClass %*")
                 appendLine("endlocal")
             },
@@ -467,8 +467,8 @@ val windowsPortableAssemble by tasks.registering {
             ZipFile(jar).use { zip -> zip.getEntry(entry) != null }
         }
         val problems = buildList {
-            if (!holds("com/music/laya/desktop/MainKt.class")) {
-                add("the Laya desktop entry point is missing")
+            if (!holds("com/music/auris/desktop/MainKt.class")) {
+                add("the Auris desktop entry point is missing")
             }
             if (!holds("androidx/compose/runtime/Composer.class")) {
                 add("the Compose runtime is missing")
@@ -487,12 +487,12 @@ val windowsPortableAssemble by tasks.registering {
         }
         check(problems.isEmpty()) { "windowsPortable: " + problems.joinToString("; ") }
 
-        val analyser = File(analysisNativeDir.get().asFile, "laya_analysis.dll").isFile
+        val analyser = File(analysisNativeDir.get().asFile, "auris_analysis.dll").isFile
         logger.lifecycle(
             if (analyser) {
                 "windowsPortable: verified — Compose runtime, Windows renderer, Windows FFmpeg, Automix analyser."
             } else {
-                "windowsPortable: verified, but no laya_analysis.dll — Automix will not run in this archive. " +
+                "windowsPortable: verified, but no auris_analysis.dll — Automix will not run in this archive. " +
                     "Rebuild with: nix-shell -p cmake pkgsCross.mingwW64.buildPackages.gcc"
             },
         )
@@ -504,12 +504,12 @@ val windowsPortable by tasks.registering(Zip::class) {
     description = "Zips the portable Windows folder for copying to a Windows machine."
     dependsOn(windowsPortableAssemble)
     from(windowsPortableDir)
-    archiveFileName.set("Laya-$appVersion-windows-portable.zip")
+    archiveFileName.set("Auris-$appVersion-windows-portable.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
     doLast { logger.lifecycle("windowsPortable: ${archiveFile.get().asFile.absolutePath}") }
 }
 
-val composeMainClass = "com.music.laya.desktop.MainKt"
+val composeMainClass = "com.music.auris.desktop.MainKt"
 
 compose.desktop {
     application {
@@ -519,18 +519,18 @@ compose.desktop {
         mainClass = composeMainClass
         jvmArgs("-Xmx512m")
         jvmArgs("-XX:+UseG1GC", "-XX:G1PeriodicGCInterval=20000", "-XX:G1PeriodicGCSystemLoadThreshold=0")
-        jvmArgs("-Dlaya.version=$appVersion")
+        jvmArgs("-Dauris.version=$appVersion")
         if (desktopModuleIndexUrl.isNotBlank()) {
-            jvmArgs("-Dlaya.module.index=$desktopModuleIndexUrl")
+            jvmArgs("-Dauris.module.index=$desktopModuleIndexUrl")
         }
         if (lastfmApiKey.isNotBlank() && lastfmSecret.isNotBlank()) {
-            jvmArgs("-Dlaya.lastfm.key=$lastfmApiKey", "-Dlaya.lastfm.secret=$lastfmSecret")
+            jvmArgs("-Dauris.lastfm.key=$lastfmApiKey", "-Dauris.lastfm.secret=$lastfmSecret")
         }
         if (listenTogetherServer.isNotBlank()) {
-            jvmArgs("-Dlaya.listentogether.server=$listenTogetherServer")
+            jvmArgs("-Dauris.listentogether.server=$listenTogetherServer")
         }
         if (signatureApiUrl.isNotBlank()) {
-            jvmArgs("-Dlaya.signature.url=$signatureApiUrl")
+            jvmArgs("-Dauris.signature.url=$signatureApiUrl")
         }
 
         buildTypes.release.proguard {
@@ -549,11 +549,11 @@ compose.desktop {
                 TargetFormat.Deb,
                 TargetFormat.Rpm,
             )
-            packageName = "Laya"
+            packageName = "Auris"
             packageVersion = nativePackageVersion
-            description = if (targetOs == "windows") "Laya" else "Aesthetic YouTube Music client"
-            vendor = "Laya contributors"
-            copyright = "Copyright © 2026 BitChord and Laya contributors"
+            description = if (targetOs == "windows") "Auris" else "Aesthetic YouTube Music client"
+            vendor = "Auris contributors"
+            copyright = "Copyright © 2026 BitChord and Auris contributors"
 
             modules(
                 "java.base",
@@ -581,9 +581,9 @@ compose.desktop {
 
             macOS {
                 iconFile.set(project.file("packaging/icons/AppIcon.icns"))
-                bundleID = "com.music.laya"
+                bundleID = "com.music.auris"
                 appCategory = "public.app-category.music"
-                dockName = "Laya"
+                dockName = "Auris"
                 infoPlist {
                     extraKeysRawXml = """
                         <key>NSRequiresAquaSystemAppearance</key>
@@ -603,7 +603,7 @@ compose.desktop {
             windows {
                 iconFile.set(project.file("packaging/icons/AppIcon.ico"))
                 upgradeUuid = "8cf8f381-55fe-4d99-9116-863b769e2de5"
-                menuGroup = "Laya"
+                menuGroup = "Auris"
                 shortcut = true
                 dirChooser = false
                 perUserInstall = true
