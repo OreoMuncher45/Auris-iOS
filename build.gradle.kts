@@ -41,8 +41,8 @@ buildscript {
  * No "v" in the name — the in-app updater reads it as a number; the "v" is the
  * release tag's alone.
  */
-extra["aurisVersionCode"] = 32
-extra["aurisVersionName"] = "1.9.1"
+extra["aurisVersionCode"] = 33
+extra["aurisVersionName"] = "1.9.2"
 
 /*
  * Bump this by hand before cutting each sideloaded test build ("beta2",
