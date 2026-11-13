@@ -388,6 +388,16 @@ final class AVAudioEngineImpl: NSObject, AudioEngine {
         (volumeView.subviews.first { $0 is UISlider } as? UISlider)?.value = level
     }
 
+    /// The user's audio-cache ceiling, in bytes (`Int64.max` for none).
+    func setStreamCacheLimit(bytes: Int64) {
+        StreamCache.shared.setCap(bytes)
+    }
+
+    /// Deletes the cached audio, keeping what is playing right now.
+    func clearStreamCache() {
+        StreamCache.shared.clear()
+    }
+
     // MARK: - Items
 
     /// Without this, AVFoundation places a seek in a FLAC with no SEEKTABLE (most addon and downloaded files) by a byte

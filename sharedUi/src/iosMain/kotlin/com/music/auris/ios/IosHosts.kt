@@ -11,6 +11,7 @@ import com.music.auris.data.model.Song
 import com.music.auris.data.settings.AppSettings
 import com.music.auris.data.settings.LastPlayerScreen
 import com.music.auris.data.settings.LibraryViewType
+import com.music.auris.sharedui.resources.Res
 import com.music.auris.ui.AppUiHost
 import com.music.auris.ui.player.AudioOutputDevice
 import com.music.auris.ui.player.CanvasVideoSpec
@@ -23,9 +24,13 @@ import com.music.auris.ui.player.SystemVolume
 import com.music.auris.ui.screens.SettingsHost
 import dev.chrisbanes.haze.HazeState
 import platform.Foundation.NSBundle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 /** Everything not overridden is hidden on iOS; Phase 5/6 fill in accounts, Listen Together, downloads. */
 internal object IosSettingsHost : SettingsHost {
@@ -37,12 +42,48 @@ internal object IosSettingsHost : SettingsHost {
     override val hasDownloads = true
     override val hasExportDownloads = false // no shared Music folder on iOS; downloads stay in the app
     override val hasQualityOptions = true // the Wi-Fi / mobile-data ceilings decide whether addons are asked
+    // The audio cache is real here too — StreamCache on the Swift side — so the
+    // storage rows (limit, clear) are the same ones Android shows.
+    override val hasSongCache = true
+    override val hasCacheFolder = false // iOS has no folder to open
     override val appIconRow: (@Composable () -> Unit)?
         get() = if (IosAppIcon.supported) ({ IosAppIconPicker() }) else null
     @Composable
     override fun versionName() =
         NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: "1.0"
+
+    override fun clearSongCache() {
+        IosEngine.engine?.clearStreamCache()
+        IosHostScope.launch {
+            IosPlayerHost.showMessage(getString(Res.string.song_cache_cleared))
+        }
+    }
+
+    override fun clearImageCache() {
+        IosImageCache.loader?.let { loader ->
+            loader.memoryCache?.clear()
+            loader.diskCache?.clear()
+        }
+        IosHostScope.launch {
+            IosPlayerHost.showMessage(getString(Res.string.image_cache_cleared))
+        }
+    }
 }
+
+/** The engine, for the settings rows that talk to the audio side. */
+internal object IosEngine {
+    @Volatile
+    var engine: AudioEngine? = null
+}
+
+/** The image loader, so the artwork cache can be emptied without a composable context. */
+internal object IosImageCache {
+    @Volatile
+    var loader: coil3.ImageLoader? = null
+}
+
+/** A scope for the settings rows that have to say something after they finish. */
+private val IosHostScope = CoroutineScope(Dispatchers.Main)
 
 internal object IosAppUiHost : AppUiHost {
     override val swipeToPlayNext = AppSettings.swipeToPlayNext

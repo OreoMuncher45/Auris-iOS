@@ -1122,24 +1122,28 @@ fun SettingsScreen(
         val unlimitedLabel = stringResource(Res.string.song_cache_unlimited)
         val cacheLimitLabel = if (cacheUnlimited) unlimitedLabel else formatCacheSize(cacheLimitMb)
         if (host.hasSongCache) SearchableSettingsGroup(search, header = stringResource(Res.string.storage)) {
-            val showCacheFolderTitle = stringResource(Res.string.show_cache_folder)
-            row(showCacheFolderTitle, "cache", "cached songs", "library", "folder") {
-                SettingsRow(
-                    icon = Icons.Rounded.Cached,
-                    title = showCacheFolderTitle,
-                    subtitle = stringResource(Res.string.show_cache_folder_subtitle),
-                    trailing = {
-                        Switch(
-                            checked = showCacheFolder,
-                            onCheckedChange = AppSettings::setShowCacheFolder,
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                checkedBorderColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        )
-                    },
-                    onClick = { AppSettings.setShowCacheFolder(!showCacheFolder) },
-                )
+            // Android can open the folder the cache lives in; iOS has no such
+            // folder to show, so the row is left off there.
+            if (host.hasCacheFolder) {
+                val showCacheFolderTitle = stringResource(Res.string.show_cache_folder)
+                row(showCacheFolderTitle, "cache", "cached songs", "library", "folder") {
+                    SettingsRow(
+                        icon = Icons.Rounded.Cached,
+                        title = showCacheFolderTitle,
+                        subtitle = stringResource(Res.string.show_cache_folder_subtitle),
+                        trailing = {
+                            Switch(
+                                checked = showCacheFolder,
+                                onCheckedChange = AppSettings::setShowCacheFolder,
+                                colors = SwitchDefaults.colors(
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        },
+                        onClick = { AppSettings.setShowCacheFolder(!showCacheFolder) },
+                    )
+                }
             }
             val songCacheLimitTitle = stringResource(Res.string.song_cache_limit)
             row(songCacheLimitTitle, "cache", "space", "unlimited") {

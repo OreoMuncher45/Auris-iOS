@@ -43,7 +43,12 @@ fun MainViewController(engine: AudioEngine, cast: CastNative, onStatusBarLight: 
     // Not NSLog: Kotlin strings passed through its C varargs crash (EXC_BAD_ACCESS).
     DebugLog.sink = DebugLog.Sink { level, tag, message, error -> println("$tag/$level: $message ${error ?: ""}") }
     TrackLog.echo = { level, tag, message, error -> println("$tag/$level: $message ${error ?: ""}") }
-    SingletonImageLoader.setSafe { ctx -> ImageLoader.Builder(ctx).components { add(KtorNetworkFetcherFactory()); add(SvgDecoder.Factory()) }.build() }
+    // The loader is kept so the artwork cache can be emptied from the settings
+    // row, which has no composable context of its own.
+    SingletonImageLoader.setSafe { ctx ->
+        ImageLoader.Builder(ctx).components { add(KtorNetworkFetcherFactory()); add(SvgDecoder.Factory()) }.build()
+            .also { IosImageCache.loader = it }
+    }
     val dir = NSFileManager.defaultManager
         .URLsForDirectory(NSApplicationSupportDirectory, NSUserDomainMask).first().let { (it as platform.Foundation.NSURL).path!! }
     LyricsTranslation.cacheDir = NSFileManager.defaultManager
@@ -84,6 +89,7 @@ fun MainViewController(engine: AudioEngine, cast: CastNative, onStatusBarLight: 
     SettingsExtras.host = IosSettingsHost
     PlayerPlatform.install(IosPlayerHost)
     IosRoute.engine = engine
+    IosEngine.engine = engine // the settings' cache rows talk to the engine directly
     IosCast.install(cast)
     // Same bundled SF Pro Display Android installs in AurisApplication; read up front so the theme sees it on first composition.
     SFProDisplay = FontFamily(

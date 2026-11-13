@@ -8,17 +8,50 @@ import Foundation
 final class StreamCache {
     static let shared = StreamCache()
     /// AppSettings.DEFAULT_CACHE_LIMIT_BYTES: Android's default audio cache size.
-    static let capBytes: Int64 = 512 << 20
+    /// The ceiling itself is the user's setting — see `setCap` — and this is
+    /// where it starts before the setting arrives.
+    private static let defaultCapBytes: Int64 = 512 << 20
 
     /// All download state lives on this queue; readers on other threads go through the entry's lock.
     fileprivate let queue = DispatchQueue(label: "auris.stream-cache")
     private let dir: URL
     private var entries: [String: Entry] = [:]
     private let lock = NSLock()
+    /// The ceiling, in bytes. `Int64.max` is "Unlimited" — see
+    /// AppSettings.UNLIMITED_CACHE_LIMIT_BYTES.
+    private var _capBytes: Int64 = StreamCache.defaultCapBytes
+
+    /// The cache's ceiling in bytes. Read under the lock.
+    var capBytes: Int64 { lock.lock(); defer { lock.unlock() }; return _capBytes }
 
     private init() {
         dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("auris-stream")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    }
+
+    /// The user's ceiling, in bytes (`Int64.max` for none). Takes effect at once.
+    func setCap(_ bytes: Int64) {
+        lock.lock()
+        _capBytes = max(0, bytes)
+        evict()
+        lock.unlock()
+    }
+
+    /// Deletes the cached audio, keeping what the player is reading right now.
+    func clear() {
+        lock.lock()
+        let inUse = Set(entries.values.filter { $0.inUse }.map { $0.path })
+        // An entry nobody reads may still have its file open; unlinking it frees
+        // the space when the last handle closes, and its reader carries on from
+        // the descriptor it already has.
+        let stale = entries.values.filter { !$0.inUse }.map { $0.path }
+        entries = entries.filter { $0.value.inUse }
+        lock.unlock()
+        for path in stale { try? FileManager.default.removeItem(at: path) }
+        let files = (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? []
+        for file in files where !inUse.contains(file) {
+            try? FileManager.default.removeItem(at: file)
+        }
     }
 
     /// The entry for [url], with a reference held until `release()`. The download runs while any reference is held.
@@ -56,7 +89,7 @@ final class StreamCache {
         }.sorted { $0.date < $1.date }
         var total = info.reduce(0) { $0 + $1.size }
         let inUse = Set(entries.values.filter { $0.inUse }.map { $0.path })
-        while total > Self.capBytes, !info.isEmpty {
+        while total > _capBytes, !info.isEmpty {
             let old = info.removeFirst()
             if inUse.contains(old.url) { continue }
             try? FileManager.default.removeItem(at: old.url)

@@ -49,6 +49,15 @@ interface AudioEngine {
     fun systemVolume(): Float
     fun setSystemVolume(level: Float)
 
+    /**
+     * The audio cache's ceiling, in bytes. [Long.MAX_VALUE] means no ceiling —
+     * the setting's "Unlimited".
+     */
+    fun setStreamCacheLimit(bytes: Long)
+
+    /** Deletes the cached audio, keeping what the player is reading right now. */
+    fun clearStreamCache()
+
     /** [portName, portType, sampleRateHz, outputChannels, ioBufferMs] of the audio session's current output route. */
     fun outputRoute(): List<String>
 }

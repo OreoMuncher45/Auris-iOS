@@ -328,6 +328,8 @@
     <string name="clear_song_cache_subtitle">Frees space used by downloaded audio</string>
     <string name="clear_song_cache_title">Clear song cache?</string>
     <string name="clear_song_cache_warning">All cached songs will be deleted and the Cached songs folder will be emptied. They will stream again the next time you play them.</string>
+    <string name="image_cache_cleared">Image cache cleared</string>
+    <string name="song_cache_cleared">Song cache cleared</string>
     <string name="connected">Connected</string>
     <string name="crossfade">Crossfade</string>
     <string name="crossfade_subtitle">Blends one track into the next</string>

@@ -202,6 +202,11 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         party.start()
         scope.launch { AppSettings.spatialAudio.collect { IosDsp.setSpatial(it) } }
         scope.launch { AppSettings.playbackSpeed.collect { engine.setSpeed(it) } }
+        // The audio cache's ceiling, as the user set it: the Swift cache used to
+        // carry a fixed 512 MB of its own and ignored the setting entirely.
+        scope.launch {
+            AppSettings.audioCacheLimitBytes.collect { engine.setStreamCacheLimit(it) }
+        }
         scope.launch {
             combine(AppSettings.crossfadeSeconds, AppSettings.smartFadeEnabled, AppSettings.repeatMode, ListenTogether.state.map { it.inParty }) { _, _, _, _ -> }
                 .collect { syncTransition() }

@@ -34,6 +34,8 @@ interface SettingsHost {
     /** false hides "Export compatible downloads" (the Music/Auris folder), which only Android has. */
     val hasExportDownloads: Boolean get() = true
     val hasSongCache: Boolean get() = false
+    /** false hides the "show cache folder" row: iOS has no folder to show. */
+    val hasCacheFolder: Boolean get() = true
     val hasBackgroundService: Boolean get() = false
     /**
      * false hides the rows that only drive Android's playback service: streaming quality ceilings,
