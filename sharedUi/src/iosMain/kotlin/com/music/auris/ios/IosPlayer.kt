@@ -16,8 +16,10 @@ import com.music.auris.data.YtMusicRepository
 import com.music.auris.data.innertube.PlaybackTracker
 import com.music.auris.data.innertube.PlayerClient
 import com.music.auris.data.innertube.StreamResolver
+import com.music.auris.data.model.HEADER_ART_PX
 import com.music.auris.data.model.QueueTier
 import com.music.auris.data.model.Song
+import com.music.auris.data.model.artworkAt
 import com.music.auris.data.settings.AppSettings
 import com.music.auris.data.settings.SmartAnalysis
 import com.music.auris.data.settings.TrackAnalysisState
@@ -789,7 +791,15 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
     private fun announce() {
         Karaoke.trackChanged(song?.videoId) // karaoke is per song, as on Android
         bindKaraoke()
-        song?.let { engine.setNowPlaying(it.title, it.artist, it.albumName, it.thumbnailUrl) }
+        // Lock screen, CarPlay and the Control Centre banner draw this large,
+        // but the catalogue URL arrives at whatever size it was requested at —
+        // usually 60px. Ask for the artwork size (as Android hands media3
+        // NOTIFICATION_ART_PX) instead of letting those surfaces upscale a
+        // thumbnail; local covers are plain paths and pass through untouched.
+        val art = song?.let { s ->
+            s.thumbnailUrl?.takeIf { it.startsWith("http") }?.artworkAt(HEADER_ART_PX) ?: s.thumbnailUrl
+        }
+        song?.let { engine.setNowPlaying(it.title, it.artist, it.albumName, art) }
         engine.setQueueCapabilities(hasNext, hasPrevious)
     }
 
