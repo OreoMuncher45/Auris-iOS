@@ -145,10 +145,10 @@ fun ReplayCreditCard(
                 )
                 Spacer(Modifier.width(10.dp))
                 Icon(
-                    painter = painterResource(Res.drawable.ic_logo),
+                    painter = painterResource(Res.drawable.ic_note),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(width = 17.dp, height = 22.dp),
+                    modifier = Modifier.size(width = 16.dp, height = 22.dp),
                 )
             }
 

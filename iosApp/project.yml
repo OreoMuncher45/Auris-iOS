@@ -88,5 +88,5 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_ENTITLEMENTS: AurisWidgets/AurisWidgets.entitlements
         # Shared/AurisWidgetShared.swift leaves out what an extension may not use.
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) LAYA_WIDGET_EXTENSION"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) AURIS_WIDGET_EXTENSION"
         SKIP_INSTALL: YES

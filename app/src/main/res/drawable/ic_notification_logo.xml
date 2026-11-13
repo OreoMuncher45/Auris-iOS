@@ -1,23 +1,19 @@
 <!--
-  Status-bar / notification variant of the Auris mark.
+  Status-bar / notification variant of the Auris note mark.
 
   Notification small icons are drawn as a silhouette: the system throws away
-  every colour and keeps only the alpha channel, so the fill has to be opaque
-  white. The note is scaled into the 22dp content box Android expects inside
-  a 24x24 canvas.
+  every colour and keeps only the alpha channel, so the black note PNG works
+  unchanged. It is a portrait 367x512 asset, so the layer scales it into a
+  17x24dp box (its own aspect ratio) inside the 24x24dp content box rather
+  than stretching it to a square.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <group
-        android:scaleX="0.14815"
-        android:scaleY="0.14815"
-        android:translateX="4.0"
-        android:translateY="1.5">
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M36 68a13 9.5 0 1 0 26 0 13 9.5 0 1 0-26 0zM59 26h6v42h-6zM65 26c11 5 16 13 15 24-3-9-8-13-15-15z" />
-    </group>
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="17dp"
+        android:height="24dp"
+        android:gravity="center">
+        <bitmap
+            android:gravity="fill"
+            android:src="@drawable/ic_note" />
+    </item>
+</layer-list>

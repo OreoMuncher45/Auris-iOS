@@ -268,7 +268,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import auris.desktopapp.generated.resources.Res
 import auris.desktopapp.generated.resources.logo
-import auris.desktopapp.generated.resources.logo_mark
+import auris.desktopapp.generated.resources.ic_note
 import auris.desktopapp.generated.resources.sf_pro_display_bold
 import auris.desktopapp.generated.resources.sf_pro_display_heavy
 import auris.desktopapp.generated.resources.sf_pro_display_medium
@@ -4538,9 +4538,9 @@ private fun DesktopTopBar(
             ) {
                 // The mark leads the player's own controls, now that the sidebar runs to the top.
                 Image(
-                    painter = painterResource(Res.drawable.logo_mark),
+                    painter = painterResource(Res.drawable.ic_note),
                     contentDescription = "Auris",
-                    modifier = Modifier.size(width = 14.dp, height = 18.dp),
+                    modifier = Modifier.size(width = 13.dp, height = 18.dp),
                 )
                 Spacer(Modifier.width(14.dp))
                 DesktopToolbarButton(onClick = onBack, enabled = canGoBack, size = 32.dp) {

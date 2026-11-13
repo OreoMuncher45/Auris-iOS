@@ -180,7 +180,7 @@ internal fun DrawScope.artwork(
     }
 }
 
-/** The ic_logo mark, tinted, with its right edge at [right] and its baseline at [baseline]. */
+/** The ic_note mark, tinted, with its right edge at [right] and its baseline at [baseline]. */
 internal fun DrawScope.logo(painter: Painter?, right: Float, baseline: Float) {
     painter ?: return
     translate(right - LOGO_W, baseline - LOGO_H) {
@@ -188,7 +188,7 @@ internal fun DrawScope.logo(painter: Painter?, right: Float, baseline: Float) {
     }
 }
 
-internal const val LOGO_W = 34f
+internal const val LOGO_W = 32f
 internal const val LOGO_H = 44f
 
 // ── Backdrop ───────────────────────────────────────────────────────────────

@@ -511,7 +511,7 @@ private fun HomeTitle(title: String, modifier: Modifier = Modifier) {
     val logoHeight = with(LocalDensity.current) { (style.fontSize * LOGO_TO_FONT).toDp() }
     Column(modifier = modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp)) {
         Icon(
-            painter = painterResource(Res.drawable.ic_logo),
+            painter = painterResource(Res.drawable.ic_note),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
@@ -530,8 +530,8 @@ private fun HomeTitle(title: String, modifier: Modifier = Modifier) {
 /** The wordmark's height against the heading's font size. */
 private const val LOGO_TO_FONT = 0.9f
 
-/** ic_logo's viewport, 219.55 x 281.52. */
-private const val LOGO_ASPECT = 219.55f / 281.52f
+/** ic_note's canvas, 367 x 512 — the Auris note mark. */
+private const val LOGO_ASPECT = 367f / 512f
 
 /**
  * Shared by the home feed, Explore and Library so headings line up across tabs.

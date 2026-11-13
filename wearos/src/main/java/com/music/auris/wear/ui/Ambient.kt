@@ -103,7 +103,7 @@ fun AmbientPlayer(np: NowPlaying, ambient: Ambient) {
         }
         // The Home page's mark, as Spotify keeps its own at the foot of the AOD.
         Icon(
-            painter = painterResource(R.drawable.ic_logo),
+            painter = painterResource(R.drawable.ic_note),
             contentDescription = null,
             tint = secondary,
             modifier = Modifier
@@ -115,5 +115,5 @@ fun AmbientPlayer(np: NowPlaying, ambient: Ambient) {
     }
 }
 
-/** ic_logo's viewport, 219.55 x 281.52 — as the phone's Home draws it. */
-private const val LOGO_ASPECT = 219.55f / 281.52f
+/** ic_note's canvas, 367 x 512 — as the phone's Home draws it. */
+private const val LOGO_ASPECT = 367f / 512f

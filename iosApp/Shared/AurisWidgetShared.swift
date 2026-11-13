@@ -95,7 +95,7 @@ struct AurisWidgetIntent: AudioPlaybackIntent {
 
     func perform() async throws -> some IntentResult {
         AurisWidgetStore.applyOptimistically(command)
-        #if !LAYA_WIDGET_EXTENSION
+        #if !AURIS_WIDGET_EXTENSION
         // No player yet (the app was started in the background for this): bring it up; the command is queued and
         // runs as soon as the player exists.
         if AurisWidgetCommands.handler?(command) != true {
@@ -106,7 +106,7 @@ struct AurisWidgetIntent: AudioPlaybackIntent {
     }
 }
 
-#if !LAYA_WIDGET_EXTENSION
+#if !AURIS_WIDGET_EXTENSION
 // Not available to an extension, and only the app's copy ever runs.
 @available(iOS 17.0, *)
 extension AurisWidgetIntent: ForegroundContinuableIntent {}

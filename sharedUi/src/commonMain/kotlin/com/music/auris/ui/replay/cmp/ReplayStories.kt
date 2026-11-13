@@ -417,10 +417,10 @@ private fun StoryChrome(
             )
             // The mark and the word together, the way the card carries it.
             Icon(
-                painter = painterResource(Res.drawable.ic_logo),
+                painter = painterResource(Res.drawable.ic_note),
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.9f),
-                modifier = Modifier.size(width = 13.dp, height = 17.dp),
+                modifier = Modifier.size(width = 12.dp, height = 17.dp),
             )
             Spacer(Modifier.width(7.dp))
             Text(

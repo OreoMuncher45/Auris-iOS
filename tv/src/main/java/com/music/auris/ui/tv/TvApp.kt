@@ -570,7 +570,7 @@ private fun TvTopBar(
     ) {
         // The mark only, as the phone's Home heading shows it.
         Icon(
-            painter = painterResource(R.drawable.ic_logo),
+            painter = painterResource(R.drawable.ic_note),
             contentDescription = "Auris",
             tint = TvGlass.TextPrimary,
             modifier = Modifier
@@ -677,7 +677,7 @@ fun TvAppMark(modifier: Modifier = Modifier, size: androidx.compose.ui.unit.Dp =
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_logo),
+            painter = painterResource(R.drawable.ic_note),
             contentDescription = "Auris",
             tint = Color.White,
             modifier = Modifier.size(size * 0.52f),

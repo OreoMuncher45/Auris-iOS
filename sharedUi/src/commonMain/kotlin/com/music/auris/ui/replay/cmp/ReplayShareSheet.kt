@@ -70,7 +70,7 @@ fun ReplayShareSheet(
     val sharer = LocalImageSharer.current
     val scope = rememberCoroutineScope()
     val pen = rememberPen()
-    val logo = painterResource(Res.drawable.ic_logo)
+    val logo = painterResource(Res.drawable.ic_note)
     var poster by remember { mutableStateOf<ImageBitmap?>(null) }
     var failed by remember { mutableStateOf(false) }
     var saved by remember { mutableStateOf(false) }

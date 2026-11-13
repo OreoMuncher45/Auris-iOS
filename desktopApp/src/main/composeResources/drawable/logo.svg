@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 108 108">
   <defs>
     <linearGradient id="auris-ground" x1="8" y1="6" x2="100" y2="102" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2B3A8C"/>
-      <stop offset="0.55" stop-color="#141A3C"/>
-      <stop offset="1" stop-color="#080A18"/>
+      <stop offset="0" stop-color="#2B2B2B"/>
+      <stop offset="0.55" stop-color="#161514"/>
+      <stop offset="1" stop-color="#0B0A0A"/>
     </linearGradient>
   </defs>
   <rect x="0" y="0" width="108" height="108" rx="24" fill="url(#auris-ground)"/>

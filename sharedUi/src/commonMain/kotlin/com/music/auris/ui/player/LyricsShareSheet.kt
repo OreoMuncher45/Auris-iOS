@@ -62,7 +62,7 @@ fun LyricsShareSheetContent(
     val scope = rememberCoroutineScope()
     val haptics = rememberHaptics()
     val pen = rememberPen()
-    val logo = painterResource(Res.drawable.ic_logo)
+    val logo = painterResource(Res.drawable.ic_note)
 
     var image by remember(request) { mutableStateOf<ImageBitmap?>(null) }
     var failed by remember(request) { mutableStateOf(false) }
