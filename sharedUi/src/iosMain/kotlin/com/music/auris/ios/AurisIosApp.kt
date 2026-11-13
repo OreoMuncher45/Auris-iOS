@@ -486,7 +486,15 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
             stack = stack.map { if (it is IosPage.Detail && it.page === base) IosPage.Detail(loaded) else it }
             val seen = HashSet<String>()
             var next = loaded.continuation
+            // Show the first page before spending the next request: on a long
+            // playlist the continuation otherwise starts in the same main-loop
+            // turn as the state update, so a screen that was ready reads as if
+            // it were still loading (Android's fillIn waits the same 150 ms).
+            if (next != null) delay(150)
             while (next != null && seen.add(next)) {
+                // The reader may have popped the page mid-fill; there is no one
+                // to append for, and each further page is a whole round trip.
+                if (stack.none { it is IosPage.Detail && it.page.browseId == base.browseId }) return@launch
                 val more = YtMusicRepository.moreSongs(next).getOrNull() ?: break
                 var progressed = false
                 stack = stack.map { p ->
@@ -848,7 +856,12 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                             when (if (top == null) tab else -1) {
                             -1 -> {
                                 when (top) {
-                                    is IosPage.Detail -> key(top) {
+                                    // Keyed on the page's identity, not the object: following a playlist's
+                                    // continuations replaces the IosPage.Detail instance every page, and keying
+                                    // on the instance threw the whole subtree away with it — the list's scroll
+                                    // offset, the optimistic save/subscribe flags — and snapped the reader back
+                                    // to the top mid-scroll. The browse id is what the page *is*.
+                                    is IosPage.Detail -> key(top.page.browseId) {
                                         var activeShelf by remember { mutableStateOf<HomeShelf?>(null) }
                                         // The Downloads page is rebuilt as songs are saved or deleted.
                                         val downloaded by IosDownloads.savedIds.collectAsState()
