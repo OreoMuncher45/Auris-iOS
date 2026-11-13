@@ -390,12 +390,17 @@ fun SwipeToQueueBox(
 
     val currentOnSwipeToQueue by rememberUpdatedState(onSwipeToQueue)
 
+    // Material 3 asks confirmValueChange on every drag frame past the halfway
+    // point, and again on settle. The latch turns that stream into one queue
+    // call per swipe, which is what the gesture means.
+    val latch = remember { SwipeCommitLatch() }
+
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value != SwipeToDismissBoxValue.Settled) {
                 val offset = try { swipeStateHolder.value?.requireOffset() ?: 0f } catch (e: Exception) { 0f }
                 // Only queue if the physical drag reached half the box width, ignoring short accidental flings.
-                if (abs(offset) >= boxWidth * 0.45f) {
+                if (latch.offer(offset, boxWidth)) {
                     haptics.play(Haptic.Select)
                     currentOnSwipeToQueue()
                 }
@@ -427,6 +432,9 @@ fun SwipeToQueueBox(
                     // queue, and that must not buzz the same gesture twice.
                     armed && travelled < armAt * 0.8f -> armed = false
                 }
+                // Back at rest: the row has settled, so the next swipe is a
+                // new gesture and may queue again.
+                if (travelled < 1f) latch.release()
             }
     }
 
