@@ -11,7 +11,6 @@ import com.music.auris.data.model.Song
 import com.music.auris.data.settings.AppSettings
 import com.music.auris.data.settings.LastPlayerScreen
 import com.music.auris.data.settings.LibraryViewType
-import com.music.auris.sharedui.resources.Res
 import com.music.auris.ui.AppUiHost
 import com.music.auris.ui.player.AudioOutputDevice
 import com.music.auris.ui.player.CanvasVideoSpec
@@ -24,13 +23,10 @@ import com.music.auris.ui.player.SystemVolume
 import com.music.auris.ui.screens.SettingsHost
 import dev.chrisbanes.haze.HazeState
 import platform.Foundation.NSBundle
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
+import kotlin.concurrent.Volatile
 
 /** Everything not overridden is hidden on iOS; Phase 5/6 fill in accounts, Listen Together, downloads. */
 internal object IosSettingsHost : SettingsHost {
@@ -53,19 +49,15 @@ internal object IosSettingsHost : SettingsHost {
         NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: "1.0"
 
     override fun clearSongCache() {
+        // No confirmation: the cache is gone the moment this returns, and
+        // there is nothing on screen to confirm against.
         IosEngine.engine?.clearStreamCache()
-        IosHostScope.launch {
-            IosPlayerHost.showMessage(getString(Res.string.song_cache_cleared))
-        }
     }
 
     override fun clearImageCache() {
         IosImageCache.loader?.let { loader ->
             loader.memoryCache?.clear()
             loader.diskCache?.clear()
-        }
-        IosHostScope.launch {
-            IosPlayerHost.showMessage(getString(Res.string.image_cache_cleared))
         }
     }
 }
@@ -81,9 +73,6 @@ internal object IosImageCache {
     @Volatile
     var loader: coil3.ImageLoader? = null
 }
-
-/** A scope for the settings rows that have to say something after they finish. */
-private val IosHostScope = CoroutineScope(Dispatchers.Main)
 
 internal object IosAppUiHost : AppUiHost {
     override val swipeToPlayNext = AppSettings.swipeToPlayNext
