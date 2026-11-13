@@ -141,10 +141,17 @@ final class PcmReader: NSObject, KaraokePcmSource {
         while pending.count - pendingPos < want, let sample = output?.copyNextSampleBuffer() {
             guard let block = CMSampleBufferGetDataBuffer(sample) else { continue }
             let floats = CMBlockBufferGetDataLength(block) / MemoryLayout<Float>.size
-            let old = pending.count - pendingPos
-            pending = Array(pending[pendingPos...]) + [Float](repeating: 0, count: floats)
-            pendingPos = 0
-            pending.withUnsafeMutableBytes { _ = CMBlockBufferCopyDataBytes(block, atOffset: 0, dataLength: floats * MemoryLayout<Float>.size, destination: $0.baseAddress! + old * MemoryLayout<Float>.size) }
+            // A zero-length block would leave `pending` empty and its base
+            // address nil, which the copy below would have dereferenced.
+            if floats > 0 {
+                let old = pending.count - pendingPos
+                pending = Array(pending[pendingPos...]) + [Float](repeating: 0, count: floats)
+                pendingPos = 0
+                pending.withUnsafeMutableBytes { raw in
+                    guard let base = raw.baseAddress else { return }
+                    _ = CMBlockBufferCopyDataBytes(block, atOffset: 0, dataLength: floats * MemoryLayout<Float>.size, destination: base + old * MemoryLayout<Float>.size)
+                }
+            }
         }
         let have = pending.count - pendingPos
         if have == 0 { return reader?.status == .failed ? -1 : 0 }

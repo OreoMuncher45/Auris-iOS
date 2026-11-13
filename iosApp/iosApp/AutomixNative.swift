@@ -190,11 +190,14 @@ private final class PcmBuffer: NSObject, AutomixPcm {
     var frames: Int32 { Int32(samples.count) }
 
     func doCopy(into: UnsafeMutableRawPointer, from: Int32, count: Int32) {
+        // An empty buffer has no base address to read from.
+        guard !samples.isEmpty, count > 0 else { return }
         samples.withUnsafeBufferPointer { into.assumingMemoryBound(to: Float.self).update(from: $0.baseAddress! + Int(from), count: Int(count)) }
     }
 
     func features(durationSeconds: Double) -> String? {
-        samples.withUnsafeBufferPointer {
+        guard !samples.isEmpty else { return nil }
+        return samples.withUnsafeBufferPointer {
             AurisAnalysis.featuresJSON($0.baseAddress!, count: $0.count, rate: 22_050, duration: durationSeconds)
         }
     }

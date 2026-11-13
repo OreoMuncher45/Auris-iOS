@@ -127,7 +127,11 @@ object IosTransition {
         startLogged = false
         beganAt = nowMs / 1000.0
         live = Live(p, outKey, inKey, startSec, span, wallSpanIn, outDurationSec)
-        val r = live!!.outRender
+        // Read once: `live` is volatile because the audio thread reads it while
+        // another thread may end the blend, and a second read could find it
+        // already cleared — a null dereference in the middle of a crossfade.
+        val l = live ?: return false
+        val r = l.outRender
         println(
             "Transition: begin ${if (p?.source != null) "smart" else "classic"} style=${r.style} variant=${r.filterVariant} " +
                 "start=$startSec fade=$fadeSec span=$span cue=${p?.cueSec} rate=${p?.inRate}/${p?.outRate} " +

@@ -161,7 +161,7 @@ final class EqualizerTap {
         }
         body(scratch)
         for c in 0..<channels {
-            let dst = buffers[c].mData!.assumingMemoryBound(to: Float.self)
+            guard let dst = buffers[c].mData?.assumingMemoryBound(to: Float.self) else { return }
             for f in 0..<frames { dst[f] = scratch[f * channels + c] }
         }
     }
