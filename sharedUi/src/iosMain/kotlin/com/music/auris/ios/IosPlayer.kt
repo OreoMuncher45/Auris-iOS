@@ -132,6 +132,14 @@ private class Opened(
     val format: StreamFormat? = null,
     /** A better copy that may still arrive (a lossless search that outlasted the quick answer). */
     val pending: Deferred<SourceStream?>? = null,
+    /**
+     * The URL *is* the audio — a podcast episode, whose row's id is the
+     * feed's enclosure URL.
+     *
+     * Nothing may look this track up: there is no catalogue entry to ask for
+     * a better copy of it, and no YouTube version to revert to.
+     */
+    val direct: Boolean = false,
 )
 
 private class KaraokeSource(val url: String, val headers: Map<String, String>, val mime: String, val length: Long)
@@ -568,6 +576,26 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
     }
 
     /**
+     * The container for a direct URL, from its extension.
+     *
+     * Podcast enclosures are usually MP3; the rest are the usual suspects.
+     * An unknown extension is treated as MP3, which is what most feeds serve
+     * and what AVFoundation will try first.
+     */
+    private fun directMime(url: String): String {
+        val ext = url.substringBefore('?').substringBefore('#').substringAfterLast('.', "").lowercase()
+        return when (ext) {
+            "mp3" -> "audio/mpeg"
+            "m4a", "mp4" -> "audio/mp4"
+            "aac" -> "audio/aac"
+            "flac" -> "audio/flac"
+            "wav" -> "audio/wav"
+            "aiff", "aif" -> "audio/aiff"
+            else -> "audio/mpeg"
+        }
+    }
+
+    /**
      * Where Android decides which source plays a track (PlaybackService's resolver): a row that came from
      * a source is resolved by it, falling back through the rest; a YouTube row is offered to every source
      * ranked above YouTube first, racing YouTube itself so a slow addon costs nothing.
@@ -576,6 +604,20 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
      * time and the lossless answer is preferred over the quick one.
      */
     private suspend fun open(song: Song, patient: Boolean): Opened {
+        // A podcast episode: the row's id is the feed's enclosure URL, and the
+        // URL is the audio. There is nothing to look up — no catalogue entry,
+        // no source to ask, no YouTube copy to fall back on — so this is
+        // played as it stands.
+        if (song.videoId.startsWith("http://", ignoreCase = true) || song.videoId.startsWith("https://", ignoreCase = true)) {
+            return Opened(
+                url = song.videoId,
+                headers = emptyMap(),
+                mime = directMime(song.videoId),
+                length = -1L,
+                sourceName = "Podcast",
+                direct = true,
+            )
+        }
         // A downloaded copy always wins: no lookup, no network (a bad file falls back to the stream like any failed source).
         IosDownloads.fileUrl(song.videoId)?.let { url ->
             val mime = when (url.substringAfterLast('.')) {
@@ -633,8 +675,10 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
     /** Gives the engine [o] and records what it is, for Karaoke and the nerd stats. */
     private fun hand(song: Song, o: Opened, next: Boolean, swap: Boolean = false) {
         streams[song.videoId] = KaraokeSource(o.url, o.headers, o.mime, o.length)
-        if (o.sourceName != "YouTube") offSite += song.videoId else offSite -= song.videoId
-        if (!next) playingFromSource = o.sourceName != "YouTube" && o.sourceName != "Downloaded"
+        // A podcast episode is not "off site": there is no source to recover it
+        // through, so a failure is a failure and not a lookup to retry.
+        if (!o.direct && o.sourceName != "YouTube") offSite += song.videoId else offSite -= song.videoId
+        if (!next) playingFromSource = !o.direct && o.sourceName != "YouTube" && o.sourceName != "Downloaded"
         // Host only: addon URLs carry the owner's token in the path or query.
         TrackLog.d(
             "Auris",
@@ -674,6 +718,8 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         alignJob?.cancel()
         IosLyricsAlign.offsetMs.value = 0
         val native = IosKaraoke.native ?: return
+        // A podcast episode has no YouTube twin to line itself up against.
+        if (o.direct) return
         if (o.sourceName == "YouTube" || o.sourceName == "Downloaded" || SourceRegistry.parseTrackKey(song.videoId) != null) return
         alignJob = scope.launch(ioDispatcher) {
             val yt = runCatching { youtube(song.videoId) }.getOrNull() ?: return@launch

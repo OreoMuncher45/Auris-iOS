@@ -135,6 +135,18 @@ data class Song(
     val playbackSourceType: PlaybackSourceType? = null,
     /** Browse id for an album, playlist, or other source page. */
     val playbackSourceId: String? = null,
+    /**
+     * When this row was published, as the source stated it — the feed's own
+     * string, not a parsed timestamp.
+     *
+     * Podcast episodes are the rows that carry one: a feed says
+     * `Tue, 15 Oct 2024 10:00:00 +0000` and the list is ordered by it, but
+     * the row keeps the source's own wording rather than a reformatted
+     * date, because the feed's formats vary wildly and a list that
+     * reformats them all into one shape is a list that gets them wrong on
+     * the feeds that matter.
+     */
+    val publishedDate: String? = null,
 ) {
     /** Legacy derived property: true if and only if [queueTier] is [QueueTier.AUTOPLAY]. */
     val fromAutoplay: Boolean get() = queueTier == QueueTier.AUTOPLAY

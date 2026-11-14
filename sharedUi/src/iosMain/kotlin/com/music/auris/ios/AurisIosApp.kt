@@ -170,6 +170,15 @@ import com.music.auris.ui.screens.SettingsScreen
 import com.music.auris.ui.screens.SourcesPage
 import com.music.auris.ui.screens.ListenTogetherScreen
 import com.music.auris.ui.screens.PartyPing
+import com.music.auris.ui.screens.PodcastShowScreen
+import com.music.auris.ui.screens.PodcastsScreen
+import com.music.auris.ui.screens.fetchPodcastShelves
+import com.music.auris.ui.screens.podcastCollectionId
+import com.music.auris.ui.screens.toShelfItem
+import com.music.auris.data.podcast.ItunesPodcasts
+import com.music.auris.data.podcast.ItunesShow
+import androidx.compose.material.icons.filled.Podcasts
+import kotlinx.coroutines.delay
 import com.music.auris.data.listentogether.JamInviteLink
 import com.music.auris.data.sources.AddonSource
 import com.music.auris.data.sources.SourceKind
@@ -205,6 +214,20 @@ private fun ShelfItem.toSong() = videoId?.let {
 }
 
 private fun List<ShelfItem>.songs() = mapNotNull { it.toSong() }
+
+/**
+ * The bottom bar's tabs, in order.
+ *
+ * Named rather than numbered: the bar grew a tab (Podcasts, which Android has
+ * as a tab of its own), and every index that used to mean "Library" or
+ * "Search" moved by one. A number would have meant a silent mistake
+ * somewhere; a name cannot.
+ */
+private const val HOME_TAB = 0
+private const val PODCASTS_TAB = 1
+private const val EXPLORE_TAB = 2
+private const val LIBRARY_TAB = 3
+private const val SEARCH_TAB = 4
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -344,6 +367,83 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
         }
     }
     LaunchedEffect(Unit) { launch { loadExplore() }; loadHome() }
+
+    // Podcasts: Apple's catalogue, one shelf per category, fetched the first
+    // time the tab is opened and kept for as long as the app is up. The
+    // searches are the page's own — twelve of them, side by side — so the
+    // page is not held hostage to the slowest of them.
+    var podcastShelves by remember { mutableStateOf<UiState<List<HomeShelf>>>(UiState.Success(emptyList())) }
+    var podcastQuery by remember { mutableStateOf("") }
+    var podcastResults by remember { mutableStateOf<UiState<List<ShelfItem>>>(UiState.Success(emptyList())) }
+    var podcastsLoaded by remember { mutableStateOf(false) }
+    var podcastSearchJob by remember { mutableStateOf<Job?>(null) }
+
+    suspend fun loadPodcasts() {
+        // Marked before the first shelf lands, not after: the page must not
+        // ask for its shelves twice because the tab was tapped twice.
+        podcastsLoaded = true
+        fetchPodcastShelves { shelves -> podcastShelves = UiState.Success(shelves) }
+    }
+
+    /** The page's own search box: Apple's catalogue, searched as it is typed. */
+    fun onPodcastQueryChange(query: String) {
+        podcastQuery = query
+        podcastSearchJob?.cancel()
+        if (query.isBlank()) {
+            podcastResults = UiState.Success(emptyList())
+            return
+        }
+        podcastResults = UiState.Loading
+        podcastSearchJob = scope.launch {
+            // A moment's pause: a catalogue search per keystroke is a
+            // request per keystroke, and the answers come back out of order.
+            delay(350)
+            podcastResults = runCatching { ItunesPodcasts.search(query, limit = 40) }
+                .fold(
+                    onSuccess = { shows -> UiState.Success(shows.map { it.toShelfItem() }) },
+                    onFailure = { UiState.Error(friendly(it)) },
+                )
+        }
+    }
+
+    /** A show from the catalogue: its own page, with the episodes its feed holds. */
+    fun openPodcastShow(item: ShelfItem) {
+        val collectionId = podcastCollectionId(item.browseId) ?: return
+        val placeholder = ItunesShow(
+            collectionId = collectionId,
+            name = item.title,
+            artist = item.subtitle,
+            artworkUrl = item.thumbnailUrl,
+            feedUrl = "",
+            genre = null,
+            trackCount = 0,
+        )
+        val page = IosPage.PodcastShow(placeholder, UiState.Loading)
+        stack = stack + page
+        scope.launch {
+            val show = runCatching { ItunesPodcasts.lookup(collectionId) }.getOrNull()
+            val episodes = if (show == null) {
+                UiState.Error("That show is no longer in the catalogue")
+            } else {
+                runCatching { ItunesPodcasts.episodes(show) }.fold(
+                    onSuccess = { list -> if (list.isEmpty()) UiState.Error("This show has no episodes") else UiState.Success(list) },
+                    onFailure = { UiState.Error(friendly(it)) },
+                )
+            }
+            stack = stack.map { if (it === page) IosPage.PodcastShow(show ?: placeholder, episodes) else it }
+        }
+    }
+
+    // The page is fetched when the tab is first opened, not at startup: a
+    // listener who never opens it should not pay for twelve searches. The
+    // fetch runs in the app's scope rather than the tab's, so switching away
+    // halfway through does not throw the shelves away.
+    LaunchedEffect(tab) {
+        if (tab == PODCASTS_TAB && !podcastsLoaded) {
+            podcastShelves = UiState.Loading
+            scope.launch { loadPodcasts() }
+        }
+    }
     // Recents is the account's history: each play YouTube registers makes it stale (MainViewModel's homeStale).
     LaunchedEffect(Unit) {
         PlaybackTracker.registeredPlays.drop(1).collect {
@@ -767,7 +867,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
         }
     }
 
-    val replayOpen = stack.lastOrNull() === IosPage.Replay || replayStory != null || showReplayShare || (tab == 2 && stack.isEmpty())
+    val replayOpen = stack.lastOrNull() === IosPage.Replay || replayStory != null || showReplayShare || (tab == LIBRARY_TAB && stack.isEmpty())
     val (replay, setReplayPeriod) = rememberReplayState(replayOpen)
     val replayCards = remember(replay.summary) { replay.summary?.takeUnless { it.isEmpty }?.cards().orEmpty() }
     // Debug only: SIMCTL_CHILD_LAYA_SEED_PLAYS=1 fills the listening record with fake plays (never set in normal use).
@@ -809,8 +909,9 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                 }
             }
             what == "downloads" -> stack = stack + IosPage.Detail(IosDownloads.page())
-            what == "search" -> tab = 3
-            what == "library" -> tab = 2
+            what == "search" -> tab = SEARCH_TAB
+            what == "library" -> tab = LIBRARY_TAB
+            what == "podcasts" -> tab = PODCASTS_TAB
             what == "sources" -> stack = stack + IosPage.Sources
             what == "party" -> stack = stack + IosPage.ListenTogether
             what.startsWith("artist:") -> YtMusicRepository.search(what.removePrefix("artist:"), SearchFilter.ARTISTS).getOrNull()
@@ -823,12 +924,16 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
     val exploreList = rememberLazyListState()
     val libraryList = rememberLazyListState()
     val searchList = rememberLazyListState()
+    val podcastList = rememberLazyListState()
     val homePull = rememberPullToRefreshState()
     val explorePull = rememberPullToRefreshState()
     val libraryPull = rememberPullToRefreshState()
     val tabs = remember {
         listOf(
             BottomTab("Home", Icons.Filled.Home),
+            // Android's own order: the podcasts page is a tab of its own there, and it is here for the same reason —
+            // a listener who wants a podcast should not have to go looking for one.
+            BottomTab("Podcasts", Icons.Filled.Podcasts),
             BottomTab("Explore", Icons.Filled.Explore),
             BottomTab("Library", Icons.Filled.LibraryMusic),
             BottomTab("Search", Icons.Filled.Search),
@@ -982,6 +1087,17 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                     IosPage.Sources -> SourcesPage(
                                         contentPadding = PaddingValues(top = 56.dp, bottom = barHeight),
                                     )
+                                    is IosPage.PodcastShow -> PodcastShowScreen(
+                                        show = top.show,
+                                        episodes = top.episodes,
+                                        // The episode's row id is its enclosure URL, and the player plays
+                                        // that URL as it stands — there is no catalogue entry to look up.
+                                        onPlay = { episodes, index -> player.play(episodes, index) },
+                                        onRetry = { stack = stack.dropLast(1); openPodcastShow(
+                                            ShelfItem(top.show.name, top.show.artist, top.show.artworkUrl, null, "itunes:${top.show.collectionId}"),
+                                        ) },
+                                        contentPadding = PaddingValues(top = 56.dp, bottom = barHeight),
+                                    )
                                     IosPage.Equalizer -> EqualizerScreen(
                                         contentPadding = PaddingValues(top = 56.dp, bottom = barHeight),
                                     )
@@ -1043,7 +1159,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                     null -> Unit
                                 }
                             }
-                            0 -> HomeScreen(
+                            HOME_TAB -> HomeScreen(
                                 state = home,
                                 listState = homeList,
                                 onItemClick = { item, shelfTitle ->
@@ -1081,7 +1197,16 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                     null
                                 },
                             )
-                            1 -> ExploreScreen(
+                            PODCASTS_TAB -> PodcastsScreen(
+                                shelves = podcastShelves,
+                                onShowClick = ::openPodcastShow,
+                                contentPadding = noPadding,
+                                listState = podcastList,
+                                searchQuery = podcastQuery,
+                                onSearchQueryChange = ::onPodcastQueryChange,
+                                searchResults = podcastResults,
+                            )
+                            EXPLORE_TAB -> ExploreScreen(
                                 state = explore,
                                 listState = exploreList,
                                 onCategoryClick = ::openMood,
@@ -1091,7 +1216,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                 pullState = explorePull,
                                 contentPadding = noPadding,
                             )
-                            2 -> LibraryScreen(
+                            LIBRARY_TAB -> LibraryScreen(
                                 signedIn = signedIn,
                                 state = library,
                                 listState = libraryList,
@@ -1235,7 +1360,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                     Modifier.align(Alignment.TopStart).fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    if (tab == 3) {
+                                    if (tab == SEARCH_TAB) {
                                         SearchField(
                                             query = query,
                                             onQueryChange = ::onQueryChange,
@@ -1253,7 +1378,7 @@ fun AurisIosApp(engine: AudioEngine, onStatusBarLight: (Boolean) -> Unit = {}) {
                                     } else Spacer(Modifier.weight(1f))
                                     IosTopPill(
                                         account = account,
-                                        onHistory = if (tab == 2 && signedIn) ({ openHistory() }) else null,
+                                        onHistory = if (tab == LIBRARY_TAB && signedIn) ({ openHistory() }) else null,
                                         onAccount = { stack = stack + IosPage.Settings },
                                     )
                                 }

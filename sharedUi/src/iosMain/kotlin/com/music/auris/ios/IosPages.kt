@@ -110,6 +110,7 @@ import com.music.auris.data.model.HomeShelf
 import com.music.auris.data.model.MoodGenre
 import com.music.auris.data.model.Song
 import com.music.auris.data.model.UiState
+import com.music.auris.data.podcast.ItunesShow
 import com.music.auris.ui.utils.guardSheetFromContentTouches
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
@@ -128,6 +129,8 @@ internal sealed interface IosPage {
     data object Flow : IosPage
     class History(val songs: UiState<List<Song>>) : IosPage
     class ShowAll(val shelf: HomeShelf) : IosPage
+    /** A podcast show from Apple's catalogue, with the episodes its feed holds. */
+    class PodcastShow(val show: ItunesShow, val episodes: UiState<List<Song>>) : IosPage
 }
 
 /** YouTube browse ids are prefixed by kind (Android's MainViewModel.browseTypeOf, minus the device-local kinds). */
@@ -312,7 +315,11 @@ internal fun IosSongMenu(
             onSongInfo?.let { Action(Icons.Rounded.Info, "Song info", it) }
             onNotForMe?.let { Action(Icons.Rounded.Block, "Not for me", it) }
             onSleepTimer?.let { Action(Icons.Rounded.Bedtime, sleepStatus?.let { s -> "Sleep timer · $s" } ?: "Sleep timer", it) }
-            Action(Icons.Rounded.Share, "Share") { shareText("https://music.youtube.com/watch?v=${song.videoId}") }
+            // A podcast episode's id is its enclosure URL, so there is no
+            // YouTube page to share — the audio's own address is the thing.
+            val shareUrl = song.videoId.takeIf { it.startsWith("http://", true) || it.startsWith("https://", true) }
+                ?: "https://music.youtube.com/watch?v=${song.videoId}"
+            Action(Icons.Rounded.Share, "Share") { shareText(shareUrl) }
             onCopyLog?.let { Action(Icons.Rounded.BugReport, "Copy log", it) }
         }
     }
