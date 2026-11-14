@@ -1,5 +1,6 @@
 package com.music.auris
 
+import com.music.auris.data.settings.AudioQuality
 import com.music.auris.data.NerdStats
 import com.music.auris.data.jiosaavn.RawSongItem
 import com.music.auris.data.jiosaavn.prioritizeExplicit
@@ -827,7 +828,7 @@ class SourcesTest {
     fun `prefers the immersive row over a lossless one when Atmos is wanted`() {
         DeviceCodecs.forced = true
         useAndroidSourcesHost()
-        AppSettings.dolbyAtmos.value = true
+        AppSettings.audioQualityWifi.value = AudioQuality.DOLBY
         try {
             val target = TrackMatcher.Target("Gehra Hua", "Shashwat Sachdev", durationSec = 362)
             val stereo = song("Gehra Hua", "Shashwat Sachdev", duration = "6:02")
@@ -849,7 +850,7 @@ class SourcesTest {
     fun `ignores the immersive row when the Atmos setting is off`() {
         DeviceCodecs.forced = true
         useAndroidSourcesHost()
-        AppSettings.dolbyAtmos.value = false
+        AppSettings.audioQualityWifi.value = AudioQuality.LOSSLESS
         try {
             val target = TrackMatcher.Target("Gehra Hua", "Shashwat Sachdev", durationSec = 362)
             val stereo = song("Gehra Hua", "Shashwat Sachdev", duration = "6:02")
@@ -863,7 +864,7 @@ class SourcesTest {
             )
         } finally {
             DeviceCodecs.forced = null
-            AppSettings.dolbyAtmos.value = true
+            AppSettings.audioQualityWifi.value = AudioQuality.DOLBY
         }
     }
 

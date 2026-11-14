@@ -180,6 +180,7 @@ private fun AudioQuality.localizedLabel(): String = stringResource(
         AudioQuality.MEDIUM -> Res.string.medium
         AudioQuality.HIGH -> Res.string.high
         AudioQuality.LOSSLESS -> Res.string.lossless
+        AudioQuality.DOLBY -> Res.string.dolby_atmos
     },
 )
 

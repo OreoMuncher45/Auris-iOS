@@ -1,5 +1,6 @@
 package com.music.auris
 
+import com.music.auris.data.settings.AudioQuality
 import com.music.auris.data.settings.AppSettings
 import com.music.auris.data.sources.AddonSource
 import com.music.auris.data.sources.DeviceCodecs
@@ -58,14 +59,14 @@ class AddonSourceTest {
         // format never depends on what the machine running it can decode.
         DeviceCodecs.forced = true
         useAndroidSourcesHost()
-        AppSettings.dolbyAtmos.value = true
+        AppSettings.audioQualityWifi.value = AudioQuality.DOLBY
     }
 
     @After
     fun tearDown() {
         server.shutdown()
         DeviceCodecs.forced = null
-        AppSettings.dolbyAtmos.value = true
+        AppSettings.audioQualityWifi.value = AudioQuality.DOLBY
     }
 
     // ── URL handling ──────────────────────────────────────────────────────
@@ -414,7 +415,7 @@ class AddonSourceTest {
      */
     @Test
     fun `no atmos hint is sent when the setting is off`() = runBlocking {
-        AppSettings.dolbyAtmos.value = false
+        AppSettings.audioQualityWifi.value = AudioQuality.LOSSLESS
         route("/manifest.json", manifest())
         route("/stream/t1", json("""{"url":"https://cdn/a.flac","codec":"flac"}"""))
 
@@ -495,7 +496,7 @@ class AddonSourceTest {
      */
     @Test
     fun `without the hint the same addon answers with the stereo ladder`() = runBlocking {
-        AppSettings.dolbyAtmos.value = false
+        AppSettings.audioQualityWifi.value = AudioQuality.LOSSLESS
         route("/manifest.json", manifest())
         server.dispatcher = atmosDispatcher("https://cdn.example.com/dash/tidal-atmos")
 

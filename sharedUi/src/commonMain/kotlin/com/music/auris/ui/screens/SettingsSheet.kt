@@ -182,10 +182,7 @@ fun SettingsScreen(
     val smartFade by AppSettings.smartFadeEnabled.collectAsStateWithLifecycle()
     val automixPerformance by AppSettings.automixPerformanceMode.collectAsStateWithLifecycle()
     val skipSilence by AppSettings.skipSilence.collectAsStateWithLifecycle()
-    val dolbyAtmos by AppSettings.dolbyAtmos.collectAsStateWithLifecycle()
-    // A property of the hardware (null where the platform has no such row) —
-    // see DeviceCodecs.playsDolbyAtmos, which caches the codec-list walk.
-    val dolbyAtmosSupported = host.playsDolbyAtmos
+    val simulatedAtmos by AppSettings.simulatedAtmos.collectAsStateWithLifecycle()
     val spatialAudio by AppSettings.spatialAudio.collectAsStateWithLifecycle()
     val reverbEnabled by AppSettings.reverbEnabled.collectAsStateWithLifecycle()
     val reverb by AppSettings.reverb.collectAsStateWithLifecycle()
@@ -383,45 +380,12 @@ fun SettingsScreen(
                     onClick = { picking = QualityTarget.CELLULAR },
                 )
             }
-            // Sits with the quality ceilings rather than with Playback: it
-            // decides which version of a track gets fetched, the same question
-            // the two rows above answer, and not how one is played back.
-            //
-            // Greyed rather than hidden where the device can't decode E-AC-3.
-            // A missing row reads as a feature the app doesn't have; a disabled
-            // one with a reason under it is the difference between "Auris
-            // has no Atmos" and "this phone has no Dolby decoder", and only the
-            // second is true. The stored preference is left untouched either
-            // way — see [AppSettings.dolbyAtmos].
-            if (dolbyAtmosSupported != null) {
-                val dolbyAtmosTitle = stringResource(Res.string.dolby_atmos)
-                row(dolbyAtmosTitle, "surround", "e-ac-3") {
-                    SettingsRow(
-                        iconPainter = painterResource(Res.drawable.ic_dolby_atmos),
-                        title = dolbyAtmosTitle,
-                        subtitle = stringResource(
-                            if (dolbyAtmosSupported) {
-                                Res.string.dolby_atmos_subtitle
-                            } else {
-                                Res.string.dolby_atmos_unavailable
-                            },
-                        ),
-                        enabled = dolbyAtmosSupported,
-                        trailing = {
-                            Switch(
-                                checked = dolbyAtmos && dolbyAtmosSupported,
-                                onCheckedChange = AppSettings::setDolbyAtmos,
-                                enabled = dolbyAtmosSupported,
-                                colors = SwitchDefaults.colors(
-                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                    checkedBorderColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            )
-                        },
-                        onClick = { AppSettings.setDolbyAtmos(!dolbyAtmos) },
-                    )
-                }
-            }
+            // There is no standalone "Dolby Atmos" switch any more: the quality
+            // ceiling above is the only statement about Atmos, and a device
+            // that cannot decode E-AC-3 falls back down the lossless ladder
+            // under it. What is left is the *simulated* effect — a sound
+            // effect on ordinary stereo, not a stream — which lives with the
+            // other audio effects below.
         }
 
         // Its own group rather than rows bolted onto the two above, because a
@@ -645,6 +609,28 @@ fun SettingsScreen(
                         )
                     },
                     onClick = { AppSettings.setSpatialAudio(!spatialAudio) },
+                )
+            }
+            // The immersive *effect*, as opposed to the immersive *stream*: a
+            // widening of ordinary stereo that reads as a surround field, with
+            // the bass left centred. Android's row, on Android's wording.
+            val simAtmosTitle = stringResource(Res.string.simulated_dolby_atmos)
+            row(simAtmosTitle, "atmos", "simulated", "spatial", "widen") {
+                SettingsRow(
+                    icon = Icons.Rounded.SurroundSound,
+                    title = simAtmosTitle,
+                    subtitle = stringResource(Res.string.simulated_dolby_atmos_subtitle),
+                    trailing = {
+                        Switch(
+                            checked = simulatedAtmos,
+                            onCheckedChange = AppSettings::setSimulatedAtmos,
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                checkedBorderColor = MaterialTheme.colorScheme.primary,
+                            ),
+                        )
+                    },
+                    onClick = { AppSettings.setSimulatedAtmos(!simulatedAtmos) },
                 )
             }
             // The switch and the room together, the room only while the
@@ -1663,6 +1649,7 @@ private fun AudioQuality.localizedLabel(): String = stringResource(
         AudioQuality.MEDIUM -> Res.string.medium
         AudioQuality.HIGH -> Res.string.high
         AudioQuality.LOSSLESS -> Res.string.lossless
+        AudioQuality.DOLBY -> Res.string.dolby_atmos
     },
 )
 

@@ -71,7 +71,12 @@ object SourceResolver {
         // sources. It was a switch whose only real effect was to downgrade the
         // one source that could do better.
         return when {
-            ceiling == AudioQuality.LOSSLESS -> StreamRequest.Lossless
+            // The immersive rung asks for the lossless ladder: on a device that
+            // can decode Atmos the immersive mix is preferred above it (see
+            // [preferred]), and on one that cannot — every iPhone, and every
+            // Android without an E-AC-3 decoder — the rung is the lossless
+            // ladder with the simulated surround field on top.
+            ceiling == AudioQuality.LOSSLESS || ceiling == AudioQuality.DOLBY -> StreamRequest.Lossless
             ceiling.maxKbps == Int.MAX_VALUE -> StreamRequest.Best
             else -> StreamRequest.Capped(ceiling.maxKbps)
         }
@@ -1170,7 +1175,7 @@ object SourceResolver {
      * chooses between rows.
      */
     private fun atmosWanted(): Boolean =
-        SourceRegistry.host.playsDolbyAtmos && AppSettings.dolbyAtmos.value
+        SourceRegistry.host.playsDolbyAtmos && AppSettings.wantsDolbyAtmos
 
     private suspend fun streamBest(
         source: MusicSource,

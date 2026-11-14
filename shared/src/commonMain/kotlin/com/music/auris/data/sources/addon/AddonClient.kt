@@ -277,7 +277,10 @@ class AddonClient(rawBaseUrl: String, userAgent: String = "") {
      * nothing on the IO thread it already runs on.
      */
     private fun atmosHint(): String? {
-        val wanted = SourceRegistry.host.playsDolbyAtmos && AppSettings.dolbyAtmos.value
+        // The quality rung is the only statement about Atmos now — see
+        // [AppSettings.wantsDolbyAtmos]. A device that cannot decode E-AC-3
+        // never asks for it, whatever the rung says.
+        val wanted = SourceRegistry.host.playsDolbyAtmos && AppSettings.wantsDolbyAtmos
         return if (wanted) ATMOS_AUTO else null
     }
 

@@ -5,6 +5,7 @@ import com.music.auris.playback.KaraokeProcessor
 import com.music.auris.playback.ReverbProcessor
 import com.music.auris.playback.VocalStems
 import com.music.auris.playback.ReverbSettings
+import com.music.auris.playback.audio.SimulatedAtmosProcessor
 import com.music.auris.playback.smart.TransitionFilterDsp
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -82,6 +83,11 @@ class IosDeck internal constructor() {
 
     internal val reverb = ReverbProcessor()
     private val widener = StereoWidener()
+    /**
+     * The simulated surround field: Android's `SimulatedAtmosProcessor`, ported to common Kotlin and run
+     * on the same interleaved floats. One per deck, so two tracks overlapping never share its delay line.
+     */
+    private val simAtmos = SimulatedAtmosProcessor()
     internal val karaoke = KaraokeProcessor(
         Karaoke::reportUnavailable,
         Karaoke::reportNeural,
@@ -113,8 +119,8 @@ class IosDeck internal constructor() {
     @Volatile var lastHighPassHz = TransitionFilterDsp.OFF_HZ; private set
     @Volatile var lastEcho = false; private set
 
-    /** Whether the tap needs to call [processPre]: widening, or Karaoke on (or ringing out). */
-    fun wantsPre(): Boolean = IosDsp.spatial || karaoke.isEnabled || karaoke.isActive
+    /** Whether the tap needs to call [processPre]: widening, the simulated surround field, or Karaoke on (or ringing out). */
+    fun wantsPre(): Boolean = IosDsp.spatial || IosDsp.simulatedAtmos || karaoke.isEnabled || karaoke.isActive
 
     /** Whether the tap needs to call [processPost]: reverb (or its tail), or this deck is in a blend. */
     fun wantsPost(): Boolean =
@@ -127,6 +133,7 @@ class IosDeck internal constructor() {
             rate = sampleRate; channels = channelCount
             karaoke.configure(sampleRate, channelCount)
             widener.configure(sampleRate, channelCount)
+            simAtmos.configure(sampleRate, channelCount)
             reverb.configure(sampleRate, channelCount)
             // The echo's ring is sized here so setting an echo on the audio thread allocates nothing.
             filter.configure(sampleRate, channelCount, preallocateEcho = true)
@@ -140,12 +147,12 @@ class IosDeck internal constructor() {
     private fun applyReset() {
         if (!resetPending) return
         resetPending = false
-        karaoke.reset(); widener.reset(); reverb.reset(); filter.flush()
+        karaoke.reset(); widener.reset(); simAtmos.reset(); reverb.reset(); filter.flush()
         frameAt = Long.MIN_VALUE
         lastEnd = Double.NaN
     }
 
-    /** Karaoke, then spatial widening, on [frames] interleaved frames of the configured channel count, in place. */
+    /** Karaoke, then spatial widening, then the simulated surround field, on [frames] interleaved frames of the configured channel count, in place. */
     fun processPre(data: CPointer<FloatVar>, frames: Int, mediaTimeUs: Long) {
         val n = frames * channels
         val s = samples
@@ -165,6 +172,8 @@ class IosDeck internal constructor() {
         for (i in 0 until n) s[i] = data[i]
         karaoke.process(s, n, time)
         if (IosDsp.spatial) widener.process(s, n)
+        // Android's order: vocal removal, widening, then the simulated surround field, then the equaliser.
+        if (IosDsp.simulatedAtmos) simAtmos.process(s, n)
         for (i in 0 until n) data[i] = s[i]
     }
 
@@ -269,6 +278,10 @@ object IosDsp {
     @Volatile
     internal var spatial = false
         private set
+    /** The simulated surround field (Android's `simulatedAtmos`), on by default like Android's. */
+    @Volatile
+    internal var simulatedAtmos = true
+        private set
     private var reverbEnabled = false
     private var reverbSettings = ReverbSettings.DEFAULT
     private var karaokeEnabled = false
@@ -285,6 +298,9 @@ object IosDsp {
     }
 
     internal fun setSpatial(enabled: Boolean) { spatial = enabled }
+
+    /** The simulated surround field. Read by every deck's audio thread; set from the main thread. */
+    internal fun setSimulatedAtmos(enabled: Boolean) { simulatedAtmos = enabled }
 
     internal fun setKaraoke(enabled: Boolean, level: Float) {
         karaokeEnabled = enabled; karaokeLevel = level

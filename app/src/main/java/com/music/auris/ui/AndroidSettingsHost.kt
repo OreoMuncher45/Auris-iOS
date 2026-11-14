@@ -85,8 +85,6 @@ object AndroidSettingsHost : SettingsHost {
         appContext = context.applicationContext
     }
 
-    override val playsDolbyAtmos: Boolean get() = DeviceCodecs.playsDolbyAtmos
-
     override val party: StateFlow<PartyInfo> = ListenTogether.state
         .map { PartyInfo(it.code, if (it.inParty) it.members.size else 0) }
         .stateIn(scope, SharingStarted.Eagerly, PartyInfo(null, 0))

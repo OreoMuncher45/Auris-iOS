@@ -277,28 +277,42 @@ object AppSettings {
     val loudnessOffOnSpeaker = MutableStateFlow(true)
 
     /**
-     * Whether a source offering a Dolby Atmos rendition is allowed to serve it.
+     * Whether the listener wants the immersive mix on the connection in hand.
      *
-     * On by default: where the device can decode it, Atmos is the premium
-     * rendition the catalogue holds and the one most people are paying a
-     * subscription for.
+     * The quality rung is the *only* thing that decides this. It used to be two
+     * statements — a standalone "Dolby Atmos" switch, on by default, OR'd with
+     * [AudioQuality.DOLBY] — and that combination was wrong in the way the
+     * switch was designed to be convenient: with the switch on, choosing
+     * **Lossless** still served Atmos. Lossless means the bit-exact stereo
+     * ladder, up to hi-res; Atmos is E-AC-3, which is lossy, and it is a
+     * different listen rather than a higher rung of the same one. A listener who
+     * asked for lossless and got a spatial mix had no way to say otherwise —
+     * the rung they picked was not the thing being honoured.
      *
-     * Off is a real preference and not just a safety valve. Atmos is E-AC-3,
-     * which is *lossy* — a track with an Atmos master is frequently also held
-     * as a FLAC, and someone listening on wired headphones may well prefer the
-     * bit-exact stereo copy to a spatial mix their output can't render. Turning
-     * this off is how they say so; see
-     * [ModuleSource.unplayable][com.music.auris.data.sources.ModuleSource],
-     * which is where the refusal is applied.
+     * So the switch is gone and the rung answers: [AudioQuality.DOLBY] asks for
+     * Atmos first and falls back down the lossless ladder below it, and every
+     * other rung — Lossless included — leaves Atmos out of the walk entirely.
      *
-     * Independent of whether the device *can* decode it — that question is
-     * [DeviceCodecs.playsDolbyAtmos][com.music.auris.data.sources.DeviceCodecs],
-     * and the two are deliberately not folded together: this one is the
-     * listener's answer, is persisted, and must survive being read on a phone
-     * that cannot honour it (a restored backup, a swapped device) without
-     * quietly rewriting itself.
+     * Callers still pair this with the device's own answer
+     * ([SourcesHost.playsDolbyAtmos][com.music.auris.data.sources.SourcesHost.playsDolbyAtmos]);
+     * capability is the phone's, not the listener's.
      */
-    val dolbyAtmos = MutableStateFlow(true)
+    val wantsDolbyAtmos: Boolean
+        get() = effectiveAudioQuality == AudioQuality.DOLBY
+
+    /**
+     * "Simulated Dolby Atmos": a widening DSP effect applied to ordinary
+     * stereo (mid/side widening with the side channel high-passed so bass
+     * stays centered). It is a *sound* effect, not a stream — the Atmos
+     * quality rung already handles real object-based mixes — so it lives
+     * beside [spatialAudio] and runs in the same DSP chain.
+     *
+     * On by default. Nothing about the effect itself is decided here — this
+     * is the value a fresh install starts from, and the value a listener who
+     * turns it off stays off at, because the switch is read from the stored
+     * preference when there is one.
+     */
+    val simulatedAtmos = MutableStateFlow(true)
 
     /**
      * Widens stereo output via [com.music.auris.playback.SpatialAudioProcessor],
@@ -857,7 +871,12 @@ object AppSettings {
         preferUsbDac.value = prefs.getBoolean(KEY_PREFER_USB_DAC, false)
         loudnessNormalization.value = prefs.getBoolean(KEY_LOUDNESS_NORMALIZATION, true)
         loudnessOffOnSpeaker.value = prefs.getBoolean(KEY_LOUDNESS_OFF_ON_SPEAKER, true)
-        dolbyAtmos.value = prefs.getBoolean(KEY_DOLBY_ATMOS, true)
+        // The old `dolby_atmos` preference is deliberately not read any more.
+        // It was a second way to ask for Atmos, on by default, which is what
+        // made Lossless serve a spatial mix; the quality rung is the only
+        // statement now. Leftover keys are ignored rather than migrated: there
+        // is nothing for them to migrate *to*.
+        simulatedAtmos.value = prefs.getBoolean(KEY_SIMULATED_ATMOS, true)
         spatialAudio.value = prefs.getBoolean(KEY_SPATIAL_AUDIO, false)
         equalizerEnabled.value = prefs.getBoolean(KEY_EQ_ENABLED, false)
         equalizerMode.value = runCatching {
@@ -1126,9 +1145,9 @@ object AppSettings {
         prefs.edit().putBoolean(KEY_SKIP_SILENCE, value).apply()
     }
 
-    fun setDolbyAtmos(value: Boolean) {
-        dolbyAtmos.value = value
-        prefs.edit().putBoolean(KEY_DOLBY_ATMOS, value).apply()
+    fun setSimulatedAtmos(value: Boolean) {
+        simulatedAtmos.value = value
+        prefs.edit().putBoolean(KEY_SIMULATED_ATMOS, value).apply()
     }
 
     fun setSpatialAudio(value: Boolean) {
@@ -2016,7 +2035,7 @@ object AppSettings {
     private const val KEY_PREFER_USB_DAC = "prefer_usb_dac"
     private const val KEY_LOUDNESS_NORMALIZATION = "loudness_normalization"
     private const val KEY_LOUDNESS_OFF_ON_SPEAKER = "loudness_off_on_speaker"
-    private const val KEY_DOLBY_ATMOS = "dolby_atmos"
+    private const val KEY_SIMULATED_ATMOS = "simulated_atmos"
     private const val KEY_SPATIAL_AUDIO = "spatial_audio"
     private const val KEY_EQ_ENABLED = "equalizer_enabled"
     private const val KEY_EQ_MODE = "equalizer_mode"

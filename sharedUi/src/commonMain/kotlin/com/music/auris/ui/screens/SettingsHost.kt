@@ -21,8 +21,6 @@ class BackupActions(val export: () -> Unit, val import: () -> Unit)
  * row behind it is hidden — which is how iOS runs; Android installs the real thing at start.
  */
 interface SettingsHost {
-    /** null hides the Dolby Atmos row; otherwise whether this device can decode it. */
-    val playsDolbyAtmos: Boolean? get() = null
     val party: StateFlow<PartyInfo> get() = NO_PARTY
     /** null hides the output-precision and USB DAC rows. */
     val audioOutput: StateFlow<AudioOutputInfo?> get() = NO_OUTPUT

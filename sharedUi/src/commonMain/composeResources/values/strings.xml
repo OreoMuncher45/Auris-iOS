@@ -335,6 +335,8 @@
     <string name="dolby_atmos">Dolby Atmos</string>
     <string name="dolby_atmos_subtitle">Play the more immersive, surround version of a song when there is one.</string>
     <string name="dolby_atmos_unavailable">This device can\'t play Atmos, so these songs play in their usual version</string>
+    <string name="simulated_dolby_atmos">Simulated Dolby Atmos</string>
+    <string name="simulated_dolby_atmos_subtitle">Widens stereo into a simulated surround field (bass stays centered).</string>
     <string name="dont_repeat_songs">Don’t repeat songs in current session</string>
     <string name="dont_repeat_songs_subtitle">AutoPlay won’t suggest a song already played or suggested this session</string>
     <string name="download_quality">Download quality</string>

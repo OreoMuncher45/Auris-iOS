@@ -201,6 +201,8 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         }
         party.start()
         scope.launch { AppSettings.spatialAudio.collect { IosDsp.setSpatial(it) } }
+        // The simulated surround field: Android's `simulatedAtmos`, on by default there and here.
+        scope.launch { AppSettings.simulatedAtmos.collect { IosDsp.setSimulatedAtmos(it) } }
         scope.launch { AppSettings.playbackSpeed.collect { engine.setSpeed(it) } }
         // The audio cache's ceiling, as the user set it: the Swift cache used to
         // carry a fixed 512 MB of its own and ignored the setting entirely.
@@ -215,7 +217,7 @@ class IosPlayer(private val engine: AudioEngine, private val scope: CoroutineSco
         scope.launch { combine(Karaoke.enabled, Karaoke.level) { on, l -> on to l }.collect { (on, l) -> IosDsp.setKaraoke(on, l) } }
         scope.launch { combine(Karaoke.enabled, Karaoke.warm) { on, warm -> on || warm }.distinctUntilChanged().collect { bindKaraoke() } }
         scope.launch {
-            combine(AppSettings.reverbEnabled, Karaoke.enabled, AppSettings.spatialAudio, AppSettings.skipSilence) { r, k, sp, s -> (r || k || sp) to s }
+            combine(AppSettings.reverbEnabled, Karaoke.enabled, AppSettings.spatialAudio, AppSettings.simulatedAtmos, AppSettings.skipSilence) { r, k, sp, sim, s -> (r || k || sp || sim) to s }
                 .distinctUntilChanged().collect { (dsp, silence) -> engine.setEffects(dsp, silence) }
         }
         scope.launch {

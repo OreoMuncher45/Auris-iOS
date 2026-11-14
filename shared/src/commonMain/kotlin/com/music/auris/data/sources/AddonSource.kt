@@ -345,7 +345,7 @@ class AddonSource(
 
         val format = formatOf(answer, url, tier)
         val playsAtmos = SourceRegistry.host.playsDolbyAtmos
-        if (SourceTiers.unplayable(format, atmosAllowed = playsAtmos && AppSettings.dolbyAtmos.value)) {
+        if (SourceTiers.unplayable(format, atmosAllowed = playsAtmos && AppSettings.wantsDolbyAtmos)) {
             val why = if (playsAtmos) {
                 "which is switched off in Settings"
             } else {
